@@ -315,3 +315,15 @@ for (t in 1:length(names(msmm_rnaseq))){
 
 sig_edges=apply(msmm_rnaseq.cocor[[1]][[1]],1,function(x)which(x<=0.05))
 sig_edges_indices=lapply(sig_edges,length)
+
+########################################################################
+test1=msmm_rnaseq.cocor_filtered$p001$BM_36[order(msmm_rnaseq.cocor_filtered$p001$BM_36$abs.corr.change,decreasing = T),][1:5,]
+gene1=msmm_rnaseq$BM_36[which(rownames(msmm_rnaseq$BM_36)%in%union(test1$Gene.A,test1$Gene.B)),which(colnames(msmm_rnaseq$BM_36)%in%high_Plaque_Samples$BM_36)][3,]
+gene2=msmm_rnaseq$BM_36[which(rownames(msmm_rnaseq$BM_36)%in%union(test1$Gene.A,test1$Gene.B)),which(colnames(msmm_rnaseq$BM_36)%in%high_Plaque_Samples$BM_36)][4,]
+plq=msmm_rnaseq_covariates$PlaqueMean[which(msmm_rnaseq_covariates$Sample.ID%in%colnames(msmm_rnaseq$BM_36))]
+df_anno=data.frame(PMI=msmm_rnaseq_covariates$PMI[which(msmm_rnaseq_covariates$Sample.ID%in%high_Plaque_Samples$BM_36)],
+                   CERAD=msmm_rnaseq_covariates$CERAD[which(msmm_rnaseq_covariates$Sample.ID%in%high_Plaque_Samples$BM_36)],
+                   Braak=msmm_rnaseq_covariates$bbscore[which(msmm_rnaseq_covariates$Sample.ID%in%high_Plaque_Samples$BM_36)],
+                   AOD=msmm_rnaseq_covariates$AOD[which(msmm_rnaseq_covariates$Sample.ID%in%high_Plaque_Samples$BM_36)])
+rownames(df_anno)=colnames(gene1)
+pheatmap(as.matrix(msmm_rnaseq$BM_36[which(rownames(msmm_rnaseq$BM_36)%in%union(test1$Gene.A,test1$Gene.B)),which(colnames(msmm_rnaseq$BM_36)%in%high_Plaque_Samples$BM_36)]),annotation = df_anno)
