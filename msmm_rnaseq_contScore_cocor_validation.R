@@ -60,8 +60,8 @@ g33=induced_subgraph(graph = g3,vids = intersect(V(g3)$name,V(g4)$name))
 g44=induced_subgraph(graph = g4,vids = intersect(V(g3)$name,V(g4)$name))
 msmm_rnaseq.DCN_rewired=vector(mode = "list",length = 2)
 names(msmm_rnaseq.DCN_rewired)=c("BM_22","BM_36")
-msmm_rnaseq.DCN_rewired$BM_22=data.frame(Common.Genes=names(degree(graph = g33,v = sort(names(degree(g33))))),BM22_LowPLQ=unname(degree(graph = g33,v = sort(names(degree(g33))))),BM22_HighPLQ=unname(degree(graph = g44,v = sort(names(degree(g44))))),Difference=abs(unname(degree(graph = g33,v = sort(names(degree(g33)))))-unname(degree(graph = g44,v = sort(names(degree(g44)))))),stringsAsFactors = F)
-msmm_rnaseq.DCN_rewired$BM_36=data.frame(Common.Genes=names(degree(graph = g11,v = sort(names(degree(g11))))),BM36_LowPLQ=unname(degree(graph = g11,v = sort(names(degree(g11))))),BM36_HighPLQ=unname(degree(graph = g22,v = sort(names(degree(g22))))),Difference=abs(unname(degree(graph = g11,v = sort(names(degree(g11)))))-unname(degree(graph = g22,v = sort(names(degree(g22)))))),stringsAsFactors = F)
+msmm_rnaseq.DCN_rewired$BM_22=data.frame(Common_Genes=names(degree(graph = g3,v = intersect(V(g3)$name,V(g4)$name))),Low_PLQ=degree(graph = g4,v = intersect(V(g3)$name,V(g4)$name)),High_PLQ=degree(graph = g3,v = intersect(V(g3)$name,V(g4)$name)),Difference=degree(graph = g4,v = intersect(V(g3)$name,V(g4)$name))-degree(graph = g3,v = intersect(V(g3)$name,V(g4)$name)),stringsAsFactors = F)
+msmm_rnaseq.DCN_rewired$BM_36=data.frame(Common_Genes=names(degree(graph = g1,v = intersect(V(g1)$name,V(g2)$name))),Low_PLQ=degree(graph = g2,v = intersect(V(g1)$name,V(g2)$name)),High_PLQ=degree(graph = g1,v = intersect(V(g1)$name,V(g2)$name)),Difference=degree(graph = g2,v = intersect(V(g1)$name,V(g2)$name))-degree(graph = g1,v = intersect(V(g1)$name,V(g2)$name)),stringsAsFactors = F)
 write.table(msmm_rnaseq.DCN_rewired$BM_22,"BM22_DCN_Filt1.0_RewiredGenes.txt",sep="\t",col.names = T,row.names = T,quote = F)
 write.table(msmm_rnaseq.DCN_rewired$BM_36,"BM36_DCN_Filt1.0_RewiredGenes.txt",sep="\t",col.names = T,row.names = T,quote = F)
 
@@ -78,23 +78,25 @@ hippocampal_proteome_ADup=read.xls("../../../BrainExpression_Datasets/Hippocampu
 hippocampal_proteome_AD=union(c(grep(pattern = ";",hippocampal_proteome_ADup$Genes,value = T,invert = T),unlist(lapply(strsplit(grep(pattern = ";",hippocampal_proteome_ADup$Genes,value = T),split = ";"),`[[`,1))),
                           c(grep(pattern = ";",hippocampal_proteome_ADdown$Genes,value = T,invert = T),unlist(lapply(strsplit(grep(pattern = ";",hippocampal_proteome_ADdown$Genes,value = T),split = ";"),`[[`,1))))
 mouse_human_ortholog=read.table("../../../BrainExpression_Datasets/Mouse_Human_Orthologs_EnsemblGRC38.txt",header = T,sep="\t",as.is=T)
+mouse_human_ortholog2=read.table("../../../BrainExpression_Datasets/Mouse_Human_Orthologs_EnsemblGRC37.txt",header = T,sep="\t",as.is=T)
 #mm_BrainProteome_sharma=read.xls("../../../BrainExpression_Datasets/Mouse_Brain_Proteome_Sharma_etal/nn.4160-S8.xlsx",sheet = 1,skip=1,header=T,as.is=T)
-mm_BrainProteome_IC_files=list.files(path = "../../../BrainExpression_Datasets/MouseBrainProteome_MannLab/CulturedCells/",pattern = "IC",full.names = T)
-mm_BrainProteome_CC_files=list.files(path = "../../../BrainExpression_Datasets/MouseBrainProteome_MannLab/CulturedCells/",pattern = "CC",full.names = T)
-mm_BrainProteome=read.xls("../../../BrainExpression_Datasets/MouseBrainProteome_MannLab/IsolatedCellsTotalDataset_Log2FoldChange.xls",sheet = 1,skip=2,header=T,as.is=T)
+mm_BrainProteome_IC_files=list.files(path = "../../../BrainExpression_Datasets/MouseBrainProteome_MannLab/IsolatedCells",pattern = "IC",full.names = T)
+mm_BrainProteome_CC_files=list.files(path = "../../../BrainExpression_Datasets/MouseBrainProteome_MannLab/CulturedCells",pattern = "CC",full.names = T)
 
 
-mm_BrainProteome_humanOrtholog=vector(mode = "list",length = 5)
+
+mm_BrainProteome_humanOrtholog=vector(mode = "list",length = 4)
 mm_BrainProteome_sharma.CellType=vector(mode = "list",length=2)
 names(mm_BrainProteome_sharma.CellType)=c("Isolated_Cells","Cultered_Cells")
 mm_BrainProteome_sharma.CellType$Isolated_Cells=mm_BrainProteome_sharma.CellType$Cultered_Cells=vector(mode = "list",length=4)
-names(mm_BrainProteome_sharma.CellType)=names(mm_BrainProteome_humanOrtholog)=c("Microglia","Astrocytes","Oligodendrocytes","Neurons")
+names(mm_BrainProteome_sharma.CellType$Isolated_Cells)=names(mm_BrainProteome_sharma.CellType$Cultered_Cells)=names(mm_BrainProteome_humanOrtholog)=c("Microglia","Astrocytes","Oligodendrocytes","Neurons")
 for (c in 1:4){
-  mm_BrainProteome_sharma.CellType[[c]]=c(unlist(strsplit(x = grep(pattern = ";",mm_BrainProteome_sharma$Gene.names.1[which((mm_BrainProteome_sharma[,c+11]=="+")&(mm_BrainProteome_sharma[,5]=="+"))],value = T),split = ";")),grep(pattern = ";",mm_BrainProteome_sharma$Gene.names.1[which((mm_BrainProteome_sharma[,c+11]=="+")&(mm_BrainProteome_sharma[,5]=="+"))],invert = T,value = T))
-  mm_BrainProteome_humanOrtholog[[c]]=mouse_human_ortholog$Human.associated.gene.name[which((mouse_human_ortholog$Associated.Gene.Name%in%mm_BrainProteome_sharma.CellType[[c]]))]
+  ic_df=read.xls(mm_BrainProteome_IC_files[c],sheet=1,skip=1,header=T,as.is=T)
+  cc_df=read.xls(mm_BrainProteome_CC_files[c],sheet=1,header=T,as.is=T)
+  mm_BrainProteome_sharma.CellType$Isolated_Cells[[c]]=c(grep(pattern = ";",ic_df$Gene.names,value = T,invert = T),unlist(strsplit(x = grep(pattern = ";",ic_df$Gene.names,value = T),split = ";")))
+  mm_BrainProteome_sharma.CellType$Cultered_Cells[[c]]=c(grep(pattern = ";",cc_df$Gene.names,value = T,invert = T),unlist(strsplit(x = grep(pattern = ";",cc_df$Gene.names,value = T),split = ";")))
+  mm_BrainProteome_humanOrtholog[[c]]=mouse_human_ortholog$Human.associated.gene.name[which(mouse_human_ortholog$Associated.Gene.Name%in%union(mm_BrainProteome_sharma.CellType$Isolated_Cells[[c]],mm_BrainProteome_sharma.CellType$Cultered_Cells[[c]]))]
 }
-mm_BrainProteome_sharma.CellType$Cerebellum=c(unlist(strsplit(x = grep(pattern = ";",mm_BrainProteome_Cerebellum$Gene.names,value = T),split = ";")),grep(pattern = ";",mm_BrainProteome_Cerebellum$Gene.names,invert = T,value = T))
-mm_BrainProteome_humanOrtholog$Cerebellum=mouse_human_ortholog$Human.associated.gene.name[which((mouse_human_ortholog$Associated.Gene.Name%in%mm_BrainProteome_sharma.CellType$Cerebellum))]
 
 library(biomaRt)
 ensembl_85=useMart(biomart = "ENSEMBL_MART_ENSEMBL",host = "www.ensembl.org",dataset = "hsapiens_gene_ensembl")
@@ -106,11 +108,12 @@ tanzi_select_variants_geneNames=unique(tanzi_select_variants_UCSC$name2)
 
 human_genes_orgDB=toTable(org.Hs.egSYMBOL)
 overlap_dist=vector(mode = "list",length = 4)
+overlap_dist_tanzi_mmProteome_celltype=vector(mode = "list",length = 4)
 overlap_dist2=vector(mode = "list",length = 1)
 names(overlap_dist)=c("lcm_neurons","hipp_proteome","tanzi_select","mm_proteome")
 overlap_dist[[1]]=overlap_dist[[2]]=overlap_dist[[3]]=overlap_dist[[4]]=list()
-overlap_dist[[4]]=vector(mode = "list",length = 5)
-names(overlap_dist[[4]])=names(mm_BrainProteome_humanOrtholog)
+overlap_dist[[4]]=vector(mode = "list",length = 4)
+names(overlap_dist[[4]])=names(overlap_dist_tanzi_mmProteome_celltype)=names(mm_BrainProteome_humanOrtholog)
 
 for (o in 1:10000){
   hippocampal_proteome_AD.random=sample(x=human_genes_orgDB$symbol,size = length(hippocampal_proteome_AD),replace = F)
@@ -129,25 +132,29 @@ for (c in 1:length(names(mm_BrainProteome_humanOrtholog))){
     overlap_dist$mm_proteome[[c]][[o]]=length(intersect(mm_proteome.random,V(msmm_rnaseq.DCN$p001$BM_36$Std)$name))
   }
 }
-
+for (c in 1:length(names(mm_BrainProteome_humanOrtholog))){
+  for (o in 1:10000){
+    mm_proteome.random=sample(x=human_genes_orgDB$symbol,size = length(mm_BrainProteome_humanOrtholog[[c]]),replace = F)
+    overlap_dist_tanzi_mmProteome_celltype[[c]][[o]]=length(intersect(mm_proteome.random,tanzi_select_variants_geneNames))
+  }
+}
 
 obj1_phg_lcmNeurons=newGeneOverlap(listA = ffpe_neurons_genes,listB = V(msmm_rnaseq.DCN$p001$BM_36$Std)$name,spec = "hg19.gene")
 obj2_phg_hippProteome=newGeneOverlap(listA = hippocampal_proteome_AD,listB = V(msmm_rnaseq.DCN$p001$BM_36$Std)$name,spec = "hg19.gene")
 
 obj4_phg_mm_hipp_Proteome=newGeneOverlap(listA = intersect(hippocampal_proteome_AD,mm_BrainProteome_humanOrtholog),listB = V(msmm_rnaseq.DCN$BM_36$Std)$name,spec = "hg19.gene")
 obj5_phg_arr_rnaseq=newGeneOverlap(listA = select(x = org.Hs.eg.db,keys = V(msbb_array19.PHG_DCN$Std)$name,keytype = "ENTREZID",columns = "SYMBOL")[,2],listB = V(msmm_rnaseq.DCN$p001$BM_36$Std)$name,spec = "hg19.gene")
-obj6_phg_tanzi=newGeneOverlap(listA = unique(select(x = org.Hs.eg.db,keys = tanzi_select_variants_Refseq$name,keytype = "REFSEQ",columns = "SYMBOL")[,2]),listB = V(msmm_rnaseq.DCN$p001$BM_36$Std)$name,spec = "hg19.gene")
+obj6_phg_tanzi=newGeneOverlap(listA = tanzi_select_variants_geneNames,listB = V(msmm_rnaseq.DCN$p001$BM_36$Std)$name,spec = "hg19.gene")
 
 obj31_phg_mmProteome=newGeneOverlap(listA = mm_BrainProteome_humanOrtholog$Microglia,listB = V(msmm_rnaseq.DCN$p001$BM_36$Std)$name,spec = "hg19.gene")
 obj32_phg_mmProteome=newGeneOverlap(listA = mm_BrainProteome_humanOrtholog$Astrocytes,listB = V(msmm_rnaseq.DCN$p001$BM_36$Std)$name,spec = "hg19.gene")
 obj33_phg_mmProteome=newGeneOverlap(listA = mm_BrainProteome_humanOrtholog$Oligodendrocytes,listB = V(msmm_rnaseq.DCN$p001$BM_36$Std)$name,spec = "hg19.gene")
 obj34_phg_mmProteome=newGeneOverlap(listA = mm_BrainProteome_humanOrtholog$Neurons,listB = V(msmm_rnaseq.DCN$p001$BM_36$Std)$name,spec = "hg19.gene")
-obj35_phg_mmProteome=newGeneOverlap(listA = mm_BrainProteome_humanOrtholog$Cerebellum,listB = V(msmm_rnaseq.DCN$p001$BM_36$Std)$name,spec = "hg19.gene")
 
-obj41_phg_mmProteome=newGeneOverlap(listA = mm_BrainProteome_humanOrtholog$Microglia,listB = unique(tanzi_select_variants_UCSC$name2),spec = "hg19.gene")
-obj42_phg_mmProteome=newGeneOverlap(listA = mm_BrainProteome_humanOrtholog$Astrocytes,listB = unique(tanzi_select_variants_UCSC$name2),spec = "hg19.gene")
-obj43_phg_mmProteome=newGeneOverlap(listA = mm_BrainProteome_humanOrtholog$Oligodendrocytes,listB = unique(tanzi_select_variants_UCSC$name2),spec = "hg19.gene")
-obj44_phg_mmProteome=newGeneOverlap(listA = mm_BrainProteome_humanOrtholog$Neurons,listB = unique(tanzi_select_variants_UCSC$name2),spec = "hg19.gene")
+obj41_phg_mmProteome=newGeneOverlap(listA = mm_BrainProteome_humanOrtholog$Microglia,listB = tanzi_select_variants_geneNames,spec = "hg19.gene")
+obj42_phg_mmProteome=newGeneOverlap(listA = mm_BrainProteome_humanOrtholog$Astrocytes,listB = tanzi_select_variants_geneNames,spec = "hg19.gene")
+obj43_phg_mmProteome=newGeneOverlap(listA = mm_BrainProteome_humanOrtholog$Oligodendrocytes,listB = tanzi_select_variants_geneNames,spec = "hg19.gene")
+obj44_phg_mmProteome=newGeneOverlap(listA = mm_BrainProteome_humanOrtholog$Neurons,listB = tanzi_select_variants_geneNames,spec = "hg19.gene")
 
 par(mfrow=c(3,1))
 hist(unlist(overlap_dist$lcm_neurons),xlab = "#Overlaps",main = "#Overlap distribution for Drummund etal LCM Neurons, DCN_PHG",col="blue4",xlim = c(0,55),breaks = 50)
@@ -163,43 +170,34 @@ hist(unlist(overlap_dist$tanzi_select),xlab = "#Overlaps",main = "#Overlap distr
 abline(v=length(intersect(V(msmm_rnaseq.DCN$p001$BM_36$Std)$name,tanzi_select_variants_geneNames)),col="red4",lwd=2)
 text(length(intersect(V(msmm_rnaseq.DCN$p001$BM_36$Std)$name,tanzi_select_variants_geneNames)),0, paste("pval=",testGeneOverlap(obj6_phg_tanzi)@pval,sep=""), col = "black",adj = c(-.1, -.1))
 
-par(mfrow=c(5,1))
-hist(unlist(as.numeric(overlap_dist$mm_proteome$Microglia)),xlab = "#Overlaps",main = "#Overlap distribution Sharma et al, Microglia w/ Tanzi select 1k",col="blue4",xlim = c(0,15),ylim=c(0,2000),breaks = 50)
-abline(v=length(intersect(unique(tanzi_select_variants_UCSC$name2),mm_BrainProteome_humanOrtholog$Microglia)),col="red4",lwd=2)
-text(length(intersect(unique(tanzi_select_variants_UCSC$name2),mm_BrainProteome_humanOrtholog$Microglia)),0, paste("pval=",round(testGeneOverlap(obj41_phg_mmProteome)@pval,digits = 3),sep=""), col = "black",adj = c(-.1, -.1))
-hist(unlist(as.numeric(overlap_dist$mm_proteome$Astrocytes)),xlab = "#Overlaps",main = "#Overlap distribution Sharma et al, Astrocytes w/ Tanzi select 1k",col="olivedrab3",xlim = c(0,15),ylim=c(0,2000),breaks = 50)
-abline(v=length(intersect(unique(tanzi_select_variants_UCSC$name2),mm_BrainProteome_humanOrtholog$Astrocytes)),col="red4",lwd=2)
-text(length(intersect(unique(tanzi_select_variants_UCSC$name2),mm_BrainProteome_humanOrtholog$Astrocytes)),0, paste("pval=",round(testGeneOverlap(obj42_phg_mmProteome)@pval,digits = 3),sep=""), col = "black",adj = c(-.1, -.1))
-hist(unlist(as.numeric(overlap_dist$mm_proteome$Oligodendrocytes)),xlab = "#Overlaps",main = "#Overlap distribution Sharma et al, Oligodendrocytes w/ Tanzi select 1k",col="darkorchid4",xlim = c(0,15),ylim=c(0,2000),breaks = 50)
-abline(v=length(intersect(unique(tanzi_select_variants_UCSC$name2),mm_BrainProteome_humanOrtholog$Oligodendrocytes)),col="red4",lwd=2)
-text(length(intersect(unique(tanzi_select_variants_UCSC$name2),mm_BrainProteome_humanOrtholog$Oligodendrocytes)),0, paste("pval=",round(testGeneOverlap(obj43_phg_mmProteome)@pval,digits = 3),sep=""), col = "black",adj = c(-.1, -.1))
-hist(unlist(as.numeric(overlap_dist$mm_proteome$Neurons)),xlab = "#Overlaps",main = "#Overlap distribution Sharma et al, Neurons w/ Tanzi select 1k",col="orange2",xlim = c(0,15),ylim=c(0,2000),breaks = 50)
-abline(v=length(intersect(unique(tanzi_select_variants_UCSC$name2),mm_BrainProteome_humanOrtholog$Neurons)),col="red4",lwd=2)
-text(length(intersect(unique(tanzi_select_variants_UCSC$name2),mm_BrainProteome_humanOrtholog$Neurons)),0, paste("pval=",round(testGeneOverlap(obj44_phg_mmProteome)@pval,digits = 3),sep=""), col = "black",adj = c(-.1, -.1))
+par(mfrow=c(2,2))
+hist(unlist(as.numeric(overlap_dist_tanzi_mmProteome_celltype$Microglia)),xlab = "#Overlaps",main = "#Overlap distribution Sharma et al, Microglia w/ Tanzi select 1k",col="blue4",xlim = c(0,50),ylim=c(0,2000),breaks = 50)
+abline(v=length(intersect(tanzi_select_variants_geneNames,overlap_dist_tanzi_mmProteome_celltype$Microglia)),col="red4",lwd=2)
+text(length(intersect(tanzi_select_variants_geneNames,mm_BrainProteome_humanOrtholog$Microglia)),0, paste("pval=",round(testGeneOverlap(obj41_phg_mmProteome)@pval,digits = 3),sep=""), col = "black",adj = c(-.1, -.1))
+hist(unlist(as.numeric(overlap_dist_tanzi_mmProteome_celltype$Astrocytes)),xlab = "#Overlaps",main = "#Overlap distribution Sharma et al, Astrocytes w/ Tanzi select 1k",col="olivedrab3",xlim = c(0,50),ylim=c(0,2000),breaks = 50)
+abline(v=length(intersect(tanzi_select_variants_geneNames,mm_BrainProteome_humanOrtholog$Astrocytes)),col="red4",lwd=2)
+text(length(intersect(tanzi_select_variants_geneNames,mm_BrainProteome_humanOrtholog$Astrocytes)),0, paste("pval=",round(testGeneOverlap(obj42_phg_mmProteome)@pval,digits = 3),sep=""), col = "black",adj = c(-.1, -.1))
+hist(unlist(as.numeric(overlap_dist_tanzi_mmProteome_celltype$Oligodendrocytes)),xlab = "#Overlaps",main = "#Overlap distribution Sharma et al, Oligodendrocytes w/ Tanzi select 1k",col="darkorchid4",xlim = c(0,50),ylim=c(0,2000),breaks = 50)
+abline(v=length(intersect(tanzi_select_variants_geneNames,mm_BrainProteome_humanOrtholog$Oligodendrocytes)),col="red4",lwd=2)
+text(length(intersect(tanzi_select_variants_geneNames,mm_BrainProteome_humanOrtholog$Oligodendrocytes)),0, paste("pval=",round(testGeneOverlap(obj43_phg_mmProteome)@pval,digits = 3),sep=""), col = "black",adj = c(-.1, -.1))
+hist(unlist(as.numeric(overlap_dist_tanzi_mmProteome_celltype$Neurons)),xlab = "#Overlaps",main = "#Overlap distribution Sharma et al, Neurons w/ Tanzi select 1k",col="orange2",xlim = c(0,50),ylim=c(0,2000),breaks = 50)
+abline(v=length(intersect(tanzi_select_variants_geneNames,mm_BrainProteome_humanOrtholog$Neurons)),col="red4",lwd=2)
+text(length(intersect(tanzi_select_variants_geneNames,mm_BrainProteome_humanOrtholog$Neurons)),0, paste("pval=",round(testGeneOverlap(obj44_phg_mmProteome)@pval,digits = 3),sep=""), col = "black",adj = c(-.1, -.1))
 
-par(mfrow=c(5,1))
+
+par(mfrow=c(2,2))
 hist(unlist(as.numeric(overlap_dist$mm_proteome$Microglia)),xlab = "#Overlaps",main = "#Overlap distribution Sharma et al, Microglia w/ DCN_PHG",col="blue4",xlim = c(0,100),ylim=c(0,2000),breaks = 50)
 abline(v=length(intersect(V(msmm_rnaseq.DCN$p001$BM_36$Std)$name,mm_BrainProteome_humanOrtholog$Microglia)),col="red4",lwd=2)
 text(length(intersect(V(msmm_rnaseq.DCN$p001$BM_36$Std)$name,mm_BrainProteome_humanOrtholog$Microglia)),0, paste("pval=",testGeneOverlap(obj31_phg_mmProteome)@pval,sep=""), col = "black",adj = c(-.1, -.1))
 hist(unlist(as.numeric(overlap_dist$mm_proteome$Astrocytes)),xlab = "#Overlaps",main = "#Overlap distribution Sharma et al, Astrocytes w/ DCN_PHG",col="olivedrab3",xlim = c(0,100),ylim=c(0,2000),breaks = 50)
 abline(v=length(intersect(V(msmm_rnaseq.DCN$p001$BM_36$Std)$name,mm_BrainProteome_humanOrtholog$Astrocytes)),col="red4",lwd=2)
 text(length(intersect(V(msmm_rnaseq.DCN$p001$BM_36$Std)$name,mm_BrainProteome_humanOrtholog$Astrocytes)),0, paste("pval=",testGeneOverlap(obj32_phg_mmProteome)@pval,sep=""), col = "black",adj = c(-.1, -.1))
-hist(unlist(as.numeric(overlap_dist$mm_proteome$Oligodendrocytes)),xlab = "#Overlaps",main = "#Overlap distribution Sharma et al, Oligodendrocytes w/ DCN_PHG",col="darkorchid4",xlim = c(0,100),ylim=c(0,2000),breaks = 50)
+hist(unlist(as.numeric(overlap_dist$mm_proteome$Oligodendrocytes)),xlab = "#Overlaps",main = "#Overlap distribution Sharma et al, Oligodendrocytes w/ DCN_PHG",col="darkorchid4",xlim = c(0,120),ylim=c(0,2000),breaks = 50)
 abline(v=length(intersect(V(msmm_rnaseq.DCN$p001$BM_36$Std)$name,mm_BrainProteome_humanOrtholog$Oligodendrocytes)),col="red4",lwd=2)
 text(length(intersect(V(msmm_rnaseq.DCN$p001$BM_36$Std)$name,mm_BrainProteome_humanOrtholog$Oligodendrocytes)),0, paste("pval=",testGeneOverlap(obj33_phg_mmProteome)@pval,sep=""), col = "black",adj = c(-.1, -.1))
-hist(unlist(as.numeric(overlap_dist$mm_proteome$Neurons)),xlab = "#Overlaps",main = "#Overlap distribution Sharma et al, Neurons w/ DCN_PHG",col="orange2",xlim = c(0,130),ylim=c(0,2000),breaks = 50)
+hist(unlist(as.numeric(overlap_dist$mm_proteome$Neurons)),xlab = "#Overlaps",main = "#Overlap distribution Sharma et al, Neurons w/ DCN_PHG",col="orange2",xlim = c(0,60),ylim=c(0,2000),breaks = 50)
 abline(v=length(intersect(V(msmm_rnaseq.DCN$p001$BM_36$Std)$name,mm_BrainProteome_humanOrtholog$Neurons)),col="red4",lwd=2)
 text(length(intersect(V(msmm_rnaseq.DCN$p001$BM_36$Std)$name,mm_BrainProteome_humanOrtholog$Neurons)),0, paste("pval=",testGeneOverlap(obj34_phg_mmProteome)@pval,sep=""), col = "black",adj = c(-.1, -.1))
-hist(unlist(as.numeric(overlap_dist$mm_proteome$Cerebellum)),xlab = "#Overlaps",main = "#Overlap distribution Sharma et al, Cerebellum w/ DCN_PHG",col="coral1",xlim = c(0,100),ylim=c(0,2000),breaks = 50)
-abline(v=length(intersect(V(msmm_rnaseq.DCN$p001$BM_36$Std)$name,mm_BrainProteome_humanOrtholog$Cerebellum)),col="red4",lwd=2)
-text(length(intersect(V(msmm_rnaseq.DCN$p001$BM_36$Std)$name,mm_BrainProteome_humanOrtholog$Cerebellum)),0, paste("pval=",testGeneOverlap(obj35_phg_mmProteome)@pval,sep=""), col = "black",adj = c(-.1, -.1))
-
-
-
-ebc=cluster_edge_betweenness(graph = msmm_rnaseq.DCN_PHG_Filt1.5_Low,directed = F,modularity = T,weights = E(msmm_rnaseq.DCN$BM_36$Std)$weight)
-comms=communities(ebc)
-indices=names(unlist(lapply(communities(x = ebc),function(x)which(length(x)>=10))))
-
 
 msmm_rnaseq.DCN_PHG_CellType_Subnet=lapply(lapply(mm_BrainProteome_humanOrtholog,intersect,V(g11)$name),induced_subgraph,graph=g11)
 #msmm_rnaseq.DCN_PHG_CellType_Subnet=lapply(lapply(mm_BrainProteome_humanOrtholog,intersect,V(g22)$name),induced_subgraph,graph=g22)
@@ -207,7 +205,7 @@ write.graph(msmm_rnaseq.DCN_PHG_CellType_Subnet$Microglia,"msmm_rnaseq_PHG_DCN_M
 write.graph(msmm_rnaseq.DCN_PHG_CellType_Subnet$Astrocytes,"msmm_rnaseq_PHG_DCN_Astrocytes_Subnet.gml",format = "gml")
 write.graph(msmm_rnaseq.DCN_PHG_CellType_Subnet$Oligodendrocytes,"msmm_rnaseq_PHG_DCN_Oligodendrocytes_Subnet.gml",format = "gml")
 write.graph(msmm_rnaseq.DCN_PHG_CellType_Subnet$Neurons,"msmm_rnaseq_PHG_DCN_Neurons_Subnet.gml",format = "gml")
-write.graph(msmm_rnaseq.DCN_PHG_CellType_Subnet$Cerebellum,"msmm_rnaseq_PHG_DCN_Cerebellum_Subnet.gml",format = "gml")
+
 
 ###################################################################################
 msbb_array19.PHG=read.table("../../MSBB_Array19/Normalised_Data/msbb_array19.corr_TrackGenes_PLQ_Genes005_PHG.txt",header = T,sep = "\t",as.is=T)
