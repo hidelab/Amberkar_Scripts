@@ -3,8 +3,6 @@
 #-l h_rt=96:00:00
 #Request resources
 #-l mem=12G -l rmem=4G
-#Queue
-#$ -P hidelab
 #Cores
 #$ -pe openmp 8
 #Job Name
