@@ -86,7 +86,7 @@ msmm_rnaseq_Plaque.Corr005.Genes=lapply(msmm_rnaseq_Plaque.Corr,function(x)x[whi
 
   for (t in 1:length(names(msmm_rnaseq))){
     for (s in 1:2){
-    exprs_rank<-msmm_rnaseq[[t]][which(rownames(msmm_rnaseq[[t]])%in%msmm_rnaseq_Plaque.Corr005.Genes[[t]][1:100]),]
+    exprs_rank<-msmm_rnaseq[[t]][which(rownames(msmm_rnaseq[[t]])%in%msmm_rnaseq_Plaque.Corr005.Genes[[t]]),]
     number_of_combinations<-choose(nrow(exprs_rank),2)
     c_exprs_rank=exprs_rank[,which(colnames(exprs_rank)%in%msmm_rnaseq.Sample_Strata[[t]][[s]]$Low)]
     t_exprs_rank=exprs_rank[,which(colnames(exprs_rank)%in%msmm_rnaseq.Sample_Strata[[t]][[s]]$High)]
