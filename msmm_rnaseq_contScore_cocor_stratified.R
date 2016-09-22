@@ -116,7 +116,7 @@ names(msmm_rnaseq.cocor_filtered$BM_10)=names(msmm_rnaseq.cocor_filtered$BM_22)=
 cat(paste("Filtering differentially correlated genes ...\n"))
 for (t in 1:length(msmm_rnaseq.cocor_filtered)){
   for (s in 1:2){
-    msmm_rnaseq.cocor_filtered[[t]][[s]]=msmm_rnaseq.cocor[[t]][[s]][(msmm_rnaseq.cocor[[t]][[s]]$p.cocor<=0.05&msmm_rnaseq.cocor[[t]][[s]]$FDR<=0.1),]
+    msmm_rnaseq.cocor_filtered[[t]][[s]]=msmm_rnaseq.cocor[[t]][[s]][(msmm_rnaseq.cocor[[t]][[s]]$p.cocor<=0.05),]
     write.table(msmm_rnaseq.cocor_filtered[[t]][[s]],file = paste(names(msmm_rnaseq.cocor_filtered)[t],names(msmm_rnaseq.cocor_filtered[[t]]),"p005_cocor_filtered_interactions.txt",sep="_"),sep = "\t",col.names = T,row.names = T,quote=F)
   }
 }
