@@ -86,7 +86,7 @@ msmm_rnaseq_Plaque.Corr005.Genes=lapply(msmm_rnaseq_Plaque.Corr,function(x)x[whi
 
   for (t in 1:length(names(msmm_rnaseq))){
     for (s in 1:2){
-    exprs_rank<-msmm_rnaseq[[t]][which(rownames(msmm_rnaseq[[t]])%in%msmm_rnaseq_Plaque.Corr005.Genes[[t]]),]
+    exprs_rank<-msmm_rnaseq[[t]][which(rownames(msmm_rnaseq[[t]])%in%msmm_rnaseq_Plaque.Corr005.Genes[[t]][1:100]),]
     number_of_combinations<-choose(nrow(exprs_rank),2)
     c_exprs_rank=exprs_rank[,which(colnames(exprs_rank)%in%msmm_rnaseq.Sample_Strata[[t]][[s]]$Low)]
     t_exprs_rank=exprs_rank[,which(colnames(exprs_rank)%in%msmm_rnaseq.Sample_Strata[[t]][[s]]$High)]
@@ -113,7 +113,7 @@ names(msmm_rnaseq.cocor_filtered)=names(msmm_rnaseq.cocor)
 msmm_rnaseq.cocor_filtered$BM_10=msmm_rnaseq.cocor_filtered$BM_22=msmm_rnaseq.cocor_filtered$BM_36=vector(mode = "list",length = 2)
 names(msmm_rnaseq.cocor_filtered$BM_10)=names(msmm_rnaseq.cocor_filtered$BM_22)=names(msmm_rnaseq.cocor_filtered$BM_36)=c("Stratum1","Stratum2")
 
-
+cat(paste("Filtering differentially correlated genes ...\n"))
 for (t in 1:length(msmm_rnaseq.cocor_filtered)){
   for (s in 1:2){
     msmm_rnaseq.cocor_filtered[[t]][[s]]=msmm_rnaseq.cocor[[t]][[s]][(msmm_rnaseq.cocor[[t]][[s]]$p.cocor<=0.05&msmm_rnaseq.cocor[[t]][[s]]$FDR<=0.1),]
@@ -131,6 +131,7 @@ names(msmm_rnaseq.DCN$BM_10$Low)=names(msmm_rnaseq.DCN$BM_10$High)=names(msmm_rn
 names(msmm_rnaseq.DCN$BM_22$Low)=names(msmm_rnaseq.DCN$BM_22$High)=names(msmm_rnaseq.DCN$BM_22$Std)=c("Stratum1","Stratum2")
 names(msmm_rnaseq.DCN$BM_36$Low)=names(msmm_rnaseq.DCN$BM_36$High)=names(msmm_rnaseq.DCN$BM_36$Std)=c("Stratum1","Stratum2")
 
+cat(paste("Building DCNs ..."))
 for (t in 1:length(names(msmm_rnaseq))){
   for (y in 1:3){
     for (s in 1:2){
@@ -138,6 +139,7 @@ for (t in 1:length(names(msmm_rnaseq))){
       E(msmm_rnaseq.DCN[[t]][[y]][[s]])$weight=msmm_rnaseq.cocor_filtered[[t]][[s]]$r.c+1
       E(msmm_rnaseq.DCN[[t]][[y]][[s]])$weight=msmm_rnaseq.cocor_filtered[[t]][[s]]$r.t+1
       E(msmm_rnaseq.DCN[[t]][[y]][[s]])$weight=msmm_rnaseq.cocor_filtered[[t]][[s]]$abs.corr.change
+      cat(paste("Writing DCNs for",names(msmm_rnaseq.DCN)[t],names(msmm_rnaseq.DCN[[t]])[[y]],names(msmm_rnaseq.DCN[[t]][[y]])[[s]],"...\n",sep = " "))
       write(V(msmm_rnaseq.DCN[[t]][[y]][[s]])$name,paste(names(msmm_rnaseq.DCN)[t],names(msmm_rnaseq.DCN[[t]])[[y]],names(msmm_rnaseq.DCN[[t]][[y]])[[s]],"p005","DiffCoexp","Genes.txt",sep = "_"),sep = "\n")
       write.graph(msmm_rnaseq.DCN[[t]][[y]][[s]],paste(names(msmm_rnaseq.DCN)[t],names(msmm_rnaseq.DCN[[t]])[[y]],names(msmm_rnaseq.DCN[[t]][[y]])[[s]],"p005","DiffCoexp","Subgraph.gml",sep = "_"),format = "gml")
       write.graph(msmm_rnaseq.DCN[[t]][[y]][[s]],paste(names(msmm_rnaseq.DCN)[t],names(msmm_rnaseq.DCN[[t]])[[y]],names(msmm_rnaseq.DCN[[t]][[y]])[[s]],"p005","DiffCoexp","Subgraph.gml",sep = "_"),format = "gml")
@@ -145,5 +147,6 @@ for (t in 1:length(names(msmm_rnaseq))){
     }
   }
 }
-
+cat(paste("Saving results in RData object ...\n"))
 save.image("msmm_rnaseq_contScore_cocor_p005_Stratum.RData")
+cat(paste("Done!"))

@@ -2,9 +2,9 @@
 #Job time
 #-l h_rt=96:00:00
 #Request resources
-#-l mem=16G -l rmem=8G
+#-l mem=8G -l rmem=4G
 #Cores
-#$ -pe openmp 8
+#$ -pe openmp 16
 #Job Name
 #-N msmm_cocor_strat
 
