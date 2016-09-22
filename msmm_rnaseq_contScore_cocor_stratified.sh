@@ -5,6 +5,8 @@
 #-l mem=12G -l rmem=8G
 #Cores
 #$ -pe openmp 8
+#Queue
+# -P hidelab
 #Job Name
 #-N msmm_cocor_strat
 
