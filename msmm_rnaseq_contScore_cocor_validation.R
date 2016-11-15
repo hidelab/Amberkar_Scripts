@@ -54,36 +54,32 @@ for (t in 1:length(msmm_rnaseq)){
   
   
 #Rewiring analysis
-g1=graph.data.frame(d = ends(graph = msmm_rnaseq.DCN$p001$BM_36$High,es = which(E(msmm_rnaseq.DCN$p001$BM_36$High)$weight>=1),names = T),directed = F)
-g2=graph.data.frame(d = ends(graph = msmm_rnaseq.DCN$p001$BM_36$Low,es = which(E(msmm_rnaseq.DCN$p001$BM_36$Low)$weight>=1),names = T),directed = F)
-g3=graph.data.frame(d = ends(graph = msmm_rnaseq.DCN$p001$BM_22$High,es = which(E(msmm_rnaseq.DCN$p001$BM_22$High)$weight>=1),names = T),directed = F)
-g4=graph.data.frame(d = ends(graph = msmm_rnaseq.DCN$p001$BM_22$Low,es = which(E(msmm_rnaseq.DCN$p001$BM_22$Low)$weight>=1),names = T),directed = F)
+g1=graph.data.frame(d = ends(graph = msmm_rnaseq.DCN$p001$BM_36$High,es = which(E(msmm_rnaseq.DCN$p001$BM_36$High)$weight>=1.5),names = T),directed = F)
+g2=graph.data.frame(d = ends(graph = msmm_rnaseq.DCN$p001$BM_36$Low,es = which(E(msmm_rnaseq.DCN$p001$BM_36$Low)$weight>=1.5),names = T),directed = F)
+g3=graph.data.frame(d = ends(graph = msmm_rnaseq.DCN$p001$BM_22$High,es = which(E(msmm_rnaseq.DCN$p001$BM_22$High)$weight>=1.5),names = T),directed = F)
+g4=graph.data.frame(d = ends(graph = msmm_rnaseq.DCN$p001$BM_22$Low,es = which(E(msmm_rnaseq.DCN$p001$BM_22$Low)$weight>=1.5),names = T),directed = F)
 g5=graph.data.frame(d = ends(graph = msmm_rnaseq.DCN$p001$BM_36$High,es = which(E(msmm_rnaseq.DCN$p001$BM_36$High)$weight<=0.5),names = T),directed = F)
 g6=graph.data.frame(d = ends(graph = msmm_rnaseq.DCN$p001$BM_36$Low,es = which(E(msmm_rnaseq.DCN$p001$BM_36$Low)$weight<=0.5),names = T),directed = F)
 g7=graph.data.frame(d = ends(graph = msmm_rnaseq.DCN$p001$BM_22$High,es = which(E(msmm_rnaseq.DCN$p001$BM_22$High)$weight<=0.5),names = T),directed = F)
 g8=graph.data.frame(d = ends(graph = msmm_rnaseq.DCN$p001$BM_22$Low,es = which(E(msmm_rnaseq.DCN$p001$BM_22$Low)$weight<=0.5),names = T),directed = F)
 
-g11=induced_subgraph(graph = g1,vids = intersect(V(g1)$name,V(g2)$name))
-g22=induced_subgraph(graph = g2,vids = intersect(V(g1)$name,V(g2)$name))
-g33=induced_subgraph(graph = g3,vids = intersect(V(g3)$name,V(g4)$name))
-g44=induced_subgraph(graph = g4,vids = intersect(V(g3)$name,V(g4)$name))
-g55=induced_subgraph(graph = g5,vids = intersect(V(g5)$name,V(g6)$name))
-g66=induced_subgraph(graph = g6,vids = intersect(V(g5)$name,V(g6)$name))
-g77=induced_subgraph(graph = g7,vids = intersect(V(g7)$name,V(g8)$name))
-g88=induced_subgraph(graph = g8,vids = intersect(V(g7)$name,V(g8)$name))
+# g9=graph.data.frame(d = ends(graph = msmm_rnaseq.DCN$p001$BM_36$Std,es = which(E(msmm_rnaseq.DCN$p001$BM_36$Std)$weight<=0.5),names = T),directed = F)
+# g10=graph.data.frame(d = ends(graph = msmm_rnaseq.DCN$p001$BM_36$Std,es = which(E(msmm_rnaseq.DCN$p001$BM_36$Std)$weight>=1.0),names = T),directed = F)
 
 msmm_rnaseq.DCN_rewired=vector(mode = "list",length = 2)
 names(msmm_rnaseq.DCN_rewired)=c("BM_22","BM_36")
 msmm_rnaseq.DCN_rewired$BM_22=vector(mode = "list",length = 2)
 msmm_rnaseq.DCN_rewired$BM_36=vector(mode = "list",length = 2)
-names(msmm_rnaseq.DCN_rewired$BM_22)=names(msmm_rnaseq.DCN_rewired$BM_36)=c("PLQ_PosCorr","PLQ_NegCorr")
-msmm_rnaseq.DCN_rewired$BM_22$PLQ_PosCorr=data.frame(Common_Genes=names(degree(graph = g3,v = intersect(V(g3)$name,V(g4)$name))),Low_PLQ=degree(graph = g4,v = intersect(V(g3)$name,V(g4)$name)),High_PLQ=degree(graph = g3,v = intersect(V(g3)$name,V(g4)$name)),Difference=degree(graph = g4,v = intersect(V(g3)$name,V(g4)$name))-degree(graph = g3,v = intersect(V(g3)$name,V(g4)$name)),stringsAsFactors = F)
-msmm_rnaseq.DCN_rewired$BM_22$PLQ_NegCorr=data.frame(Common_Genes=names(degree(graph = g7,v = intersect(V(g7)$name,V(g8)$name))),Low_PLQ=degree(graph = g8,v = intersect(V(g7)$name,V(g8)$name)),High_PLQ=degree(graph = g7,v = intersect(V(g7)$name,V(g8)$name)),Difference=degree(graph = g8,v = intersect(V(g7)$name,V(g8)$name))-degree(graph = g7,v = intersect(V(g7)$name,V(g8)$name)),stringsAsFactors = F)
-msmm_rnaseq.DCN_rewired$BM_36$PLQ_PosCorr=data.frame(Common_Genes=names(degree(graph = g1,v = intersect(V(g1)$name,V(g2)$name))),Low_PLQ=degree(graph = g2,v = intersect(V(g1)$name,V(g2)$name)),High_PLQ=degree(graph = g1,v = intersect(V(g1)$name,V(g2)$name)),Difference=degree(graph = g2,v = intersect(V(g1)$name,V(g2)$name))-degree(graph = g1,v = intersect(V(g1)$name,V(g2)$name)),stringsAsFactors = F)
-msmm_rnaseq.DCN_rewired$BM_36$PLQ_NegCorr=data.frame(Common_Genes=names(degree(graph = g5,v = intersect(V(g5)$name,V(g6)$name))),Low_PLQ=degree(graph = g6,v = intersect(V(g5)$name,V(g6)$name)),High_PLQ=degree(graph = g5,v = intersect(V(g5)$name,V(g6)$name)),Difference=degree(graph = g5,v = intersect(V(g5)$name,V(g6)$name))-degree(graph = g6,v = intersect(V(g5)$name,V(g6)$name)),stringsAsFactors = F)
+names(msmm_rnaseq.DCN_rewired$BM_22)=names(msmm_rnaseq.DCN_rewired$BM_36)=c("PosCoexp","NegCoexp")
+msmm_rnaseq.DCN_rewired$BM_22$PosCoexp=data.frame(Common_Genes=names(degree(graph = g3,v = intersect(V(g3)$name,V(g4)$name))),Low_PLQ=degree(graph = g4,v = intersect(V(g3)$name,V(g4)$name)),High_PLQ=degree(graph = g3,v = intersect(V(g3)$name,V(g4)$name)),Difference=degree(graph = g4,v = intersect(V(g3)$name,V(g4)$name))-degree(graph = g4,v = intersect(V(g3)$name,V(g4)$name)),stringsAsFactors = F)
+msmm_rnaseq.DCN_rewired$BM_22$NegCoexp=data.frame(Common_Genes=names(degree(graph = g7,v = intersect(V(g7)$name,V(g8)$name))),Low_PLQ=degree(graph = g8,v = intersect(V(g7)$name,V(g8)$name)),High_PLQ=degree(graph = g7,v = intersect(V(g7)$name,V(g8)$name)),Difference=degree(graph = g8,v = intersect(V(g7)$name,V(g8)$name))-degree(graph = g8,v = intersect(V(g7)$name,V(g8)$name)),stringsAsFactors = F)
+msmm_rnaseq.DCN_rewired$BM_36$PosCoexp=data.frame(Common_Genes=names(degree(graph = g1,v = intersect(V(g1)$name,V(g2)$name))),Low_PLQ=degree(graph = g2,v = intersect(V(g1)$name,V(g2)$name)),High_PLQ=degree(graph = g1,v = intersect(V(g1)$name,V(g2)$name)),Difference=degree(graph = g2,v = intersect(V(g1)$name,V(g2)$name))-degree(graph = g1,v = intersect(V(g1)$name,V(g2)$name)),stringsAsFactors = F)
+msmm_rnaseq.DCN_rewired$BM_36$NegCoexp=data.frame(Common_Genes=names(degree(graph = g5,v = intersect(V(g5)$name,V(g6)$name))),Low_PLQ=degree(graph = g6,v = intersect(V(g5)$name,V(g6)$name)),High_PLQ=degree(graph = g5,v = intersect(V(g5)$name,V(g6)$name)),Difference=degree(graph = g6,v = intersect(V(g5)$name,V(g6)$name))-degree(graph = g5,v = intersect(V(g5)$name,V(g6)$name)),stringsAsFactors = F)
 
-write.table(msmm_rnaseq.DCN_rewired$BM_22,"BM22_DCN_Filt1.0_RewiredGenes.txt",sep="\t",col.names = T,row.names = T,quote = F)
-write.table(msmm_rnaseq.DCN_rewired$BM_36,"BM36_DCN_Filt1.0_RewiredGenes.txt",sep="\t",col.names = T,row.names = T,quote = F)
+write.table(msmm_rnaseq.DCN_rewired$BM_22$PosCoexp,"BM22_DCN_PosCorr_RewiredGenes.txt",sep="\t",col.names = T,row.names = T,quote = F)
+write.table(msmm_rnaseq.DCN_rewired$BM_22$NegCoexp,"BM22_DCN_NegCorr_RewiredGenes.txt",sep="\t",col.names = T,row.names = T,quote = F)
+write.table(msmm_rnaseq.DCN_rewired$BM_36$PosCoexp,"BM36_DCN_PosCorr_RewiredGenes.txt",sep="\t",col.names = T,row.names = T,quote = F)
+write.table(msmm_rnaseq.DCN_rewired$BM_36$NegCoexp,"BM36_DCN_NegCorr_RewiredGenes.txt",sep="\t",col.names = T,row.names = T,quote = F)
 
 #Validation and Hypothesis generation
 ffpe_neurons=read.xls("../../../BrainExpression_Datasets/FFPE-Proteomics-Wiesniewski/srep15456-s6.xls",sheet = 2,header=T,as.is=T)
@@ -155,6 +151,7 @@ tanzi_select_variants=read.xls("../../../../Collaborations/Tanzi_WGS/wking.top10
 tanzi_select_variants.chr_regions=paste(tanzi_select_variants$MarkerName,"-",as.integer(unlist(lapply(strsplit(x = tanzi_select_variants$MarkerName,split = ":"),`[[`,2)))+1,sep = "")
 write(paste("chr",tanzi_select_variants$MarkerName,"-",as.integer(unlist(lapply(strsplit(x = tanzi_select_variants$MarkerName,split = ":"),`[[`,2)))+1,sep = ""),file = "../../../../Collaborations/Tanzi_WGS/Tanzi_HET_METAL_select_variants_chr_regions.txt",sep="\n")
 tanzi_select_variants_UCSC=read.xls("../../../../Collaborations/Tanzi_WGS/Tanzi_HET_METAL_select_variants_chr_regions_UCSC_Output_hg19.xlsx",sheet = 1,header=T,as.is=T)
+tanzi_select_variants_UCSC_hg38=read.xls("../../../../Collaborations/Tanzi_WGS/Tanzi_HET_METAL_select_variants_chr_regions_UCSC_Output.xlsx",sheet = 1,header=T,as.is=T)
 tanzi_select_variants_geneNames=unique(tanzi_select_variants_UCSC$name2)
 
 human_genes_orgDB=toTable(org.Hs.egSYMBOL)
@@ -176,8 +173,8 @@ for (o in 1:10000){
   overlap_dist$lcm_neurons[[o]]=length(intersect(lcm_neurons_AD.random,V(msmm_rnaseq.DCN$p001$BM_36$Std)$name))
   # overlap_dist$mm_proteome[[o]]=length(intersect(mm_proteome_AD.random,V(msmm_rnaseq.DCN$BM_36$Std)$name))
   overlap_dist$tanzi_select[[o]]=length(intersect(tanzi_select_variants.random,V(msmm_rnaseq.DCN$p001$BM_36$Std)$name))
-  PP_NTr_random=sample(x = human_genes_orgDB$symbol,size=length(PHG_PP_NTr_genes))
-  overlap_dist_PP_Ntr[[o]]=length(intersect(PP_NTr_random,V(msmm_rnaseq.DCN$p001$BM_36$Std)$name))
+  #PP_NTr_random=sample(x = human_genes_orgDB$symbol,size=length(PHG_PP_NTr_genes))
+  #overlap_dist_PP_Ntr[[o]]=length(intersect(PP_NTr_random,V(msmm_rnaseq.DCN$p001$BM_36$Std)$name))
 }
 for (c in 1:length(names(mm_BrainProteome_humanOrtholog))){
   for (o in 1:10000){
@@ -289,3 +286,17 @@ msbb_array19.PHG=read.table("../../MSBB_Array19/Normalised_Data/msbb_array19.cor
 msbb_array19.PHG_covariates=read.table("../../MSBB_Array19/Normalised_Data/msbb_array19_covariates_PHG.txt",sep="\t",header = T,as.is = T)
 msbb_array19.PHG_LowPLQ_samples=paste("X",msbb_array19.PHG_covariates$BrainBank[which(msbb_array19.PHG_covariates$PLQ_Mn<=1)],sep = "")
 msbb_array19.PHG_HighPLQ_samples=paste("X",msbb_array19.PHG_covariates$BrainBank[which(msbb_array19.PHG_covariates$PLQ_Mn>=15)],sep = "")
+###################################################################################
+msmm_rnaseq.DCN_rewired_cluster=vector(mode = "list",length = 4)
+names(msmm_rnaseq.DCN_rewired_cluster)=c("PosCoexp_Gain","PosCoexp_Loss","NegCoexp_Gain","NegCoexp_Loss")
+msmm_rnaseq.DCN_rewired_cluster$PosCoexp_Loss=select(x = org.Hs.eg.db,keys=msmm_rnaseq.DCN_rewired$BM_36$PosCoexp$Common_Genes[which(msmm_rnaseq.DCN_rewired$BM_36$PosCoexp$Difference>0)],columns = "ENTREZID",keytype = "SYMBOL")[,2]
+msmm_rnaseq.DCN_rewired_cluster$PosCoexp_Gain=select(x = org.Hs.eg.db,keys=msmm_rnaseq.DCN_rewired$BM_36$PosCoexp$Common_Genes[which(msmm_rnaseq.DCN_rewired$BM_36$PosCoexp$Difference<0)],columns = "ENTREZID",keytype = "SYMBOL")[,2]
+msmm_rnaseq.DCN_rewired_cluster$NegCoexp_Loss=select(x = org.Hs.eg.db,keys=msmm_rnaseq.DCN_rewired$BM_36$NegCoexp$Common_Genes[which(msmm_rnaseq.DCN_rewired$BM_36$NegCoexp$Difference>0)],columns = "ENTREZID",keytype = "SYMBOL")[,2]
+msmm_rnaseq.DCN_rewired_cluster$NegCoexp_Gain=select(x = org.Hs.eg.db,keys=msmm_rnaseq.DCN_rewired$BM_36$NegCoexp$Common_Genes[which(msmm_rnaseq.DCN_rewired$BM_36$NegCoexp$Difference<0)],columns = "ENTREZID",keytype = "SYMBOL")[,2]
+
+msmm_rnaseq.DCN_rewired_cluster2=vector(mode = "list",length = 4)
+names(msmm_rnaseq.DCN_rewired_cluster2)=c("PosCoexp_Loss","PosCoexp_Gain","NegCoexp_Loss","NegCoexp_Gain")
+msmm_rnaseq.DCN_rewired_cluster2$PosCoexp_Loss=msmm_rnaseq.DCN_rewired$BM_36$PosCoexp$Common_Genes[which(msmm_rnaseq.DCN_rewired$BM_36$PosCoexp$Difference>0)]
+msmm_rnaseq.DCN_rewired_cluster2$PosCoexp_Gain=msmm_rnaseq.DCN_rewired$BM_36$PosCoexp$Common_Genes[which(msmm_rnaseq.DCN_rewired$BM_36$PosCoexp$Difference<0)]
+msmm_rnaseq.DCN_rewired_cluster2$NegCoexp_Loss=msmm_rnaseq.DCN_rewired$BM_36$PosCorr$Common_Genes[which(msmm_rnaseq.DCN_rewired$BM_36$NegCoexp$Difference>0)]
+msmm_rnaseq.DCN_rewired_cluster2$NegCoexp_Gain=msmm_rnaseq.DCN_rewired$BM_36$PosCorr$Common_Genes[which(msmm_rnaseq.DCN_rewired$BM_36$NegCoexp$Difference<0)]
