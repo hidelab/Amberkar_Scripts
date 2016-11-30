@@ -4,6 +4,7 @@ library(cocor)
 library(gdata)
 library(dataframes2xls)
 library(GeneOverlap)
+library(ReactomePA)
 
 setwd("/Users/sandeepamberkar/Work/Data/MSMM-MSBB-HBTRC-Data/MSMM_RNAseq/MSMM_RNAseq_FinalRelease/")
 load("msmm_rnaseq_contScore_cocor_p005.RData")
@@ -55,13 +56,17 @@ for (t in 1:length(msmm_rnaseq)){
   
 #Rewiring analysis
 g1=graph.data.frame(d = ends(graph = msmm_rnaseq.DCN$p001$BM_36$High,es = which(E(msmm_rnaseq.DCN$p001$BM_36$High)$weight>=1.5),names = T),directed = F)
+write.graph(g1,"PHG_DCN_High_PosCoexp.gml",format="gml")
 g2=graph.data.frame(d = ends(graph = msmm_rnaseq.DCN$p001$BM_36$Low,es = which(E(msmm_rnaseq.DCN$p001$BM_36$Low)$weight>=1.5),names = T),directed = F)
-g3=graph.data.frame(d = ends(graph = msmm_rnaseq.DCN$p001$BM_22$High,es = which(E(msmm_rnaseq.DCN$p001$BM_22$High)$weight>=1.5),names = T),directed = F)
-g4=graph.data.frame(d = ends(graph = msmm_rnaseq.DCN$p001$BM_22$Low,es = which(E(msmm_rnaseq.DCN$p001$BM_22$Low)$weight>=1.5),names = T),directed = F)
+write.graph(g2,"PHG_DCN_Low_PosCoexp.gml",format="gml")
+# g3=graph.data.frame(d = ends(graph = msmm_rnaseq.DCN$p001$BM_22$High,es = which(E(msmm_rnaseq.DCN$p001$BM_22$High)$weight>=1.5),names = T),directed = F)
+# g4=graph.data.frame(d = ends(graph = msmm_rnaseq.DCN$p001$BM_22$Low,es = which(E(msmm_rnaseq.DCN$p001$BM_22$Low)$weight>=1.5),names = T),directed = F)
 g5=graph.data.frame(d = ends(graph = msmm_rnaseq.DCN$p001$BM_36$High,es = which(E(msmm_rnaseq.DCN$p001$BM_36$High)$weight<=0.5),names = T),directed = F)
+write.graph(g5,"PHG_DCN_High_NegCoexp.gml",format="gml")
 g6=graph.data.frame(d = ends(graph = msmm_rnaseq.DCN$p001$BM_36$Low,es = which(E(msmm_rnaseq.DCN$p001$BM_36$Low)$weight<=0.5),names = T),directed = F)
-g7=graph.data.frame(d = ends(graph = msmm_rnaseq.DCN$p001$BM_22$High,es = which(E(msmm_rnaseq.DCN$p001$BM_22$High)$weight<=0.5),names = T),directed = F)
-g8=graph.data.frame(d = ends(graph = msmm_rnaseq.DCN$p001$BM_22$Low,es = which(E(msmm_rnaseq.DCN$p001$BM_22$Low)$weight<=0.5),names = T),directed = F)
+write.graph(g6,"PHG_DCN_Low_NegCoexp.gml",format="gml")
+# g7=graph.data.frame(d = ends(graph = msmm_rnaseq.DCN$p001$BM_22$High,es = which(E(msmm_rnaseq.DCN$p001$BM_22$High)$weight<=0.5),names = T),directed = F)
+# g8=graph.data.frame(d = ends(graph = msmm_rnaseq.DCN$p001$BM_22$Low,es = which(E(msmm_rnaseq.DCN$p001$BM_22$Low)$weight<=0.5),names = T),directed = F)
 
 # g9=graph.data.frame(d = ends(graph = msmm_rnaseq.DCN$p001$BM_36$Std,es = which(E(msmm_rnaseq.DCN$p001$BM_36$Std)$weight<=0.5),names = T),directed = F)
 # g10=graph.data.frame(d = ends(graph = msmm_rnaseq.DCN$p001$BM_36$Std,es = which(E(msmm_rnaseq.DCN$p001$BM_36$Std)$weight>=1.0),names = T),directed = F)
@@ -71,13 +76,13 @@ names(msmm_rnaseq.DCN_rewired)=c("BM_22","BM_36")
 msmm_rnaseq.DCN_rewired$BM_22=vector(mode = "list",length = 2)
 msmm_rnaseq.DCN_rewired$BM_36=vector(mode = "list",length = 2)
 names(msmm_rnaseq.DCN_rewired$BM_22)=names(msmm_rnaseq.DCN_rewired$BM_36)=c("PosCoexp","NegCoexp")
-msmm_rnaseq.DCN_rewired$BM_22$PosCoexp=data.frame(Common_Genes=names(degree(graph = g3,v = intersect(V(g3)$name,V(g4)$name))),Low_PLQ=degree(graph = g4,v = intersect(V(g3)$name,V(g4)$name)),High_PLQ=degree(graph = g3,v = intersect(V(g3)$name,V(g4)$name)),Difference=degree(graph = g4,v = intersect(V(g3)$name,V(g4)$name))-degree(graph = g4,v = intersect(V(g3)$name,V(g4)$name)),stringsAsFactors = F)
-msmm_rnaseq.DCN_rewired$BM_22$NegCoexp=data.frame(Common_Genes=names(degree(graph = g7,v = intersect(V(g7)$name,V(g8)$name))),Low_PLQ=degree(graph = g8,v = intersect(V(g7)$name,V(g8)$name)),High_PLQ=degree(graph = g7,v = intersect(V(g7)$name,V(g8)$name)),Difference=degree(graph = g8,v = intersect(V(g7)$name,V(g8)$name))-degree(graph = g8,v = intersect(V(g7)$name,V(g8)$name)),stringsAsFactors = F)
+# msmm_rnaseq.DCN_rewired$BM_22$PosCoexp=data.frame(Common_Genes=names(degree(graph = g3,v = intersect(V(g3)$name,V(g4)$name))),Low_PLQ=degree(graph = g4,v = intersect(V(g3)$name,V(g4)$name)),High_PLQ=degree(graph = g3,v = intersect(V(g3)$name,V(g4)$name)),Difference=degree(graph = g4,v = intersect(V(g3)$name,V(g4)$name))-degree(graph = g4,v = intersect(V(g3)$name,V(g4)$name)),stringsAsFactors = F)
+# msmm_rnaseq.DCN_rewired$BM_22$NegCoexp=data.frame(Common_Genes=names(degree(graph = g7,v = intersect(V(g7)$name,V(g8)$name))),Low_PLQ=degree(graph = g8,v = intersect(V(g7)$name,V(g8)$name)),High_PLQ=degree(graph = g7,v = intersect(V(g7)$name,V(g8)$name)),Difference=degree(graph = g8,v = intersect(V(g7)$name,V(g8)$name))-degree(graph = g8,v = intersect(V(g7)$name,V(g8)$name)),stringsAsFactors = F)
 msmm_rnaseq.DCN_rewired$BM_36$PosCoexp=data.frame(Common_Genes=names(degree(graph = g1,v = intersect(V(g1)$name,V(g2)$name))),Low_PLQ=degree(graph = g2,v = intersect(V(g1)$name,V(g2)$name)),High_PLQ=degree(graph = g1,v = intersect(V(g1)$name,V(g2)$name)),Difference=degree(graph = g2,v = intersect(V(g1)$name,V(g2)$name))-degree(graph = g1,v = intersect(V(g1)$name,V(g2)$name)),stringsAsFactors = F)
 msmm_rnaseq.DCN_rewired$BM_36$NegCoexp=data.frame(Common_Genes=names(degree(graph = g5,v = intersect(V(g5)$name,V(g6)$name))),Low_PLQ=degree(graph = g6,v = intersect(V(g5)$name,V(g6)$name)),High_PLQ=degree(graph = g5,v = intersect(V(g5)$name,V(g6)$name)),Difference=degree(graph = g6,v = intersect(V(g5)$name,V(g6)$name))-degree(graph = g5,v = intersect(V(g5)$name,V(g6)$name)),stringsAsFactors = F)
 
-write.table(msmm_rnaseq.DCN_rewired$BM_22$PosCoexp,"BM22_DCN_PosCorr_RewiredGenes.txt",sep="\t",col.names = T,row.names = T,quote = F)
-write.table(msmm_rnaseq.DCN_rewired$BM_22$NegCoexp,"BM22_DCN_NegCorr_RewiredGenes.txt",sep="\t",col.names = T,row.names = T,quote = F)
+# write.table(msmm_rnaseq.DCN_rewired$BM_22$PosCoexp,"BM22_DCN_PosCorr_RewiredGenes.txt",sep="\t",col.names = T,row.names = T,quote = F)
+# write.table(msmm_rnaseq.DCN_rewired$BM_22$NegCoexp,"BM22_DCN_NegCorr_RewiredGenes.txt",sep="\t",col.names = T,row.names = T,quote = F)
 write.table(msmm_rnaseq.DCN_rewired$BM_36$PosCoexp,"BM36_DCN_PosCorr_RewiredGenes.txt",sep="\t",col.names = T,row.names = T,quote = F)
 write.table(msmm_rnaseq.DCN_rewired$BM_36$NegCoexp,"BM36_DCN_NegCorr_RewiredGenes.txt",sep="\t",col.names = T,row.names = T,quote = F)
 
@@ -98,37 +103,37 @@ mouse_human_ortholog2=read.table("../../../BrainExpression_Datasets/Mouse_Human_
 #mm_BrainProteome_sharma=read.xls("../../../BrainExpression_Datasets/Mouse_Brain_Proteome_Sharma_etal/nn.4160-S8.xlsx",sheet = 1,skip=1,header=T,as.is=T)
 mm_BrainProteome_IC_files=list.files(path = "../../../BrainExpression_Datasets/MouseBrainProteome_MannLab/IsolatedCells",pattern = "IC",full.names = T)
 mm_BrainProteome_CC_files=list.files(path = "../../../BrainExpression_Datasets/MouseBrainProteome_MannLab/CulturedCells",pattern = "CC",full.names = T)
-mm_BrainProteome_concRNAseq=read.xls("../../../BrainExpression_Datasets/Mouse_Brain_Proteome_Sharma_etal/nn.4160-S5.xlsx",sheet = 1,header=1,as.is=T)
-colnames(mm_BrainProteome_concRNAseq)=c("Oligodendrocytes.Div1.R1","Oligodendrocytes.Div1.R2","Oligodendrocytes.Div1.R3","Oligodendrocytes.div2.5.R1","Oligodendrocytes.div2.5.R2","Oligodendrocytes.div2.5.R3","Oligodendrocytes.div4.R1","Oligodendrocytes.div4.R2","Oligodendrocytes.div4.R3","adult.microglia.R1","adult.microglia.R2","adult.microglia.R3","Astrocytes.R1","Astrocytes.R2","Astrocytes.R3","cortical.neurons.div05.R1","cortical.neurons.div05.R2","cortical.neurons.div05.R3","cortical.neurons.div10.R1","cortical.neurons.div10.R2","cortical.neurons.div10.R3","GeneName")
-cond=c(rep("Oligodendrocytes",9),rep("Microglia",3),rep("Astrocytes",3),rep("Neurons",6))
-type=c(rep("paired-end",length(cond)))
-mm_BrainProteome_concRNAseq.expSetup=data.frame(condition=cond,type=type)
-nan_counts=unique(c(which(is.na(mm_BrainProteome_concRNAseq$Oligodendrocytes.Div1.R1)==T),
-which(is.na(mm_BrainProteome_concRNAseq$Oligodendrocytes.Div1.R2)==T),
-which(is.na(mm_BrainProteome_concRNAseq$Oligodendrocytes.Div1.R3)==T),
-which(is.na(mm_BrainProteome_concRNAseq$Oligodendrocytes.div2.5.R1)==T),
-which(is.na(mm_BrainProteome_concRNAseq$Oligodendrocytes.div2.5.R2)==T),
-which(is.na(mm_BrainProteome_concRNAseq$Oligodendrocytes.div2.5.R3)==T),
-which(is.na(mm_BrainProteome_concRNAseq$Oligodendrocytes.div4.R1)==T),
-which(is.na(mm_BrainProteome_concRNAseq$Oligodendrocytes.div4.R2)==T),
-which(is.na(mm_BrainProteome_concRNAseq$Oligodendrocytes.div4.R3)==T),
-which(is.na(mm_BrainProteome_concRNAseq$adult.microglia.R1)==T),
-which(is.na(mm_BrainProteome_concRNAseq$adult.microglia.R2)==T),
-which(is.na(mm_BrainProteome_concRNAseq$adult.microglia.R3)==T),
-which(is.na(mm_BrainProteome_concRNAseq$Astrocytes.R1)==T),
-which(is.na(mm_BrainProteome_concRNAseq$Astrocytes.R2)==T),
-which(is.na(mm_BrainProteome_concRNAseq$Astrocytes.R3)==T),
-which(is.na(mm_BrainProteome_concRNAseq$cortical.neurons.div05.R1)==T),
-which(is.na(mm_BrainProteome_concRNAseq$cortical.neurons.div05.R2)==T),
-which(is.na(mm_BrainProteome_concRNAseq$cortical.neurons.div05.R3)==T),
-which(is.na(mm_BrainProteome_concRNAseq$cortical.neurons.div10.R1)==T),
-which(is.na(mm_BrainProteome_concRNAseq$cortical.neurons.div10.R2)==T),
-which(is.na(mm_BrainProteome_concRNAseq$cortical.neurons.div10.R3)==T)))
-mm_BrainProteome_concRNAseq2=sapply((mm_BrainProteome_concRNAseq[-c(nan_counts,1393,5652),-22]),as.integer)
-rownames(mm_BrainProteome_concRNAseq2)=mm_BrainProteome_concRNAseq$GeneName[-c(nan_counts,1393,5652)]
-mm_BrainProteome_concRNAseq.dds=DESeqDataSetFromMatrix(countData = mm_BrainProteome_concRNAseq2,colData = mm_BrainProteome_concRNAseq.expSetup,design = ~condition)
-mm_BrainProteome_concRNAseq.dds=DESeq(mm_BrainProteome_concRNAseq.dds)
-mm_BrainProteome_concRNAseq.counts=data.frame(log2(counts(mm_BrainProteome_concRNAseq.dds,normalized=T)))
+# mm_BrainProteome_concRNAseq=read.xls("../../../BrainExpression_Datasets/Mouse_Brain_Proteome_Sharma_etal/nn.4160-S5.xlsx",sheet = 1,header=1,as.is=T)
+# colnames(mm_BrainProteome_concRNAseq)=c("Oligodendrocytes.Div1.R1","Oligodendrocytes.Div1.R2","Oligodendrocytes.Div1.R3","Oligodendrocytes.div2.5.R1","Oligodendrocytes.div2.5.R2","Oligodendrocytes.div2.5.R3","Oligodendrocytes.div4.R1","Oligodendrocytes.div4.R2","Oligodendrocytes.div4.R3","adult.microglia.R1","adult.microglia.R2","adult.microglia.R3","Astrocytes.R1","Astrocytes.R2","Astrocytes.R3","cortical.neurons.div05.R1","cortical.neurons.div05.R2","cortical.neurons.div05.R3","cortical.neurons.div10.R1","cortical.neurons.div10.R2","cortical.neurons.div10.R3","GeneName")
+# cond=c(rep("Oligodendrocytes",9),rep("Microglia",3),rep("Astrocytes",3),rep("Neurons",6))
+# type=c(rep("paired-end",length(cond)))
+# mm_BrainProteome_concRNAseq.expSetup=data.frame(condition=cond,type=type)
+# nan_counts=unique(c(which(is.na(mm_BrainProteome_concRNAseq$Oligodendrocytes.Div1.R1)==T),
+# which(is.na(mm_BrainProteome_concRNAseq$Oligodendrocytes.Div1.R2)==T),
+# which(is.na(mm_BrainProteome_concRNAseq$Oligodendrocytes.Div1.R3)==T),
+# which(is.na(mm_BrainProteome_concRNAseq$Oligodendrocytes.div2.5.R1)==T),
+# which(is.na(mm_BrainProteome_concRNAseq$Oligodendrocytes.div2.5.R2)==T),
+# which(is.na(mm_BrainProteome_concRNAseq$Oligodendrocytes.div2.5.R3)==T),
+# which(is.na(mm_BrainProteome_concRNAseq$Oligodendrocytes.div4.R1)==T),
+# which(is.na(mm_BrainProteome_concRNAseq$Oligodendrocytes.div4.R2)==T),
+# which(is.na(mm_BrainProteome_concRNAseq$Oligodendrocytes.div4.R3)==T),
+# which(is.na(mm_BrainProteome_concRNAseq$adult.microglia.R1)==T),
+# which(is.na(mm_BrainProteome_concRNAseq$adult.microglia.R2)==T),
+# which(is.na(mm_BrainProteome_concRNAseq$adult.microglia.R3)==T),
+# which(is.na(mm_BrainProteome_concRNAseq$Astrocytes.R1)==T),
+# which(is.na(mm_BrainProteome_concRNAseq$Astrocytes.R2)==T),
+# which(is.na(mm_BrainProteome_concRNAseq$Astrocytes.R3)==T),
+# which(is.na(mm_BrainProteome_concRNAseq$cortical.neurons.div05.R1)==T),
+# which(is.na(mm_BrainProteome_concRNAseq$cortical.neurons.div05.R2)==T),
+# which(is.na(mm_BrainProteome_concRNAseq$cortical.neurons.div05.R3)==T),
+# which(is.na(mm_BrainProteome_concRNAseq$cortical.neurons.div10.R1)==T),
+# which(is.na(mm_BrainProteome_concRNAseq$cortical.neurons.div10.R2)==T),
+# which(is.na(mm_BrainProteome_concRNAseq$cortical.neurons.div10.R3)==T)))
+# mm_BrainProteome_concRNAseq2=sapply((mm_BrainProteome_concRNAseq[-c(nan_counts,1393,5652),-22]),as.integer)
+# rownames(mm_BrainProteome_concRNAseq2)=mm_BrainProteome_concRNAseq$GeneName[-c(nan_counts,1393,5652)]
+# mm_BrainProteome_concRNAseq.dds=DESeqDataSetFromMatrix(countData = mm_BrainProteome_concRNAseq2,colData = mm_BrainProteome_concRNAseq.expSetup,design = ~condition)
+# mm_BrainProteome_concRNAseq.dds=DESeq(mm_BrainProteome_concRNAseq.dds)
+# mm_BrainProteome_concRNAseq.counts=data.frame(log2(counts(mm_BrainProteome_concRNAseq.dds,normalized=T)))
 
 mm_BrainProteome_humanOrtholog=vector(mode = "list",length = 4)
 mm_BrainProteome_sharma.CellType=vector(mode = "list",length=2)
@@ -300,3 +305,25 @@ msmm_rnaseq.DCN_rewired_cluster2$PosCoexp_Loss=msmm_rnaseq.DCN_rewired$BM_36$Pos
 msmm_rnaseq.DCN_rewired_cluster2$PosCoexp_Gain=msmm_rnaseq.DCN_rewired$BM_36$PosCoexp$Common_Genes[which(msmm_rnaseq.DCN_rewired$BM_36$PosCoexp$Difference<0)]
 msmm_rnaseq.DCN_rewired_cluster2$NegCoexp_Loss=msmm_rnaseq.DCN_rewired$BM_36$PosCorr$Common_Genes[which(msmm_rnaseq.DCN_rewired$BM_36$NegCoexp$Difference>0)]
 msmm_rnaseq.DCN_rewired_cluster2$NegCoexp_Gain=msmm_rnaseq.DCN_rewired$BM_36$PosCorr$Common_Genes[which(msmm_rnaseq.DCN_rewired$BM_36$NegCoexp$Difference<0)]
+
+write(msmm_rnaseq.DCN_rewired$BM_36$NegCoexp$Common_Genes[which(msmm_rnaseq.DCN_rewired$BM_36$NegCoexp$Difference>0)],"msmm_PHG_DCN_rewire_NegCoexp_Loss.txt",sep = "\n")
+write(msmm_rnaseq.DCN_rewired$BM_36$NegCoexp$Common_Genes[which(msmm_rnaseq.DCN_rewired$BM_36$NegCoexp$Difference<0)],"msmm_PHG_DCN_rewire_NegCoexp_Gain.txt",sep = "\n")
+write(msmm_rnaseq.DCN_rewired$BM_36$PosCoexp$Common_Genes[which(msmm_rnaseq.DCN_rewired$BM_36$PosCoexp$Difference>0)],"msmm_PHG_DCN_rewire_PosCoexp_Loss.txt",sep = "\n")
+write(msmm_rnaseq.DCN_rewired$BM_36$PosCoexp$Common_Genes[which(msmm_rnaseq.DCN_rewired$BM_36$PosCoexp$Difference<0)],"msmm_PHG_DCN_rewire_PosCoexp_Gain.txt",sep = "\n")
+
+######################################################################################################################################################################
+# Comparison with Zhang paper 2016 19 brain region                                                                                                                   #
+######################################################################################################################################################################
+zhang_19BR_data=read.xls("../../../BrainExpression_Datasets/Zhang_19BrainRegions_Paper/13073_2016_355_MOESM1_ESM.xlsx",sheet = 3,skip=2,header=T,as.is=T)
+zhang_19BR_cellTypeSignature=vector(mode = "list",length = 5)
+names(zhang_19BR_cellTypeSignature)=unique(zhang_19BR_data$Cell.type)
+
+for (i in 1:length(names(zhang_19BR_cellTypeSignature))){
+  zhang_19BR_cellTypeSignature[[i]]=zhang_19BR_data$Gene.symbol[which(zhang_19BR_data$Cell.type%in%names(zhang_19BR_cellTypeSignature)[i])]
+}
+zhang_19BR_cellTypeSignature_PHG_DCN_rewire=vector(mode = "list",length = 4)
+names(zhang_19BR_cellTypeSignature_PHG_DCN_rewire)=c("zhang_CTS_PosCoexp_Loss","zhang_CTS_PosCoexp_Gain","zhang_CTS_NegCoexp_Loss","zhang_CTS_NegCoexp_Gain")
+zhang_19BR_cellTypeSignature_PHG_DCN_rewire$zhang_CTS_PosCoexp_Loss=select(x = org.Hs.eg.db,keys = intersect(zhang_19BR_cellTypeSignature$Neurons,msmm_rnaseq.DCN_rewired_cluster2$PosCoexp_Loss),columns = "ENTREZID",keytype = "SYMBOL")[,2]
+zhang_19BR_cellTypeSignature_PHG_DCN_rewire$zhang_CTS_PosCoexp_Gain=select(x = org.Hs.eg.db,keys = intersect(zhang_19BR_cellTypeSignature$Neurons,msmm_rnaseq.DCN_rewired_cluster2$PosCoexp_Gain),columns = "ENTREZID",keytype = "SYMBOL")[,2]
+zhang_19BR_cellTypeSignature_PHG_DCN_rewire$zhang_CTS_NegCoexp_Loss=select(x = org.Hs.eg.db,keys = intersect(zhang_19BR_cellTypeSignature$Neurons,msmm_rnaseq.DCN_rewired_cluster2$NegCoexp_Loss),columns = "ENTREZID",keytype = "SYMBOL")[,2]
+zhang_19BR_cellTypeSignature_PHG_DCN_rewire$zhang_CTS_NegCoexp_Gain=select(x = org.Hs.eg.db,keys = intersect(zhang_19BR_cellTypeSignature$Neurons,msmm_rnaseq.DCN_rewired_cluster2$NegCoexp_Gain),columns = "ENTREZID",keytype = "SYMBOL")[,2]
