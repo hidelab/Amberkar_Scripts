@@ -4,7 +4,7 @@
 #Request resources 
 #-l mem=8G -l rmem=8G 
 #Cores 
-#$ -pe openmp 12
+#$ -pe openmp 8
 #Job Name 
 #-N MSMM_FDS
 module load apps/R/3.3.1
