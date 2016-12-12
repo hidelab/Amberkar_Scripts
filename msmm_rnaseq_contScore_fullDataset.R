@@ -84,8 +84,8 @@ for (t in 1:3){
   number_of_combinations<-choose(nrow(exprs_rank[[t]]),2)
   c_exprs_rank=exprs_rank[[t]][,low_Plaque_Samples[[t]]]
   t_exprs_rank=exprs_rank[[t]][,high_Plaque_Samples[[t]]]
-  n.c<-ncol(c_exprs_rank[[t]])
-  n.t<-ncol(t_exprs_rank[[t]])
+  n.c<-ncol(c_exprs_rank)
+  n.t<-ncol(t_exprs_rank)
   gene.names<-rownames(exprs_rank[[t]])
   
   i<-0
