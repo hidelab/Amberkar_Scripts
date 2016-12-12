@@ -19,9 +19,10 @@ cat(paste("Averaging mean expression for multiple Ensembl probeIDs to Gene Symbo
 msmm_rnaseq_data2=msmm_rnaseq_data[,c(1,7,which(colnames(msmm_rnaseq_data)%in%msmm_rnaseq_metaSample$NewBarcode[grep(pattern = "^BM_",msmm_rnaseq_metaSample$LibID)]))]
 msmm_rnaseq_raw_data2=msmm_rnaseq_raw_data[,c(1,7,which(colnames(msmm_rnaseq_data)%in%msmm_rnaseq_metaSample$NewBarcode[grep(pattern = "^BM_",msmm_rnaseq_metaSample$LibID)]))]
 colnames(msmm_rnaseq_data2)[-c(1:2)]=msmm_rnaseq_metaSample$LibID[1:469]
-colnames(msmm_rnaseq_raw_data2)[-c(1:2)]=msmm_rnaseq_metaSample$LibID[1:469]
-msmm_rnaseq_data2.agg=aggregate(x = msmm_rnaseq_data2[,-c(1:2)],by=list(geneSymbol=msmm_rnaseq_data2$geneSymbol),mean)
-msmm_rnaseq_raw_data2.agg=aggregate(x = msmm_rnaseq_raw_data2[,-c(1:2)],by=list(geneSymbol=msmm_rnaseq_raw_data2$geneSymbol),mean)
+#colnames(msmm_rnaseq_raw_data2)[-c(1:2)]=msmm_rnaseq_metaSample$LibID[1:469]
+rm_genes=grep(pattern = "_|\\.|^RP|-",msmm_rnaseq_data2$geneSymbol)
+msmm_rnaseq_data2.agg=aggregate(x = msmm_rnaseq_data2[-rm_genes,-c(1:2)],by=list(geneSymbol=msmm_rnaseq_data2$geneSymbol[-rm_genes]),mean)
+#msmm_rnaseq_raw_data2.agg=aggregate(x = msmm_rnaseq_raw_data2[-rm_genes,-c(1:2)],by=list(geneSymbol=msmm_rnaseq_raw_data2$geneSymbol),mean)
 
 msmm_rnaseq=vector(mode = "list",length = 3)
 names(msmm_rnaseq)=c("BM_10","BM_22","BM_36")
