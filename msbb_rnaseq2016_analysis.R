@@ -41,28 +41,30 @@ blocks=round(length(rownames(msbb_rnaseq2016_byRegion$FP))/blocksize,digits = 0)
 start<-i*blocksize+1
 end<-min((i+1)*blocksize, length(rownames(msbb_rnaseq2016_byRegion$FP)))
 broadman_area=c("BM10","BM44","BM36","BM22")
-while( start < end)
-{
-  input<-start:end
-  pb = txtProgressBar(min=0,max=length(input),style=3,initial=0)
-  cat("\n")
-  plaque=msbb_rnaseq_covariates.merged_final[[r]]$PlaqueMean[which(msbb_rnaseq_covariates.merged_final[[r]]$BrodmannArea==broadman_area[[r]])]
-  geneCounts=list()
-  for (l in 1:length(input)){
-    geneCounts[[l]]=unlist(unname(msbb_rnaseq2016_byRegion[[r]][l,which(colnames(msbb_rnaseq2016_byRegion[[r]])%in%unlist(lapply(strsplit(x = msbb_rnaseq_covariates.merged_final[[r]]$sampleIdentifier,split = "_"),`[[`,3)))]))  
-    
+for (r in 1:length(msbb_rnaseq2016_byRegion)){
+  while(start < end){
+  
+    input<-start:end
+    pb = txtProgressBar(min=0,max=length(input),style=3,initial=0)
+    cat("\n")
+    plaque=msbb_rnaseq_covariates.merged_final[[r]]$PlaqueMean[which(msbb_rnaseq_covariates.merged_final[[r]]$BrodmannArea==broadman_area[[r]])]
+    geneCounts=list()
+    for (l in 1:length(input)){
+      geneCounts[[l]]=unlist(unname(msbb_rnaseq2016_byRegion[[r]][l,which(colnames(msbb_rnaseq2016_byRegion[[r]])%in%unlist(lapply(strsplit(x = msbb_rnaseq_covariates.merged_final[[r]]$sampleIdentifier,split = "_"),`[[`,3)))]))  
+    }
+    names(geneCounts)=rownames(msbb_rnaseq2016_byRegion[[r]][input,which(colnames(msbb_rnaseq2016_byRegion[[r]])%in%unlist(lapply(strsplit(x = msbb_rnaseq_covariates.merged_final[[r]]$sampleIdentifier,split = "_"),`[[`,3)))])
+    res = mclapply(geneCounts,cor.test,plaque,method = "spearman",mc.cores = nc)
+    close(pb)
+    rho.p=mclapply(res,function(x)x$p.value,mc.cores = nc)
+    rho=mclapply(res,function(x)unname(x$estimate),mc.cores = nc)
+    result=data.frame(Genes=names(geneCounts),Rho=unlist(rho),Rho.p=unlist(rho.p),stringsAsFactors = F)
+    write.table(result, file=paste(names(msbb_rnaseq2016_byRegion)[r],"_",i, ".txt",sep = ""), sep="\t",col.names = T, row.names=FALSE, quote = FALSE)
+    #write.table(result, file=paste0("/shared/hidelab2/user/md4zsa/Work/Data/MSMM_RNAseq/MSMM_RNAseq_FinalRelease2/",names(msbb_rnaseq2016_byRegion)[r], i, ".txt"), sep="\t",col.names = T, row.names=FALSE, quote = FALSE)
+    i<-i+1
+    start<-i*blocksize+1
+    end<-min((i+1)*blocksize, length(rownames(msbb_rnaseq2016_byRegion$FP)))  
   }
-  names(geneCounts)=rownames(msbb_rnaseq2016_byRegion[[r]][input,which(colnames(msbb_rnaseq2016_byRegion[[r]])%in%unlist(lapply(strsplit(x = msbb_rnaseq_covariates.merged_final[[r]]$sampleIdentifier,split = "_"),`[[`,3)))])
-  res = mclapply(geneCounts,cor.test,plaque,method = "spearman",mc.cores = nc)
-  close(pb)
-  rho.p=mclapply(res,function(x)x$p.value,mc.cores = nc)
-  rho=mclapply(res,function(x)unname(x$estimate),mc.cores = nc)
-  result <- data.frame(Genes=names(geneCounts),Rho=unlist(rho),Rho.p=unlist(rho.p),stringsAsFactors = F)
-  write.table(result, file=paste0(names(msbb_rnaseq2016_byRegion)[r], i, ".txt"), sep="\t",col.names = T, row.names=FALSE, quote = FALSE)
-  #write.table(result, file=paste0("/shared/hidelab2/user/md4zsa/Work/Data/MSMM_RNAseq/MSMM_RNAseq_FinalRelease2/",names(msbb_rnaseq2016_byRegion)[r], i, ".txt"), sep="\t",col.names = T, row.names=FALSE, quote = FALSE)
-  i<-i+1
-  start<-i*blocksize+1
-  end<-min((i+1)*blocksize, 100)
+  
 }
 cat(paste("Done!\n"))
 
