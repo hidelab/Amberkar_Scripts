@@ -15,9 +15,9 @@ names(msbb_rnaseq2016_byRegion)=names(msbb_rnaseq_covariates.merged_final)=names
 msbb_rnaseq2016_data2=msbb_rnaseq2016_data[-which(rownames(msbb_rnaseq2016_data)%in%msbb_ensembl_symbol$Ensembl[which(is.na(msbb_ensembl_symbol$Symbol)==T)]),]
 msbb_rnaseq2016_data2=data.frame(cbind(Symbol=msbb_ensembl_symbol$Symbol[-which(is.na(msbb_ensembl_symbol$Symbol)==T)],msbb_rnaseq2016_data2),stringsAsFactors = F)
 msbb_rnaseq2016_data2.agg=aggregate(x=msbb_rnaseq2016_data2[,-1],by=list(geneSymbol=msbb_rnaseq2016_data2$Symbol),mean)
-rm_genes=grep(pattern = "_|\\.|^RP|-",msbb_rnaseq2016_data2.agg$geneSymbol,invert = F)
+#rm_genes=grep(pattern = "_|\\.|-",msbb_rnaseq2016_data2.agg$geneSymbol,invert = F)
 rownames(msbb_rnaseq2016_data2.agg)=msbb_rnaseq2016_data2.agg$geneSymbol
-msbb_rnaseq2016_data2.agg=msbb_rnaseq2016_data2.agg[-rm_genes,-1]
+msbb_rnaseq2016_data2.agg=msbb_rnaseq2016_data2.agg[,-1]
 colnames(msbb_rnaseq2016_data2.agg)=gsub(pattern = "X",replacement = "",x = colnames(msbb_rnaseq2016_data2.agg))
 
 msbb_rnaseq_covariates.merged_final$FP=msbb_rnaseq_covariates.merged2[which(unlist(lapply(strsplit(x=msbb_rnaseq_covariates.merged2$sampleIdentifier,split = "_"),`[[`,3))%in%colnames(msbb_rnaseq2016_byRegion$FP)),c(1:11,13,15:16)]
@@ -36,55 +36,33 @@ lowPlaque_samples=lapply(msbb_rnaseq_covariates.merged_final,function(x)x$sample
 highPlaque_samples=lapply(msbb_rnaseq_covariates.merged_final,function(x)x$sampleIdentifier[which(x$PlaqueMean>=15)])
 
 i=0
-blocksize=5
-blocks=200#length(rownames(msbb_rnaseq2016_byRegion[[1]]))/5
+blocksize=300
+blocks=round(length(rownames(msbb_rnaseq2016_byRegion$FP))/blocksize,digits = 0)#length(rownames(msbb_rnaseq2016_byRegion[[1]]))/5
 start<-i*blocksize+1
-end<-min((i+1)*blocksize, blocks)
-
-indices=data.frame(cbind(seq(1,16556,by = 55)[seq(1,301,by=2)],seq(1,16556,by = 55)[seq(0,302,by=2)]),stringsAsFactors = F)
-colnames(indices)=c("Start","End")
-indices[151,]=c(16501,16505)
-
-for (n in 1:dim(indices)[1]){
-  for (r in 1:length(msbb_rnaseq2016_byRegion)){
-    cat(paste("Processing brain region ",names(msbb_rnaseq2016_byRegion)[r]," ...\n",sep=""))
-    tmp2=foreach(i=indices$Start[n]:indices$End[n],.combine = rbind)%dopar%{
-      cat(paste("Correlating for block ", indices$Start[n]," ...\n",sep=""))
-      pb = txtProgressBar(min=0,max=length(indices$Start[n]:indices$End[n]),style=3,initial=0)
-      cat("\n")
-      x1=unlist(unname(msbb_rnaseq2016_byRegion[[r]][i,which(colnames(msbb_rnaseq2016_byRegion[[r]])%in%unlist(lapply(strsplit(x = msbb_rnaseq_covariates.merged_final[[r]]$sampleIdentifier,split = "_"),`[[`,3)))]))
-      y1=rep(msbb_rnaseq_covariates.merged_final[[r]]$PlaqueMean,length(i))
-      rho=cor.test(x = x1,y = y1,method = "spearman")
-      rho.sp=unname(rho$estimate)
-      rho.p=rho$p.value
-      gene=rownames(msbb_rnaseq2016_byRegion[[r]])[i]
-      padj=p.adjust(rho.p,method = "fdr")
-      tmp1=c(gene,rho.sp,rho.p,padj)
-      close(pb)
-    }
-    res=data.frame(tmp2[which(tmp2[,3]<=0.05),],stringsAsFactors = F)
-    msbb_rnaseq2016_PLQGenes[[r]]=data.frame(Genes=res$X1,Rho.Spearman=round(as.numeric(res$X2),digits = 5),Pval=round(as.numeric(res$X3),digits = 5),FDR=round(as.numeric(res$X4),digits = 5),stringsAsFactors = F)
+end<-min((i+1)*blocksize, length(rownames(msbb_rnaseq2016_byRegion$FP)))
+broadman_area=c("BM10","BM44","BM36","BM22")
+while( start < end)
+{
+  input<-start:end
+  pb = txtProgressBar(min=0,max=length(input),style=3,initial=0)
+  cat("\n")
+  plaque=msbb_rnaseq_covariates.merged_final[[r]]$PlaqueMean[which(msbb_rnaseq_covariates.merged_final[[r]]$BrodmannArea==broadman_area[[r]])]
+  geneCounts=list()
+  for (l in 1:length(input)){
+    geneCounts[[l]]=unlist(unname(msbb_rnaseq2016_byRegion[[r]][l,which(colnames(msbb_rnaseq2016_byRegion[[r]])%in%unlist(lapply(strsplit(x = msbb_rnaseq_covariates.merged_final[[r]]$sampleIdentifier,split = "_"),`[[`,3)))]))  
     
   }
+  names(geneCounts)=rownames(msbb_rnaseq2016_byRegion[[r]][input,which(colnames(msbb_rnaseq2016_byRegion[[r]])%in%unlist(lapply(strsplit(x = msbb_rnaseq_covariates.merged_final[[r]]$sampleIdentifier,split = "_"),`[[`,3)))])
+  res = mclapply(geneCounts,cor.test,plaque,method = "spearman",mc.cores = nc)
+  close(pb)
+  rho.p=mclapply(res,function(x)x$p.value,mc.cores = nc)
+  rho=mclapply(res,function(x)unname(x$estimate),mc.cores = nc)
+  result <- data.frame(Genes=names(geneCounts),Rho=unlist(rho),Rho.p=unlist(rho.p),stringsAsFactors = F)
+  write.table(result, file=paste0(names(msbb_rnaseq2016_byRegion)[r], i, ".txt"), sep="\t",col.names = T, row.names=FALSE, quote = FALSE)
+  #write.table(result, file=paste0("/shared/hidelab2/user/md4zsa/Work/Data/MSMM_RNAseq/MSMM_RNAseq_FinalRelease2/",names(msbb_rnaseq2016_byRegion)[r], i, ".txt"), sep="\t",col.names = T, row.names=FALSE, quote = FALSE)
+  i<-i+1
+  start<-i*blocksize+1
+  end<-min((i+1)*blocksize, 100)
 }
-
-
-
-
-
-# i<-0
-# start<-i*blocksize+1
-# end<-min((i+1)*blocksize, number_of_combinations)
-# GenePlaqueCorr <- function(){
-#   
-#   x1=geneCounts
-#   y1=plaque
-#   rho=cor.test(x = x1,y = y1,method = "spearman")
-#   rho.p=rho$p.value
-#   genes=rownames(geneCounts)
-#   tmp1[j,1:3]=cbind(genes,rho.sp,rho.p)
-#   tmp2=data.frame(Genes=tmp1[,1],Rho.Spearman=as.numeric(tmp1[,2]),Pval=as.numeric(tmp1[,3]),stringsAsFactors = F)
-#   return(tmp2)
-#   
-# }
+cat(paste("Done!\n"))
 
