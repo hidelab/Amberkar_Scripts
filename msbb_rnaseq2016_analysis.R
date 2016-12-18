@@ -58,7 +58,7 @@ for (r in 1:length(msbb_rnaseq2016_byRegion)){
     rho.p=mclapply(res,function(x)x$p.value,mc.cores = nc)
     rho=mclapply(res,function(x)unname(x$estimate),mc.cores = nc)
     result=data.frame(Genes=names(geneCounts),Rho=unlist(rho),Rho.p=unlist(rho.p),stringsAsFactors = F)
-    write.table(result, file=paste(names(msbb_rnaseq2016_byRegion)[r],"_",i, ".txt",sep = ""), sep="\t",col.names = T, row.names=FALSE, quote = FALSE)
+    write.table(result, file=paste(names(msbb_rnaseq2016_byRegion)[r],"/",names(msbb_rnaseq2016_byRegion)[r],"_",i, ".txt",sep = ""), sep="\t",col.names = T, row.names=FALSE, quote = FALSE)
     #write.table(result, file=paste0("/shared/hidelab2/user/md4zsa/Work/Data/MSMM_RNAseq/MSMM_RNAseq_FinalRelease2/",names(msbb_rnaseq2016_byRegion)[r], i, ".txt"), sep="\t",col.names = T, row.names=FALSE, quote = FALSE)
     i<-i+1
     start<-i*blocksize+1
