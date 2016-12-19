@@ -2,9 +2,9 @@
 #Job time 
 #$-l h_rt=120:00:00 
 #Request resources 
-#$-l mem=8G -l rmem=6G 
+#$-l mem=8G -l rmem=8G 
 #Cores 
-#$ -pe openmp 12
+#$ -pe openmp 10
 #Job Name 
 #$-N MSBB2016_DiffCorr
 module load apps/R/3.3.1
