@@ -4,6 +4,8 @@ require(parallel)
 library(org.Hs.eg.db)
 
 setwd("/shared/hidelab2/user/md4zsa/Work/Data/MSMM_RNAseq/MSMM_RNAseq_FinalRelease2/")
+
+#Read data and preprocess - remove unmapped/reseq samples
 msbb_rnaseq2016_data=read.table("AMP-AD_MSBB_MSSM_IlluminaHiSeq2500_normalized_counts_September_2016.txt",sep="\t",header = T,as.is = T)
 msbb_rnaseq_covariates=read.csv("MSBB_RNAseq_covariates.csv",header = T,as.is = T)
 msbb_rnaseq_clinical_covariates=read.csv("MSBB_clinical.csv",header = T,as.is = T)
@@ -22,21 +24,42 @@ rownames(msbb_rnaseq2016_data2.agg)=msbb_rnaseq2016_data2.agg$geneSymbol
 msbb_rnaseq2016_data2.agg=msbb_rnaseq2016_data2.agg[,-1]
 colnames(msbb_rnaseq2016_data2.agg)=gsub(pattern = "X",replacement = "",x = colnames(msbb_rnaseq2016_data2.agg))
 
+#Read region-wise covariates independently from text files to avoid whitespace issues
 msbb_rnaseq_covariates.merged_final$FP=read.table("MSBB_RNAseq2016_FP_covariates.txt",sep = "\t",header = T,as.is = T)
 msbb_rnaseq_covariates.merged_final$IFG=read.table("MSBB_RNAseq2016_IFG_covariates.txt",sep = "\t",header = T,as.is = T)
 msbb_rnaseq_covariates.merged_final$PHG=read.table("MSBB_RNAseq2016_PHG_covariates.txt",sep = "\t",header = T,as.is = T)
 msbb_rnaseq_covariates.merged_final$STG=read.table("MSBB_RNAseq2016_STG_covariates.txt",sep = "\t",header = T,as.is = T)
 
+#Read preprocessed gene counts by region
 msbb_rnaseq2016_byRegion$FP=msbb_rnaseq2016_data2.agg[,which(colnames(msbb_rnaseq2016_data2.agg)%in%unlist(lapply(strsplit(x = msbb_rnaseq_covariates.merged2$sampleIdentifier[which(msbb_rnaseq_covariates.merged2$BrodmannArea=="BM10")],split = "_"),`[[`,3)))]
 msbb_rnaseq2016_byRegion$IFG=msbb_rnaseq2016_data2.agg[,which(colnames(msbb_rnaseq2016_data2.agg)%in%unlist(lapply(strsplit(x = msbb_rnaseq_covariates.merged2$sampleIdentifier[which(msbb_rnaseq_covariates.merged2$BrodmannArea=="BM44")],split = "_"),`[[`,3)))]
 msbb_rnaseq2016_byRegion$PHG=msbb_rnaseq2016_data2.agg[,which(colnames(msbb_rnaseq2016_data2.agg)%in%unlist(lapply(strsplit(x = msbb_rnaseq_covariates.merged2$sampleIdentifier[which(msbb_rnaseq_covariates.merged2$BrodmannArea=="BM36")],split = "_"),`[[`,3)))]
 msbb_rnaseq2016_byRegion$STG=msbb_rnaseq2016_data2.agg[,which(colnames(msbb_rnaseq2016_data2.agg)%in%unlist(lapply(strsplit(x = msbb_rnaseq_covariates.merged2$sampleIdentifier[which(msbb_rnaseq_covariates.merged2$BrodmannArea=="BM22")],split = "_"),`[[`,3)))]
 
+#Define Low and High PLQ samples i.e. Control and Disease samples
 lowPlaque_samples=highPlaque_samples=vector(mode = "list",length = 4)
 names(lowPlaque_samples)=names(highPlaque_samples)=names(msbb_rnaseq2016_byRegion)
 lowPlaque_samples=lapply(msbb_rnaseq_covariates.merged_final,function(x)x$sampleIdentifier[which(x$PlaqueMean<=1)])
 highPlaque_samples=lapply(msbb_rnaseq_covariates.merged_final,function(x)x$sampleIdentifier[which(x$PlaqueMean>=15)])
 
+#Read PLQ associated genes
+msbb_rnaseq2016_PLQGenes=vector(mode = "list",length = 4)
+names(msbb_rnaseq2016_PLQGenes)=names(msbb_rnaseq2016_byRegion)
+msbb_rnaseq2016_PLQGenes$FP=read.table("FP_allPLQ_AssocGenes.txt",sep = "\t",header = T,as.is = T)
+msbb_rnaseq2016_PLQGenes$IFG=read.table("IFG_allPLQ_AssocGenes.txt",sep = "\t",header = T,as.is = T)
+msbb_rnaseq2016_PLQGenes$PHG=read.table("PHG_allPLQ_AssocGenes.txt",sep = "\t",header = T,as.is = T)
+msbb_rnaseq2016_PLQGenes$STG=read.table("STG_allPLQ_AssocGenes.txt",sep = "\t",header = T,as.is = T)
+#Compute FDR for all regions
+msbb_rnaseq2016_PLQGenes_Rho.padj=lapply(msbb_rnaseq2016_PLQGenes,function(x)p.adjust(x$Rho.p,method="fdr"))
+msbb_rnaseq2016_PLQGenes$FP$Rho.padj=msbb_rnaseq2016_PLQGenes_Rho.padj$FP
+msbb_rnaseq2016_PLQGenes$IFG$Rho.padj=msbb_rnaseq2016_PLQGenes_Rho.padj$IFG
+msbb_rnaseq2016_PLQGenes$PHG$Rho.padj=msbb_rnaseq2016_PLQGenes_Rho.padj$PHG
+msbb_rnaseq2016_PLQGenes$STG$Rho.padj=msbb_rnaseq2016_PLQGenes_Rho.padj$STG
+
+#Apply FDR filter of 5%
+msbb_rnaseq2016_PLQGenes2=lapply(msbb_rnaseq2016_PLQGenes,function(x)x[which(x$Rho.padj<=0.05),])
+
+#Setup parallel cocor analysis
 nc = 8
 blocksize=100000
 ProcessElement <- function(ic){
@@ -81,8 +104,8 @@ for (j in 1:4){
   
   exprs_rank[[j]]=msbb_rnaseq2016_byRegion[[j]][msbb_rnaseq2016_byRegion.final_keep[[j]],]
   number_of_combinations<-choose(nrow(exprs_rank[[j]]),2)
-  c_exprs_rank=exprs_rank[[j]][,which(colnames(exprs_rank[[j]])%in%unlist(lapply(strsplit(lowPlaque_samples[[j]],split="_"),`[[`,3)))]
-  t_exprs_rank=exprs_rank[[j]][,which(colnames(exprs_rank[[j]])%in%unlist(lapply(strsplit(highPlaque_samples[[j]],split="_"),`[[`,3)))]
+  c_exprs_rank=exprs_rank[[j]][which(rownames(exprs_rank[[j]])%in%msbb_rnaseq2016_PLQGenes2[[j]]$Genes),which(colnames(exprs_rank[[j]])%in%unlist(lapply(strsplit(lowPlaque_samples[[j]],split="_"),`[[`,3)))]
+  t_exprs_rank=exprs_rank[[j]][which(rownames(exprs_rank[[j]])%in%msbb_rnaseq2016_PLQGenes2[[j]]$Genes),which(colnames(exprs_rank[[j]])%in%unlist(lapply(strsplit(highPlaque_samples[[j]],split="_"),`[[`,3)))]
   n.c<-ncol(c_exprs_rank)
   n.t<-ncol(t_exprs_rank)
   gene.names<-rownames(exprs_rank[[j]])
