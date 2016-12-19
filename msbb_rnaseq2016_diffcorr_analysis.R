@@ -37,7 +37,7 @@ names(lowPlaque_samples)=names(highPlaque_samples)=names(msbb_rnaseq2016_byRegio
 lowPlaque_samples=lapply(msbb_rnaseq_covariates.merged_final,function(x)x$sampleIdentifier[which(x$PlaqueMean<=1)])
 highPlaque_samples=lapply(msbb_rnaseq_covariates.merged_final,function(x)x$sampleIdentifier[which(x$PlaqueMean>=15)])
 
-ncore = 8
+nc = 8
 blocksize=100000
 ProcessElement <- function(ic){
   A = ceiling((sqrt(8*(ic+1)-7)+1)/2)
