@@ -27,7 +27,6 @@ msbb_rnaseq_covariates.merged_final$IFG=read.table("MSBB_RNAseq2016_IFG_covariat
 msbb_rnaseq_covariates.merged_final$PHG=read.table("MSBB_RNAseq2016_PHG_covariates.txt",sep = "\t",header = T,as.is = T)
 msbb_rnaseq_covariates.merged_final$STG=read.table("MSBB_RNAseq2016_STG_covariates.txt",sep = "\t",header = T,as.is = T)
 
-
 msbb_rnaseq2016_byRegion$FP=msbb_rnaseq2016_data2.agg[,which(colnames(msbb_rnaseq2016_data2.agg)%in%unlist(lapply(strsplit(x = msbb_rnaseq_covariates.merged2$sampleIdentifier[which(msbb_rnaseq_covariates.merged2$BrodmannArea=="BM10")],split = "_"),`[[`,3)))]
 msbb_rnaseq2016_byRegion$IFG=msbb_rnaseq2016_data2.agg[,which(colnames(msbb_rnaseq2016_data2.agg)%in%unlist(lapply(strsplit(x = msbb_rnaseq_covariates.merged2$sampleIdentifier[which(msbb_rnaseq_covariates.merged2$BrodmannArea=="BM44")],split = "_"),`[[`,3)))]
 msbb_rnaseq2016_byRegion$PHG=msbb_rnaseq2016_data2.agg[,which(colnames(msbb_rnaseq2016_data2.agg)%in%unlist(lapply(strsplit(x = msbb_rnaseq_covariates.merged2$sampleIdentifier[which(msbb_rnaseq_covariates.merged2$BrodmannArea=="BM36")],split = "_"),`[[`,3)))]
@@ -101,7 +100,7 @@ for (j in 1:4){
     result <- rbindlist(res)
     result <- as.data.frame(result)
     result <- data.frame(result,stringsAsFactors = F)
-    #write.table(result, file=paste0("/shared/hidelab2/user/md4zsa/Work/Data/ALS/sALS_Neurons_DiffCorr/txt/neurons_sals_", i, ".txt"), sep="\t", row.names=FALSE, quote = FALSE)
+    write.table(result, file=paste("/shared/hidelab2/user/md4zsa/Work/Data/MSMM_RNAseq/MSMM_RNAseq_FinalRelease2/",names(msbb_rnaseq2016_byRegion)[j],"_",i,".txt",sep=""),sep="\t",col.names = T,row.names=FALSE, quote = FALSE)
     i<-i+1
     start<-i*blocksize+1
     end<-min((i+1)*blocksize, number_of_combinations)

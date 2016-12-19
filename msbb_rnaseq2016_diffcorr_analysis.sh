@@ -4,7 +4,7 @@
 #Request resources 
 #$-l mem=12G -l rmem=8G 
 #Cores 
-#$ -pe openmp 8
+#$ -pe openmp 12
 #Job Name 
 #$-N MSBB2016_DiffCorr
 module load apps/R/3.3.1
