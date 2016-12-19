@@ -9,40 +9,51 @@ load("../msmm_rnaseq_FinalDataset_contPLQ.RData")
 cat(paste("Applying significance threshold of 0.05 ...\n"))
 msmm_rnaseq.Sample_Strata=vector(mode = "list",length=3)
 names(msmm_rnaseq.Sample_Strata)=names(msmm_rnaseq)
-msmm_rnaseq.Sample_Strata$BM_10=msmm_rnaseq.Sample_Strata$BM_22=msmm_rnaseq.Sample_Strata$BM_36=vector(mode = "list",length = 2)
-names(msmm_rnaseq.Sample_Strata$BM_10)=names(msmm_rnaseq.Sample_Strata$BM_22)=names(msmm_rnaseq.Sample_Strata$BM_36)=c("Stratum1","Stratum2")
-msmm_rnaseq.Sample_Strata$BM_10$Stratum1=msmm_rnaseq.Sample_Strata$BM_10$Stratum2=msmm_rnaseq.Sample_Strata$BM_22$Stratum1=msmm_rnaseq.Sample_Strata$BM_22$Stratum2=msmm_rnaseq.Sample_Strata$BM_36$Stratum1=msmm_rnaseq.Sample_Strata$BM_36$Stratum2=vector(mode = "list",length = 2)
-names(msmm_rnaseq.Sample_Strata$BM_10$Stratum1)=names(msmm_rnaseq.Sample_Strata$BM_10$Stratum2)=names(msmm_rnaseq.Sample_Strata$BM_22$Stratum1)=names(msmm_rnaseq.Sample_Strata$BM_22$Stratum2)=names(msmm_rnaseq.Sample_Strata$BM_36$Stratum1)=names(msmm_rnaseq.Sample_Strata$BM_36$Stratum2)=c("Low","High")
+msmm_rnaseq.Sample_Strata$BM_10=msmm_rnaseq.Sample_Strata$BM_22=msmm_rnaseq.Sample_Strata$BM_36=vector(mode = "list",length = 4)
+names(msmm_rnaseq.Sample_Strata$BM_10)=names(msmm_rnaseq.Sample_Strata$BM_22)=names(msmm_rnaseq.Sample_Strata$BM_36)=c("Stratum1","Stratum2","Stratum3","Stratum4")
+msmm_rnaseq.Sample_Strata$BM_10$Stratum1=msmm_rnaseq.Sample_Strata$BM_10$Stratum2=msmm_rnaseq.Sample_Strata$BM_10$Stratum3=msmm_rnaseq.Sample_Strata$BM_10$Stratum4=vector(mode = "list",length = 2)
+msmm_rnaseq.Sample_Strata$BM_22$Stratum1=msmm_rnaseq.Sample_Strata$BM_22$Stratum2=msmm_rnaseq.Sample_Strata$BM_22$Stratum3=msmm_rnaseq.Sample_Strata$BM_22$Stratum4=vector(mode = "list",length = 2)
+msmm_rnaseq.Sample_Strata$BM_36$Stratum1=msmm_rnaseq.Sample_Strata$BM_36$Stratum2=msmm_rnaseq.Sample_Strata$BM_36$Stratum3=msmm_rnaseq.Sample_Strata$BM_36$Stratum4=vector(mode = "list",length = 2)
+
+names(msmm_rnaseq.Sample_Strata$BM_10$Stratum1)=names(msmm_rnaseq.Sample_Strata$BM_10$Stratum2)=names(msmm_rnaseq.Sample_Strata$BM_10$Stratum3)=names(msmm_rnaseq.Sample_Strata$BM_10$Stratum4)=c("Low","High")
+names(msmm_rnaseq.Sample_Strata$BM_22$Stratum1)=names(msmm_rnaseq.Sample_Strata$BM_22$Stratum2)=names(msmm_rnaseq.Sample_Strata$BM_22$Stratum3)=names(msmm_rnaseq.Sample_Strata$BM_22$Stratum4)=c("Low","High")
+names(msmm_rnaseq.Sample_Strata$BM_36$Stratum1)=names(msmm_rnaseq.Sample_Strata$BM_36$Stratum2)=names(msmm_rnaseq.Sample_Strata$BM_36$Stratum3)=names(msmm_rnaseq.Sample_Strata$BM_36$Stratum4)=c("Low","High")
 
 stratum1.Low=msmm_rnaseq_covariates$Sample.ID[which(msmm_rnaseq_covariates$PlaqueMean<1)]
 stratum1.High=msmm_rnaseq_covariates$Sample.ID[which(msmm_rnaseq_covariates$PlaqueMean>=1&msmm_rnaseq_covariates$PlaqueMean<=10)]
 stratum2.Low=msmm_rnaseq_covariates$Sample.ID[which(msmm_rnaseq_covariates$PlaqueMean<11)]
-stratum2.High=msmm_rnaseq_covariates$Sample.ID[which(msmm_rnaseq_covariates$PlaqueMean>=11)]
-# stratum3.Low=msmm_rnaseq_covariates$Sample.ID[which(msmm_rnaseq_covariates$PlaqueMean<21)]
-# stratum3.High=msmm_rnaseq_covariates$Sample.ID[which(msmm_rnaseq_covariates$PlaqueMean>=21)]
-# stratum4.Low=msmm_rnaseq_covariates$Sample.ID[which(msmm_rnaseq_covariates$PlaqueMean<31)]
-# stratum4.High=msmm_rnaseq_covariates$Sample.ID[which(msmm_rnaseq_covariates$PlaqueMean>=31)]
+stratum2.High=msmm_rnaseq_covariates$Sample.ID[which(msmm_rnaseq_covariates$PlaqueMean>=11&msmm_rnaseq_covariates$PlaqueMean<=20)]
+stratum3.Low=msmm_rnaseq_covariates$Sample.ID[which(msmm_rnaseq_covariates$PlaqueMean<21)]
+stratum3.High=msmm_rnaseq_covariates$Sample.ID[which(msmm_rnaseq_covariates$PlaqueMean>=21&msmm_rnaseq_covariates$PlaqueMean<=30)]
+stratum4.Low=msmm_rnaseq_covariates$Sample.ID[which(msmm_rnaseq_covariates$PlaqueMean<31)]
+stratum4.High=msmm_rnaseq_covariates$Sample.ID[which(msmm_rnaseq_covariates$PlaqueMean>=31)]
 
 msmm_rnaseq.Sample_Strata$BM_10$Stratum1$Low=grep(pattern = "BM_10",stratum1.Low,value = T)
 msmm_rnaseq.Sample_Strata$BM_10$Stratum1$High=grep(pattern = "BM_10",stratum1.High,value = T)
 msmm_rnaseq.Sample_Strata$BM_10$Stratum2$Low=grep(pattern = "BM_10",stratum2.Low,value = T)
 msmm_rnaseq.Sample_Strata$BM_10$Stratum2$High=grep(pattern = "BM_10",stratum2.High,value = T)
-# msmm_rnaseq.Sample_Strata$BM_10$Stratum3$Low=stratum3.Low=grep(pattern = "BM_10",stratum3.Low,value = T)
-# msmm_rnaseq.Sample_Strata$BM_10$Stratum3$High=stratum3.High=grep(pattern = "BM_10",stratum3.High,value = T)
+msmm_rnaseq.Sample_Strata$BM_10$Stratum3$Low=stratum3.Low=grep(pattern = "BM_10",stratum3.Low,value = T)
+msmm_rnaseq.Sample_Strata$BM_10$Stratum3$High=stratum3.High=grep(pattern = "BM_10",stratum3.High,value = T)
+msmm_rnaseq.Sample_Strata$BM_10$Stratum4$Low=stratum3.Low=grep(pattern = "BM_10",stratum4.Low,value = T)
+msmm_rnaseq.Sample_Strata$BM_10$Stratum4$High=stratum3.High=grep(pattern = "BM_10",stratum4.High,value = T)
 
 msmm_rnaseq.Sample_Strata$BM_22$Stratum1$Low=grep(pattern = "BM_22",stratum1.Low,value = T)
 msmm_rnaseq.Sample_Strata$BM_22$Stratum1$High=grep(pattern = "BM_22",stratum1.High,value = T)
 msmm_rnaseq.Sample_Strata$BM_22$Stratum2$Low=grep(pattern = "BM_22",stratum2.Low,value = T)
 msmm_rnaseq.Sample_Strata$BM_22$Stratum2$High=grep(pattern = "BM_22",stratum2.High,value = T)
-# msmm_rnaseq.Sample_Strata$BM_22$Stratum3$Low=stratum3.Low=grep(pattern = "BM_22",stratum3.Low,value = T)
-# msmm_rnaseq.Sample_Strata$BM_22$Stratum3$High=stratum3.High=grep(pattern = "BM_22",stratum3.High,value = T)
+msmm_rnaseq.Sample_Strata$BM_22$Stratum3$Low=stratum3.Low=grep(pattern = "BM_22",stratum3.Low,value = T)
+msmm_rnaseq.Sample_Strata$BM_22$Stratum3$High=stratum3.High=grep(pattern = "BM_22",stratum3.High,value = T)
+msmm_rnaseq.Sample_Strata$BM_22$Stratum4$Low=stratum3.Low=grep(pattern = "BM_22",stratum4.Low,value = T)
+msmm_rnaseq.Sample_Strata$BM_22$Stratum4$High=stratum3.High=grep(pattern = "BM_22",stratum4.High,value = T)
 
 msmm_rnaseq.Sample_Strata$BM_36$Stratum1$Low=grep(pattern = "BM_36",stratum1.Low,value = T)
 msmm_rnaseq.Sample_Strata$BM_36$Stratum1$High=grep(pattern = "BM_36",stratum1.High,value = T)
 msmm_rnaseq.Sample_Strata$BM_36$Stratum2$Low=grep(pattern = "BM_36",stratum2.Low,value = T)
 msmm_rnaseq.Sample_Strata$BM_36$Stratum2$High=grep(pattern = "BM_36",stratum2.High,value = T)
-# msmm_rnaseq.Sample_Strata$BM_36$Stratum3$Low=stratum3.Low=grep(pattern = "BM_36",stratum3.Low,value = T)
-# msmm_rnaseq.Sample_Strata$BM_36$Stratum3$High=stratum3.High=grep(pattern = "BM_36",stratum3.High,value = T)
+msmm_rnaseq.Sample_Strata$BM_36$Stratum3$Low=stratum3.Low=grep(pattern = "BM_36",stratum3.Low,value = T)
+msmm_rnaseq.Sample_Strata$BM_36$Stratum3$High=stratum3.High=grep(pattern = "BM_36",stratum3.High,value = T)
+msmm_rnaseq.Sample_Strata$BM_36$Stratum4$Low=stratum3.Low=grep(pattern = "BM_36",stratum4.Low,value = T)
+msmm_rnaseq.Sample_Strata$BM_36$Stratum4$High=stratum3.High=grep(pattern = "BM_36",stratum4.High,value = T)
 
 
 msmm_rnaseq.cocor=vector(mode = "list",length = 3)

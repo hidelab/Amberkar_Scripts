@@ -10,6 +10,6 @@
 #Job Name 
 #-N ALS_DCN 
  
-module load apps/R/3.3.1
+module load apps/R/3.3.0
 module load compilers/gcc/5.3 
 R CMD BATCH --no-save --no-restore /shared/hidelab2/user/md4zsa/Work/Amberkar_Scripts/als_dcn_analysis_iceberg.R

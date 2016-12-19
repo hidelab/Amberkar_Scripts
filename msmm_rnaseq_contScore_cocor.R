@@ -72,7 +72,7 @@ for (t in 1:length(names(msmm_rnaseq))){
 msmm_rnaseq.cocor_filtered=vector(mode = "list",length = 3)
 names(msmm_rnaseq.cocor_filtered)=names(msmm_rnaseq.cocor)
 for (t in 1:length(msmm_rnaseq.cocor_filtered)){
-  msmm_rnaseq.cocor_filtered[[t]]=msmm_rnaseq.cocor[[t]][(msmm_rnaseq.cocor[[t]]$p.cocor<=0.05),]
+  msmm_rnaseq.cocor_filtered[[t]]=msmm_rnaseq.cocor[[t]][which((msmm_rnaseq.cocor[[t]]$p.cocor<=0.05)&(msmm_rnaseq.cocor[[t]]$FDR<=0.1)),]
   write.table(msmm_rnaseq.cocor_filtered[[t]],file = paste(names(msmm_rnaseq.cocor_filtered)[t],"p005_cocor_filtered_interactions.txt",sep="_"),sep = "\t",col.names = T,row.names = T,quote=F)
 }
 #[order(msmm_rnaseq.cocor[[t]]$abs.corr.change,decreasing = T),]
@@ -99,32 +99,6 @@ for(t in 1:length(names(msmm_rnaseq.DCN))){
   
 }
 
-ffpe_wiesniewski=read.xls("../../../BrainExpression_Datasets/FFPE-Proteomics-Wiesniewski/srep15456-s6.xls",sheet = 2,header=T,as.is=T)
-ffpe_wiesniewski2=ffpe_wiesniewski$Accession[which((ffpe_wiesniewski$Neuronal..more.stringent.database.=="Yes")&(ffpe_wiesniewski$Alzheimer.s.associated.protein=="Yes"))]
-ffpe_wiesniewski2=gsub(pattern = "\\-[0-9]",replacement = "",x = ffpe_wiesniewski$Accession[which((ffpe_wiesniewski$Neuronal..more.stringent.database.=="Yes")&(ffpe_wiesniewski$Alzheimer.s.associated.protein=="Yes"))])
-#Resolve dual IDs manually
-ffpe_wiesniewski2[c(6,17,56,72,80,121,191)]=c("P68366","P09104","P38606","P30048","P18669","P48735","P27338")
-seeds=intersect(V(msmm_rnaseq.DCN$BM_36$Std)$name,select(x = org.Hs.eg.db,keys = ffpe_wiesniewski2,columns = "SYMBOL",keytype = "UNIPROT")[,2])
 
-ebc=cluster_edge_betweenness(graph = msmm_rnaseq.DCN$BM_36$Std,directed = F,modularity = T,weights = E(msmm_rnaseq.DCN$BM_36$Std)$weight)
-comms=communities(ebc)
-indices=names(unlist(lapply(communities(x = ebc),function(x)which(length(x)>=10))))
-# msmm_rnaseq.PLQ_Corr005=vector(mode = "list",length = 3)
-# names(msmm_rnaseq.PLQ_Corr005)=names(msmm_rnaseq.DCN)
-# msmm_rnaseq.PLQ_Corr005[[1]]=scan("msmm_rnaseq_BM10_PLQ_Corr005_Genes.txt",what = "char",sep = "\n")
-# msmm_rnaseq.PLQ_Corr005[[2]]=scan("msmm_rnaseq_BM22_PLQ_Corr005_Genes.txt",what = "char",sep = "\n")
-# msmm_rnaseq.PLQ_Corr005[[3]]=scan("msmm_rnaseq_BM36_PLQ_Corr005_Genes.txt",what = "char",sep = "\n")
-
-# 
-# msmm_rnaseq.megena=vector(mode = "list",length = 3)
-# names(msmm_rnaseq.megena)=names(msmm_rnaseq.DCN)
-# megena_files=list.files("MEGENA_Networks/",pattern = "*.txt",full.names = T)
-# for (t in 1:length(megena_files)){
-#   dt=read.table(file = megena_files[t],sep="\t",header = T,as.is = T)
-#   msmm_rnaseq.megena[[t]]=graph.data.frame(dt[,c(1:2)],directed = F)
-#   E(msmm_rnaseq.megena[[t]])$weight=dt[,3]
-# }
-# 
-# msmm_rnaseq.DCN$BM_22$Std=delete_vertices(graph = msmm_rnaseq.DCN$BM_22$Std,V(msmm_rnaseq.DCN$BM_22$Std)$name[which(V(msmm_rnaseq.DCN$BM_22$Std)$name%in%mapped_Ids[msmm_rnaseq.DCN_BM22_NA_Map$Index[which(msmm_rnaseq.DCN_BM22_NA_Map$ENTREZID=="<NA>")],1])])
 save.image("msmm_rnaseq_contScore_cocor_p001.RData")
 save.image("msmm_rnaseq_contScore_cocor_p001.RData")

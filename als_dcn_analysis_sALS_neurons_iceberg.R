@@ -83,15 +83,20 @@ while( start < number_of_combinations)
   result <- rbindlist(res)
   result <- as.data.frame(result)
   result <- data.frame(result,stringsAsFactors = F)
-  write.table(result, file=paste0("/shared/hidelab2/user/md4zsa/Work/Data/ALS/sALS_Neurons_DiffCorr/txt/neurons_sals_", i, ".t
-xt"), sep="\t", row.names=FALSE, quote = FALSE)
+  write.table(result, file=paste0("/shared/hidelab2/user/md4zsa/Work/Data/ALS/sALS_Neurons_DiffCorr/txt/neurons_sals_", i, ".txt"), sep="\t", row.names=FALSE, quote = FALSE)
   i<-i+1
   start<-i*blocksize+1
   end<-min((i+1)*blocksize, number_of_combinations)
 }
-cat(paste("Done!"))
+cat(paste("Done!\n"))
 
 
-
-
+#BASH lines for collating results
+# grep -vw '^Gene.A' neurons_sals_[0-9].txt|cut -d: -f2 > tmp1.txt 
+# sed 1i"$(sed -n 1p neurons_sals_0.txt)" tmp1.txt > neurons_sals_allResults_DiffCorr.txt
+# 
+# awk '
+#     FNR==1 && NR!=1 { while (/^<header>/) getline; }
+#     1 {print}
+# ' file*.txt >all.txt
 

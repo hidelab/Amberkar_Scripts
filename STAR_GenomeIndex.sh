@@ -1,0 +1,1 @@
+/home/md4zsa/Software/STAR/bin/Linux_x86_64/STAR --runThreadN 32 --runMode genomeGenerate --genomeDir /fastdata/md4zsa/STAR_Index/ --genomeFastaFiles /data/md4zsa/Reference_Genomes/ENSEMBL_Genomes/fasta/

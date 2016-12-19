@@ -2,10 +2,10 @@ library(org.Hs.eg.db)
 library(cocor)
 library(data.table)
 library(parallel)
-
+#Set working directory
 setwd("/shared/hidelab2/user/md4zsa/Work/Data/MSMM_RNAseq/MSMM_RNAseq_FinalRelease/")
 cat(paste("Reading data ...\n"))
-
+#Data preprocessing and mapping
 msmm_rnaseq_data=read.table("AMP-AD_MSBB_MSSM_IlluminaHiSeq2500_final.TMM_normalized.race_age_RIN_PMI_batch_corrected.tsv",sep = "\t",header = T,as.is = T)
 msmm_rnaseq_raw_data=read.table("AMP-AD_MSBB_MSSM_IlluminaHiSeq2500_raw_counts_final.tsv",sep = "\t",header = T,as.is = T)
 msmm_rnaseq_clinical=read.table("MSBB_clinical.csv",header = T,sep = ",",as.is = T)
@@ -15,15 +15,15 @@ msmm_rnaseq_covariates2=msmm_rnaseq_covariates[which(msmm_rnaseq_covariates$Samp
 msmm_rnaseq_covariates2$AOD[which(msmm_rnaseq_covariates2$AOD=="90+")]=90
 msmm_rnaseq_covariates2=msmm_rnaseq_covariates2[-which(is.na(msmm_rnaseq_covariates2$bbscore)==T),]
 
+#Remove spurious genes and average gene expression for multiple Ensembl IDs
 cat(paste("Averaging mean expression for multiple Ensembl probeIDs to Gene Symbols ...\n"))
 msmm_rnaseq_data2=msmm_rnaseq_data[,c(1,7,which(colnames(msmm_rnaseq_data)%in%msmm_rnaseq_metaSample$NewBarcode[grep(pattern = "^BM_",msmm_rnaseq_metaSample$LibID)]))]
 msmm_rnaseq_raw_data2=msmm_rnaseq_raw_data[,c(1,7,which(colnames(msmm_rnaseq_data)%in%msmm_rnaseq_metaSample$NewBarcode[grep(pattern = "^BM_",msmm_rnaseq_metaSample$LibID)]))]
 colnames(msmm_rnaseq_data2)[-c(1:2)]=msmm_rnaseq_metaSample$LibID[1:469]
-#colnames(msmm_rnaseq_raw_data2)[-c(1:2)]=msmm_rnaseq_metaSample$LibID[1:469]
 rm_genes=grep(pattern = "_|\\.|^RP|-",msmm_rnaseq_data2$geneSymbol)
 msmm_rnaseq_data2.agg=aggregate(x = msmm_rnaseq_data2[-rm_genes,-c(1:2)],by=list(geneSymbol=msmm_rnaseq_data2$geneSymbol[-rm_genes]),mean)
-#msmm_rnaseq_raw_data2.agg=aggregate(x = msmm_rnaseq_raw_data2[-rm_genes,-c(1:2)],by=list(geneSymbol=msmm_rnaseq_raw_data2$geneSymbol),mean)
 
+#Setup data structure to organise 3 brain regions
 msmm_rnaseq=vector(mode = "list",length = 3)
 names(msmm_rnaseq)=c("BM_10","BM_22","BM_36")
 for (l in 1:length(names(msmm_rnaseq))){
@@ -33,6 +33,7 @@ for (l in 1:length(names(msmm_rnaseq))){
 }
 nc = detectCores()
 blocksize=100000
+#Function to procee
 ProcessElement <- function(ic){
   A = ceiling((sqrt(8*(ic+1)-7)+1)/2)
   B = ic-choose(floor(1/2+sqrt(2*ic)),2)

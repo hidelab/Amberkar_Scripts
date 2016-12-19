@@ -7,6 +7,9 @@
 #$ -pe openmp 8
 #Job Name 
 #$-N MSBB_PLQ_DiffCorr
+#Email
+#$-M s.amberkar@sheffield.ac.uk
+
 module load apps/R/3.3.1
 module load compilers/gcc/5.3 
 R CMD BATCH --no-save --no-restore /shared/hidelab2/user/md4zsa/Work/Amberkar_Scripts/msbb_rnaseq2016_PLQGenes_diffcorr_analysis.R

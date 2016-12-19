@@ -126,6 +126,7 @@ for(j in 1:length(names(msmm_rnaseq))){
 }
 
 msmm_rnaseq.Plaque_DEG=lapply(msmm_rnaseq.Plaque_DEG,DESeq)
+msmm_rnaseq.Plaque_DEG_Results=lapply(msmm_rnaseq.Plaque_DEG, function(x)data.frame(results(x)[which((results(x)$padj<=0.05)&(abs(results(x)$log2FoldChange)>1)),],stringsAsFactors = F))
 msmm_rnaseq.Plaque_DEG=lapply(msmm_rnaseq.Plaque_DEG,varianceStabilizingTransformation)
 lowCounts=lapply(lapply(msmm_rnaseq.Plaque_DEG,counts),function(x)(rowSums(x)>1))
 lowCounts_genes=lapply(lowCounts,function(x)which(x==F))
@@ -318,12 +319,24 @@ sig_edges_indices=lapply(sig_edges,length)
 
 ########################################################################
 test1=msmm_rnaseq.cocor_filtered$p001$BM_36[order(msmm_rnaseq.cocor_filtered$p001$BM_36$abs.corr.change,decreasing = T),][1:5,]
-gene1=msmm_rnaseq$BM_36[which(rownames(msmm_rnaseq$BM_36)%in%union(test1$Gene.A,test1$Gene.B)),which(colnames(msmm_rnaseq$BM_36)%in%high_Plaque_Samples$BM_36)][3,]
-gene2=msmm_rnaseq$BM_36[which(rownames(msmm_rnaseq$BM_36)%in%union(test1$Gene.A,test1$Gene.B)),which(colnames(msmm_rnaseq$BM_36)%in%high_Plaque_Samples$BM_36)][4,]
+gene1=msmm_rnaseq$BM_36[which(rownames(msmm_rnaseq$BM_36)%in%union(test1$Gene.A,test1$Gene.B)),which(colnames(msmm_rnaseq$BM_36)%in%high_Plaque_Samples$BM_36)][6,]
+gene2=msmm_rnaseq$BM_36[which(rownames(msmm_rnaseq$BM_36)%in%union(test1$Gene.A,test1$Gene.B)),which(colnames(msmm_rnaseq$BM_36)%in%high_Plaque_Samples$BM_36)][1,]
 plq=msmm_rnaseq_covariates$PlaqueMean[which(msmm_rnaseq_covariates$Sample.ID%in%colnames(msmm_rnaseq$BM_36))]
-df_anno=data.frame(PMI=msmm_rnaseq_covariates$PMI[which(msmm_rnaseq_covariates$Sample.ID%in%high_Plaque_Samples$BM_36)],
-                   CERAD=msmm_rnaseq_covariates$CERAD[which(msmm_rnaseq_covariates$Sample.ID%in%high_Plaque_Samples$BM_36)],
-                   Braak=msmm_rnaseq_covariates$bbscore[which(msmm_rnaseq_covariates$Sample.ID%in%high_Plaque_Samples$BM_36)],
-                   AOD=msmm_rnaseq_covariates$AOD[which(msmm_rnaseq_covariates$Sample.ID%in%high_Plaque_Samples$BM_36)])
-rownames(df_anno)=colnames(gene1)
-pheatmap(as.matrix(msmm_rnaseq$BM_36[which(rownames(msmm_rnaseq$BM_36)%in%union(test1$Gene.A,test1$Gene.B)),which(colnames(msmm_rnaseq$BM_36)%in%high_Plaque_Samples$BM_36)]),annotation = df_anno)
+df_anno=data.frame(PMI=msmm_rnaseq_covariates$PMI[which(msmm_rnaseq_covariates$Sample.ID%in%c(low_Plaque_Samples$BM_36,high_Plaque_Samples$BM_36))],
+                   CERAD=msmm_rnaseq_covariates$CERAD[which(msmm_rnaseq_covariates$Sample.ID%in%c(low_Plaque_Samples$BM_36,high_Plaque_Samples$BM_36))],
+                   Braak=msmm_rnaseq_covariates$bbscore[which(msmm_rnaseq_covariates$Sample.ID%in%c(low_Plaque_Samples$BM_36,high_Plaque_Samples$BM_36))],
+                   AOD=msmm_rnaseq_covariates$AOD[which(msmm_rnaseq_covariates$Sample.ID%in%c(low_Plaque_Samples$BM_36,high_Plaque_Samples$BM_36))])
+rownames(df_anno)=c(low_Plaque_Samples$BM_36,high_Plaque_Samples$BM_36)
+pheatmap(as.matrix(msmm_rnaseq$BM_36[which(rownames(msmm_rnaseq$BM_36)%in%union(test1$Gene.A,test1$Gene.B)),which(colnames(msmm_rnaseq$BM_36)%in%c(low_Plaque_Samples$BM_36,high_Plaque_Samples$BM_36))]),
+         annotation = df_anno,
+         cluster_cols = T,
+         clustering_distance_cols = "manhattan",
+         clustering_method = "average",
+         cellwidth = 10,main = "PHG All samples with covariates")
+
+
+par(mfrow=c(2,2))
+hist(msmm_rnaseq.cocor$BM_22$r.c,xlab="Spearman.Rho",col="blue4",breaks = 100,main = "STG_LowPLQ_Coexpp")
+hist(msmm_rnaseq.cocor$BM_22$r.t,xlab="Spearman.Rho",col="blue4",breaks = 100,main = "STG_HighPLQ_Coexpp")
+hist(msmm_rnaseq.cocor$BM_36$r.c,xlab="Spearman.Rho",col="red4",breaks = 100,main="PHG_LowPLQ_Coexpp")
+hist(msmm_rnaseq.cocor$BM_36$r.t,xlab="Spearman.Rho",col="red4",breaks = 100,main="PHG_HighPLQ_Coexpp")

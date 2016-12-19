@@ -3,8 +3,8 @@ library(data.table)
 require(parallel)
 library(org.Hs.eg.db)
 
-setwd("/shared/hidelab2/user/md4zsa/Work/Data/MSMM_RNAseq/MSMM_RNAseq_FinalRelease2/")
 
+setwd("/shared/hidelab2/user/md4zsa/Work/Data/MSMM_RNAseq/MSMM_RNAseq_FinalRelease2/")
 #Read data and preprocess - remove unmapped/reseq samples
 msbb_rnaseq2016_data=read.table("AMP-AD_MSBB_MSSM_IlluminaHiSeq2500_normalized_counts_September_2016.txt",sep="\t",header = T,as.is = T)
 msbb_rnaseq_covariates=read.csv("MSBB_RNAseq_covariates.csv",header = T,as.is = T)
@@ -123,7 +123,7 @@ for (j in 1:4){
     result <- rbindlist(res)
     result <- as.data.frame(result)
     result <- data.frame(result,stringsAsFactors = F)
-    write.table(result, file=paste("/shared/hidelab2/user/md4zsa/Work/Data/MSMM_RNAseq/MSMM_RNAseq_FinalRelease2/",names(msbb_rnaseq2016_byRegion)[j],"_",i,".txt",sep=""),sep="\t",col.names = T,row.names=FALSE, quote = FALSE)
+    write.table(result, file=paste("/shared/hidelab2/user/md4zsa/Work/Data/MSMM_RNAseq/MSMM_RNAseq_FinalRelease2/",names(msbb_rnaseq2016_byRegion)[j],"_PLQGenes_",i,".txt",sep=""),sep="\t",col.names = T,row.names=FALSE, quote = FALSE)
     i<-i+1
     start<-i*blocksize+1
     end<-min((i+1)*blocksize, number_of_combinations)
