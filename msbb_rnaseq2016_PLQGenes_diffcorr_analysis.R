@@ -123,7 +123,7 @@ for (j in 1:4){
     result <- rbindlist(res)
     result <- as.data.frame(result)
     result <- data.frame(result,stringsAsFactors = F)
-    write.table(result, file=paste("/shared/hidelab2/user/md4zsa/Work/Data/MSMM_RNAseq/MSMM_RNAseq_FinalRelease2/",names(msbb_rnaseq2016_byRegion)[j],"_PLQGenes",i,".txt",sep=""),sep="\t",col.names = T,row.names=FALSE, quote = FALSE)
+    write.table(result, file=paste("/shared/hidelab2/user/md4zsa/Work/Data/MSMM_RNAseq/MSMM_RNAseq_FinalRelease2/",names(msbb_rnaseq2016_byRegion)[j],"_PLQGenes_DiffCorr_",i,".txt",sep=""),sep="\t",col.names = T,row.names=FALSE, quote = FALSE)
     i<-i+1
     start<-i*blocksize+1
     end<-min((i+1)*blocksize, number_of_combinations)
