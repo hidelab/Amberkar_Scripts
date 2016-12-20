@@ -4,7 +4,7 @@
 #Request resources 
 #$-l mem=8G -l rmem=8G 
 #Cores 
-#$ -pe openmp 8
+#$ -pe openmp   12
 #Job Name 
 #$-N MSBB_PLQ_DiffCorr
 #Email

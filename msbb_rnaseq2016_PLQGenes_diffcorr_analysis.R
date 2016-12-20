@@ -102,10 +102,10 @@ exprs_rank=vector(mode = "list",length = 4)
 names(exprs_rank)=names(msbb_rnaseq2016_byRegion)
 for (j in 1:4){
   
-  exprs_rank[[j]]=msbb_rnaseq2016_byRegion[[j]][msbb_rnaseq2016_byRegion.final_keep[[j]],]
+  exprs_rank[[j]]=msbb_rnaseq2016_byRegion[[j]][msbb_rnaseq2016_byRegion.final_keep[[j]],][which(rownames(exprs_rank[[j]])%in%msbb_rnaseq2016_PLQGenes2[[j]]$Genes),]
   number_of_combinations<-choose(nrow(exprs_rank[[j]]),2)
-  c_exprs_rank=exprs_rank[[j]][which(rownames(exprs_rank[[j]])%in%msbb_rnaseq2016_PLQGenes2[[j]]$Genes),which(colnames(exprs_rank[[j]])%in%unlist(lapply(strsplit(lowPlaque_samples[[j]],split="_"),`[[`,3)))]
-  t_exprs_rank=exprs_rank[[j]][which(rownames(exprs_rank[[j]])%in%msbb_rnaseq2016_PLQGenes2[[j]]$Genes),which(colnames(exprs_rank[[j]])%in%unlist(lapply(strsplit(highPlaque_samples[[j]],split="_"),`[[`,3)))]
+  c_exprs_rank=exprs_rank[[j]][,which(colnames(exprs_rank[[j]])%in%unlist(lapply(strsplit(lowPlaque_samples[[j]],split="_"),`[[`,3)))]
+  t_exprs_rank=exprs_rank[[j]][,which(colnames(exprs_rank[[j]])%in%unlist(lapply(strsplit(highPlaque_samples[[j]],split="_"),`[[`,3)))]
   n.c<-ncol(c_exprs_rank)
   n.t<-ncol(t_exprs_rank)
   gene.names<-rownames(exprs_rank[[j]])
