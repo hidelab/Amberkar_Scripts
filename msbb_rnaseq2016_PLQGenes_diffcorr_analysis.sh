@@ -5,6 +5,8 @@
 #$-l mem=8G -l rmem=8G 
 #Cores 
 #$ -pe openmp   12
+#Queue
+#$ -P hidelab
 #Job Name 
 #$-N MSBB_PLQ_DiffCorr
 #Email
