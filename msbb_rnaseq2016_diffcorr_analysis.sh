@@ -4,11 +4,13 @@
 #Request resources 
 #$-l mem=8G -l rmem=8G 
 #Cores 
-#$ -pe openmp 8
+#$ -pe openmp 12
+#Queue
+#-P hidelab
 #Job Name 
-#$-N MSBB2016_DiffCorr
+#$-N MSBB_DiffCorr2
 #Email
-#$-M s.amberkar@sheffield.ac.uk
+#$-m s.amberkar@sheffield.ac.uk
 
 module load apps/R/3.3.1
 module load compilers/gcc/5.3 
