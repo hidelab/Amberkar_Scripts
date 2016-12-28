@@ -10,7 +10,7 @@
 #Job Name 
 #$-N MSBB_DiffCorr2
 #Email
-#$-m s.amberkar@sheffield.ac.uk
+#$-M s.amberkar@sheffield.ac.uk
 
 module load apps/R/3.3.1
 module load compilers/gcc/5.3 
