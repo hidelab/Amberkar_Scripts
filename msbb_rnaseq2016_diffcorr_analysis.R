@@ -2,6 +2,7 @@ library(cocor)
 library(data.table)
 require(parallel)
 library(org.Hs.eg.db)
+library(foreach)
 
 setwd("/shared/hidelab2/user/md4zsa/Work/Data/MSMM_RNAseq/MSMM_RNAseq_FinalRelease2/")
 msbb_rnaseq2016_data=read.table("AMP-AD_MSBB_MSSM_IlluminaHiSeq2500_normalized_counts_September_2016.txt",sep="\t",header = T,as.is = T)
@@ -10,7 +11,7 @@ msbb_rnaseq_clinical_covariates=read.csv("MSBB_clinical.csv",header = T,as.is = 
 colnames(msbb_rnaseq2016_data)=unlist(lapply(strsplit(x = colnames(msbb_rnaseq2016_data),split = "X"),`[[`,2))
 msbb_ensembl_symbol=data.frame(Ensembl=names(mapIds(x = org.Hs.eg.db,keys=rownames(msbb_rnaseq2016_data),column = "SYMBOL",keytype = "ENSEMBL",multiVals = "first")),Symbol=mapIds(x = org.Hs.eg.db,keys=rownames(msbb_rnaseq2016_data),column = "SYMBOL",keytype = "ENSEMBL",multiVals = "first"),stringsAsFactors = F)
 msbb_rnaseq_covariates.merged=merge(x = msbb_rnaseq_clinical_covariates,y=msbb_rnaseq_covariates,by=c("individualIdentifier","individualIdentifier"))
-msbb_rnaseq_covariates.merged2=msbb_rnaseq_covariates.merged[grep(pattern = "unmapped|resequenced",x = msbb_rnaseq_covariates.merged$fileName,invert = T),]
+msbb_rnaseq_covariates.merged2=msbb_rnaseq_covariates.merged[grep(pattern = "unmapped",x = msbb_rnaseq_covariates.merged$fileName,invert = T),]#include resequenced samples
 
 msbb_rnaseq2016_byRegion=msbb_rnaseq_covariates.merged_final=msbb_rnaseq2016_PLQGenes=vector(mode = "list",length = 4)
 names(msbb_rnaseq2016_byRegion)=names(msbb_rnaseq_covariates.merged_final)=names(msbb_rnaseq2016_PLQGenes)=c("FP","IFG","PHG","STG") 
@@ -22,22 +23,27 @@ rownames(msbb_rnaseq2016_data2.agg)=msbb_rnaseq2016_data2.agg$geneSymbol
 msbb_rnaseq2016_data2.agg=msbb_rnaseq2016_data2.agg[,-1]
 colnames(msbb_rnaseq2016_data2.agg)=gsub(pattern = "X",replacement = "",x = colnames(msbb_rnaseq2016_data2.agg))
 
-msbb_rnaseq_covariates.merged_final$FP=read.table("MSBB_RNAseq2016_FP_covariates.txt",sep = "\t",header = T,as.is = T)
-msbb_rnaseq_covariates.merged_final$IFG=read.table("MSBB_RNAseq2016_IFG_covariates.txt",sep = "\t",header = T,as.is = T)
-msbb_rnaseq_covariates.merged_final$PHG=read.table("MSBB_RNAseq2016_PHG_covariates.txt",sep = "\t",header = T,as.is = T)
-msbb_rnaseq_covariates.merged_final$STG=read.table("MSBB_RNAseq2016_STG_covariates.txt",sep = "\t",header = T,as.is = T)
+# msbb_rnaseq_covariates.merged_final$FP=read.table("MSBB_RNAseq2016_FP_covariates.txt",sep = "\t",header = T,as.is = T)
+# msbb_rnaseq_covariates.merged_final$IFG=read.table("MSBB_RNAseq2016_IFG_covariates.txt",sep = "\t",header = T,as.is = T)
+# msbb_rnaseq_covariates.merged_final$PHG=read.table("MSBB_RNAseq2016_PHG_covariates.txt",sep = "\t",header = T,as.is = T)
+# msbb_rnaseq_covariates.merged_final$STG=read.table("MSBB_RNAseq2016_STG_covariates.txt",sep = "\t",header = T,as.is = T)
 
-msbb_rnaseq2016_byRegion$FP=msbb_rnaseq2016_data2.agg[,which(colnames(msbb_rnaseq2016_data2.agg)%in%unlist(lapply(strsplit(x = msbb_rnaseq_covariates.merged2$sampleIdentifier[which(msbb_rnaseq_covariates.merged2$BrodmannArea=="BM10")],split = "_"),`[[`,3)))]
-msbb_rnaseq2016_byRegion$IFG=msbb_rnaseq2016_data2.agg[,which(colnames(msbb_rnaseq2016_data2.agg)%in%unlist(lapply(strsplit(x = msbb_rnaseq_covariates.merged2$sampleIdentifier[which(msbb_rnaseq_covariates.merged2$BrodmannArea=="BM44")],split = "_"),`[[`,3)))]
-msbb_rnaseq2016_byRegion$PHG=msbb_rnaseq2016_data2.agg[,which(colnames(msbb_rnaseq2016_data2.agg)%in%unlist(lapply(strsplit(x = msbb_rnaseq_covariates.merged2$sampleIdentifier[which(msbb_rnaseq_covariates.merged2$BrodmannArea=="BM36")],split = "_"),`[[`,3)))]
-msbb_rnaseq2016_byRegion$STG=msbb_rnaseq2016_data2.agg[,which(colnames(msbb_rnaseq2016_data2.agg)%in%unlist(lapply(strsplit(x = msbb_rnaseq_covariates.merged2$sampleIdentifier[which(msbb_rnaseq_covariates.merged2$BrodmannArea=="BM22")],split = "_"),`[[`,3)))]
+msbb_rnaseq_covariates.merged_final$FP=msbb_rnaseq_covariates.merged2[grep(pattern="BM10",msbb_rnaseq_covariates.merged2$BrodmannArea),]
+msbb_rnaseq_covariates.merged_final$IFG=msbb_rnaseq_covariates.merged2[grep(pattern="BM22",msbb_rnaseq_covariates.merged2$BrodmannArea),]
+msbb_rnaseq_covariates.merged_final$PHG=msbb_rnaseq_covariates.merged2[grep(pattern="BM36",msbb_rnaseq_covariates.merged2$BrodmannArea),]
+msbb_rnaseq_covariates.merged_final$STG=msbb_rnaseq_covariates.merged2[grep(pattern="BM44",msbb_rnaseq_covariates.merged2$BrodmannArea),]
+
+msbb_rnaseq2016_byRegion$FP=msbb_rnaseq2016_data2.agg[,which(colnames(msbb_rnaseq2016_data2.agg)%in%unlist(lapply(strsplit(x = msbb_rnaseq_covariates.merged_final$FP$sampleIdentifier,split = "_"),`[[`,3)))]
+msbb_rnaseq2016_byRegion$IFG=msbb_rnaseq2016_data2.agg[,which(colnames(msbb_rnaseq2016_data2.agg)%in%unlist(lapply(strsplit(x = msbb_rnaseq_covariates.merged_final$IFG$sampleIdentifier,split = "_"),`[[`,3)))]
+msbb_rnaseq2016_byRegion$PHG=msbb_rnaseq2016_data2.agg[,which(colnames(msbb_rnaseq2016_data2.agg)%in%unlist(lapply(strsplit(x = msbb_rnaseq_covariates.merged_final$PHG$sampleIdentifier,split = "_"),`[[`,3)))]
+msbb_rnaseq2016_byRegion$STG=msbb_rnaseq2016_data2.agg[,which(colnames(msbb_rnaseq2016_data2.agg)%in%unlist(lapply(strsplit(x = msbb_rnaseq_covariates.merged_final$STG$sampleIdentifier,split = "_"),`[[`,3)))]
 
 lowPlaque_samples=highPlaque_samples=vector(mode = "list",length = 4)
 names(lowPlaque_samples)=names(highPlaque_samples)=names(msbb_rnaseq2016_byRegion)
 lowPlaque_samples=lapply(msbb_rnaseq_covariates.merged_final,function(x)x$sampleIdentifier[which(x$PlaqueMean<=1)])
 highPlaque_samples=lapply(msbb_rnaseq_covariates.merged_final,function(x)x$sampleIdentifier[which(x$PlaqueMean>=15)])
 
-nc = 8
+nc = 15
 blocksize=100000
 ProcessElement <- function(ic){
   A = ceiling((sqrt(8*(ic+1)-7)+1)/2)
@@ -77,7 +83,7 @@ msbb_rnaseq2016_byRegion.final_keep=lapply(msbb_rnaseq2016_byRegion,function(x)r
 
 exprs_rank=vector(mode = "list",length = 4)
 names(exprs_rank)=names(msbb_rnaseq2016_byRegion)
-for (j in 1:4){
+for(j in 1:4){
   
   exprs_rank[[j]]=msbb_rnaseq2016_byRegion[[j]][msbb_rnaseq2016_byRegion.final_keep[[j]],]
   number_of_combinations<-choose(nrow(exprs_rank[[j]]),2)
@@ -100,7 +106,7 @@ for (j in 1:4){
     result <- rbindlist(res)
     result <- as.data.frame(result)
     result <- data.frame(result,stringsAsFactors = F)
-    write.table(result, file=paste("/shared/hidelab2/user/md4zsa/Work/Data/MSMM_RNAseq/MSMM_RNAseq_FinalRelease2/",names(msbb_rnaseq2016_byRegion)[j],"_",i,".txt",sep=""),sep="\t",col.names = T,row.names=FALSE, quote = FALSE)
+    write.table(result, file=paste("/shared/hidelab2/user/md4zsa/Work/Data/MSMM_RNAseq/MSMM_RNAseq_FinalRelease2/",names(msbb_rnaseq2016_byRegion)[j],"_R2_",i,".txt",sep=""),sep="\t",col.names = T,row.names=FALSE, quote = FALSE)
     i<-i+1
     start<-i*blocksize+1
     end<-min((i+1)*blocksize, number_of_combinations)
