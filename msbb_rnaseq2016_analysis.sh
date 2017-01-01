@@ -5,6 +5,8 @@
 #$-l mem=12G -l rmem=8G 
 #Cores 
 #$ -pe openmp 12
+#Queue
+#-P hidelab
 #Job Name 
 #$-N MSBB2016_PLQ
 module load apps/R/3.3.1
