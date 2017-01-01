@@ -8,7 +8,7 @@
 #Queue
 #-P hidelab
 #Job Name 
-#$-N MSBB2016_PLQ
+#$-N MSBB_PLQ_R2
 module load apps/R/3.3.1
 module load compilers/gcc/5.3 
 R CMD BATCH --no-save --no-restore /shared/hidelab2/user/md4zsa/Work/Amberkar_Scripts/msbb_rnaseq2016_analysis.R
