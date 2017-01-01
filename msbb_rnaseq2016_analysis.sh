@@ -4,7 +4,7 @@
 #Request resources 
 #$-l mem=12G -l rmem=8G 
 #Cores 
-#$ -pe openmp 8
+#$ -pe openmp 12
 #Queue
 #$ -P hidelab
 #Job Name 
