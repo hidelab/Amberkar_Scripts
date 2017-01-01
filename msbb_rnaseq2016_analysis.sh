@@ -6,7 +6,7 @@
 #Cores 
 #$ -pe openmp 8
 #Queue
-#-P hidelab
+#$ -P hidelab
 #Job Name 
 #$-N MSBB_PLQ_R2
 module load apps/R/3.3.1
