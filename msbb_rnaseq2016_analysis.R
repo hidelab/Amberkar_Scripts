@@ -21,10 +21,10 @@ rownames(msbb_rnaseq2016_data2.agg)=msbb_rnaseq2016_data2.agg$geneSymbol
 msbb_rnaseq2016_data2.agg=msbb_rnaseq2016_data2.agg[,-1]
 colnames(msbb_rnaseq2016_data2.agg)=gsub(pattern = "X",replacement = "",x = colnames(msbb_rnaseq2016_data2.agg))
 
-msbb_rnaseq_covariates.merged_final$FP=msbb_rnaseq_covariates.merged2[which(unlist(lapply(strsplit(x=msbb_rnaseq_covariates.merged2$sampleIdentifier,split = "_"),`[[`,3))%in%colnames(msbb_rnaseq2016_byRegion$FP)),c(1:11,13,15:16)]
-msbb_rnaseq_covariates.merged_final$IFG=msbb_rnaseq_covariates.merged2[which(unlist(lapply(strsplit(x=msbb_rnaseq_covariates.merged2$sampleIdentifier,split = "_"),`[[`,3))%in%colnames(msbb_rnaseq2016_byRegion$IFG)),c(1:11,13,15:16)]
-msbb_rnaseq_covariates.merged_final$PHG=msbb_rnaseq_covariates.merged2[which(unlist(lapply(strsplit(x=msbb_rnaseq_covariates.merged2$sampleIdentifier,split = "_"),`[[`,3))%in%colnames(msbb_rnaseq2016_byRegion$PHG)),c(1:11,13,15:16)]
-msbb_rnaseq_covariates.merged_final$STG=msbb_rnaseq_covariates.merged2[which(unlist(lapply(strsplit(x=msbb_rnaseq_covariates.merged2$sampleIdentifier,split = "_"),`[[`,3))%in%colnames(msbb_rnaseq2016_byRegion$STG)),c(1:11,13,15:16)]
+msbb_rnaseq_covariates.merged_final$FP=msbb_rnaseq_covariates.merged2[grep(pattern="BM10",msbb_rnaseq_covariates.merged2$BrodmannArea),]
+msbb_rnaseq_covariates.merged_final$IFG=msbb_rnaseq_covariates.merged2[grep(pattern="BM22",msbb_rnaseq_covariates.merged2$BrodmannArea),]
+msbb_rnaseq_covariates.merged_final$PHG=msbb_rnaseq_covariates.merged2[grep(pattern="BM36",msbb_rnaseq_covariates.merged2$BrodmannArea),]
+msbb_rnaseq_covariates.merged_final$STG=msbb_rnaseq_covariates.merged2[grep(pattern="BM44",msbb_rnaseq_covariates.merged2$BrodmannArea),]
 
 msbb_rnaseq2016_byRegion$FP=msbb_rnaseq2016_data2.agg[,which(colnames(msbb_rnaseq2016_data2.agg)%in%unlist(lapply(strsplit(x = msbb_rnaseq_covariates.merged2$sampleIdentifier[which(msbb_rnaseq_covariates.merged2$BrodmannArea=="BM10")],split = "_"),`[[`,3)))]
 msbb_rnaseq2016_byRegion$IFG=msbb_rnaseq2016_data2.agg[,which(colnames(msbb_rnaseq2016_data2.agg)%in%unlist(lapply(strsplit(x = msbb_rnaseq_covariates.merged2$sampleIdentifier[which(msbb_rnaseq_covariates.merged2$BrodmannArea=="BM44")],split = "_"),`[[`,3)))]
