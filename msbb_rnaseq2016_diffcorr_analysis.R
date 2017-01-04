@@ -4,6 +4,7 @@ require(parallel)
 library(org.Hs.eg.db)
 library(foreach)
 
+#Read data and covariates
 setwd("/shared/hidelab2/user/md4zsa/Work/Data/MSMM_RNAseq/MSMM_RNAseq_FinalRelease2/")
 msbb_rnaseq2016_data=read.table("AMP-AD_MSBB_MSSM_IlluminaHiSeq2500_normalized_counts_September_2016.txt",sep="\t",header = T,as.is = T)
 msbb_rnaseq_covariates=read.csv("MSBB_RNAseq_covariates.csv",header = T,as.is = T)
@@ -13,12 +14,13 @@ msbb_ensembl_symbol=data.frame(Ensembl=names(mapIds(x = org.Hs.eg.db,keys=rownam
 msbb_rnaseq_covariates.merged=merge(x = msbb_rnaseq_clinical_covariates,y=msbb_rnaseq_covariates,by=c("individualIdentifier","individualIdentifier"))
 msbb_rnaseq_covariates.merged2=msbb_rnaseq_covariates.merged[grep(pattern = "unmapped",x = msbb_rnaseq_covariates.merged$fileName,invert = T),]#include resequenced samples
 
+#Initialise datastructre to store preprocessed data
 msbb_rnaseq2016_byRegion=msbb_rnaseq_covariates.merged_final=msbb_rnaseq2016_PLQGenes=vector(mode = "list",length = 4)
 names(msbb_rnaseq2016_byRegion)=names(msbb_rnaseq_covariates.merged_final)=names(msbb_rnaseq2016_PLQGenes)=c("FP","IFG","PHG","STG") 
 msbb_rnaseq2016_data2=msbb_rnaseq2016_data[-which(rownames(msbb_rnaseq2016_data)%in%msbb_ensembl_symbol$Ensembl[which(is.na(msbb_ensembl_symbol$Symbol)==T)]),]
 msbb_rnaseq2016_data2=data.frame(cbind(Symbol=msbb_ensembl_symbol$Symbol[-which(is.na(msbb_ensembl_symbol$Symbol)==T)],msbb_rnaseq2016_data2),stringsAsFactors = F)
+#Compute mean expression for  gene symbol
 msbb_rnaseq2016_data2.agg=aggregate(x=msbb_rnaseq2016_data2[,-1],by=list(geneSymbol=msbb_rnaseq2016_data2$Symbol),mean)
-#rm_genes=grep(pattern = "_|\\.|^RP|-",msbb_rnaseq2016_data2.agg$geneSymbol,invert = F)
 rownames(msbb_rnaseq2016_data2.agg)=msbb_rnaseq2016_data2.agg$geneSymbol
 msbb_rnaseq2016_data2.agg=msbb_rnaseq2016_data2.agg[,-1]
 colnames(msbb_rnaseq2016_data2.agg)=gsub(pattern = "X",replacement = "",x = colnames(msbb_rnaseq2016_data2.agg))
@@ -33,18 +35,22 @@ msbb_rnaseq_covariates.merged_final$IFG=msbb_rnaseq_covariates.merged2[grep(patt
 msbb_rnaseq_covariates.merged_final$PHG=msbb_rnaseq_covariates.merged2[grep(pattern="BM36",msbb_rnaseq_covariates.merged2$BrodmannArea),]
 msbb_rnaseq_covariates.merged_final$STG=msbb_rnaseq_covariates.merged2[grep(pattern="BM44",msbb_rnaseq_covariates.merged2$BrodmannArea),]
 
+#Segregate preprocessed data into datastructure
 msbb_rnaseq2016_byRegion$FP=msbb_rnaseq2016_data2.agg[,which(colnames(msbb_rnaseq2016_data2.agg)%in%unlist(lapply(strsplit(x = msbb_rnaseq_covariates.merged_final$FP$sampleIdentifier,split = "_"),`[[`,3)))]
 msbb_rnaseq2016_byRegion$IFG=msbb_rnaseq2016_data2.agg[,which(colnames(msbb_rnaseq2016_data2.agg)%in%unlist(lapply(strsplit(x = msbb_rnaseq_covariates.merged_final$IFG$sampleIdentifier,split = "_"),`[[`,3)))]
 msbb_rnaseq2016_byRegion$PHG=msbb_rnaseq2016_data2.agg[,which(colnames(msbb_rnaseq2016_data2.agg)%in%unlist(lapply(strsplit(x = msbb_rnaseq_covariates.merged_final$PHG$sampleIdentifier,split = "_"),`[[`,3)))]
 msbb_rnaseq2016_byRegion$STG=msbb_rnaseq2016_data2.agg[,which(colnames(msbb_rnaseq2016_data2.agg)%in%unlist(lapply(strsplit(x = msbb_rnaseq_covariates.merged_final$STG$sampleIdentifier,split = "_"),`[[`,3)))]
 
+#Separate samples into Low (Control) and High (AD) plaque samples
 lowPlaque_samples=highPlaque_samples=vector(mode = "list",length = 4)
 names(lowPlaque_samples)=names(highPlaque_samples)=names(msbb_rnaseq2016_byRegion)
 lowPlaque_samples=lapply(msbb_rnaseq_covariates.merged_final,function(x)x$sampleIdentifier[which(x$PlaqueMean<=1)])
 highPlaque_samples=lapply(msbb_rnaseq_covariates.merged_final,function(x)x$sampleIdentifier[which(x$PlaqueMean>=15)])
 
-nc = 15
-blocksize=100000
+nc = 15 # number of cores
+blocksize=100000 #Gene pair blocks to compute in parallel
+
+#Define function to compute diffcorr
 ProcessElement <- function(ic){
   A = ceiling((sqrt(8*(ic+1)-7)+1)/2)
   B = ic-choose(floor(1/2+sqrt(2*ic)),2)
@@ -79,20 +85,22 @@ ProcessElement <- function(ic){
   return(tmp)
 }
 
+#Keep genes with counts>0 and occuring in at least 1/3 samples
 msbb_rnaseq2016_byRegion.final_keep=lapply(msbb_rnaseq2016_byRegion,function(x)rowSums(x>0)>=ncol(x)/3)
 
 exprs_rank=vector(mode = "list",length = 4)
 names(exprs_rank)=names(msbb_rnaseq2016_byRegion)
+#Outer for loop to loop over tissue type
 for(j in 1:4){
   
-  exprs_rank[[j]]=msbb_rnaseq2016_byRegion[[j]][msbb_rnaseq2016_byRegion.final_keep[[j]],]
+  exprs_rank[[j]]=msbb_rnaseq2016_byRegion[[j]][msbb_rnaseq2016_byRegion.final_keep,]
   number_of_combinations<-choose(nrow(exprs_rank[[j]]),2)
   c_exprs_rank=exprs_rank[[j]][,which(colnames(exprs_rank[[j]])%in%unlist(lapply(strsplit(lowPlaque_samples[[j]],split="_"),`[[`,3)))]
   t_exprs_rank=exprs_rank[[j]][,which(colnames(exprs_rank[[j]])%in%unlist(lapply(strsplit(highPlaque_samples[[j]],split="_"),`[[`,3)))]
   n.c<-ncol(c_exprs_rank)
   n.t<-ncol(t_exprs_rank)
   gene.names<-rownames(exprs_rank[[j]])
-  
+  #Parallel diffcorr computation
   i<-0
   start<-i*blocksize+1
   end<-min((i+1)*blocksize, number_of_combinations)
@@ -114,4 +122,4 @@ for(j in 1:4){
   
 }
 cat(paste("Done!\n"))
-
+system.time()
