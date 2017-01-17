@@ -94,7 +94,8 @@ for(r in 1:4){
     }
   }
 }
-
+saveRDS(poscoexp_pval_vector,'MSBB_PosCoexp_PvalVector.RDS')
+saveRDS(negcoexp_pval_vector,'MSBB_NegCoexp_PvalVector.RDS')
 # msbb_dcn.clusters=msbb_plq_dcn.clusters=list()
 # msbb_dcn.clusters[[1]]=V(msbb_rnaseq2016.DCN$FP$High)$name
 # msbb_dcn.clusters[[2]]=V(msbb_rnaseq2016.DCN$IFG$High)$name
