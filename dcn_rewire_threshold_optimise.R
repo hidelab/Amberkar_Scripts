@@ -1,7 +1,7 @@
 library(igraph)
 library(org.Hs.eg.db)
 library(clusterProfiler)
-library(ReactomePA)
+
 
 msbb_rnaseq2016.DCN=msbb_rnaseq2016_R2.DCN=msbb_rnaseq2016_PLQ.DCN=msbb_rnaseq2016_PLQGenes.cluster=vector(mode = "list",length = 4)
 names(msbb_rnaseq2016.DCN)=names(msbb_rnaseq2016_R2.DCN)=names(msbb_rnaseq2016_PLQ.DCN)=names(msbb_rnaseq2016_PLQGenes.cluster)=c("FP","IFG","PHG","STG")
