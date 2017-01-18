@@ -2,7 +2,7 @@ library(igraph)
 library(org.Hs.eg.db)
 library(clusterProfiler)
 
-
+setwd('/shared/hidelab2/user/md4zsa/Work/Data/MSMM_RNAseq/MSMM_RNAseq_FinalRelease2')
 msbb_rnaseq2016.DCN=msbb_rnaseq2016_R2.DCN=msbb_rnaseq2016_PLQ.DCN=msbb_rnaseq2016_PLQGenes.cluster=vector(mode = "list",length = 4)
 names(msbb_rnaseq2016.DCN)=names(msbb_rnaseq2016_R2.DCN)=names(msbb_rnaseq2016_PLQ.DCN)=names(msbb_rnaseq2016_PLQGenes.cluster)=c("FP","IFG","PHG","STG")
 
