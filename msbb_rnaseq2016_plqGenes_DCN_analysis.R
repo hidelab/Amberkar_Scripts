@@ -492,7 +492,24 @@ threshold_df=data.frame(df1)
 rownames(threshold_df)=as.numeric(rownames(df1))-1
 
 plot(compareCluster(geneClusters = lapply(lapply(msbb_rnaseq2016_AllAnalyses$IFG[c(5:7)],select,x = org.Hs.eg.db,keytype = 'SYMBOL',columns = 'ENTREZID'),`[[`,2),fun = 'enrichKEGG',organism='hsa',pvalueCutoff=0.1,pAdjustMethod='BH'),title='FP Rewiring,KEGG pathway enrichment')
-
-
-
 graph.union(induced_subgraph(graph = msbb_rnaseq2016.PosCoexp$STG$Low,vids = msbb_rnaseq2016Genes_PosCoexp.rewiredDF$STG$Common_Genes[(msbb_rnaseq2016Genes_PosCoexp.rewiredDF$STG$Difference>0)]),induced_subgraph(graph = ttrust_tf_network,vids = which(V(ttrust_tf_network)$name%in%msbb_rnaseq2016Genes_PosCoexp.rewiredDF$STG$Common_Genes[(msbb_rnaseq2016Genes_PosCoexp.rewiredDF$STG$Difference>0)]%in%ttrust_tf_data$TF)))
+
+
+#Write edge lists for MCL
+msbb_dcn_edgeList=msbb_plq_dcn_edgeList=vector(mode = 'list',length = 4)
+names(msbb_dcn_edgeList)=names(msbb_plq_dcn_edgeList)=names(msbb_rnaseq2016.DCN)
+msbb_dcn_edgeList$FP=msbb_dcn_edgeList$IFG=msbb_dcn_edgeList$PHG=msbb_dcn_edgeList$STG=vector(mode = 'list',length = 2)
+msbb_plq_dcn_edgeList$FP=msbb_plq_dcn_edgeList$IFG=msbb_plq_dcn_edgeList$PHG=msbb_plq_dcn_edgeList$STG=vector(mode = 'list',length = 2)
+names(msbb_dcn_edgeList$FP)=names(msbb_dcn_edgeList$IFG)=names(msbb_dcn_edgeList$PHG)=names(msbb_dcn_edgeList$STG)=c('Low','High')
+names(msbb_plq_dcn_edgeList$FP)=names(msbb_plq_dcn_edgeList$IFG)=names(msbb_plq_dcn_edgeList$PHG)=names(msbb_plq_dcn_edgeList$STG)=c('Low','High')
+for (i in 1:4){
+  for (j in 1:2){
+    msbb_dcn_edgeList[[i]][[j]]=data.frame(as_edgelist(graph = msbb_rnaseq2016.DCN[[i]][[j]],names = T),Weight=E(msbb_rnaseq2016.DCN[[i]][[j]])$weight,stringsAsFactors = F)
+    msbb_plq_dcn_edgeList[[i]][[j]]=data.frame(as_edgelist(graph = msbb_rnaseq2016_PLQ.DCN[[i]][[j]],names = T),Weight=E(msbb_rnaseq2016_PLQ.DCN[[i]][[j]])$weight,stringsAsFactors = F)
+    #colnames(msbb_dcn_edgeList[[i]][[j]])=c('LABEL1','LABEL2','WEIGHT')
+    cat(paste('Writing edge list for brain region ',names(msbb_dcn_edgeList)[i],' and sample type ',names(msbb_dcn_edgeList[[i]])[j],'...\n',sep=''))
+    write.table(msbb_dcn_edgeList[[i]][[j]],paste('msbb_dcn_',names(msbb_dcn_edgeList)[i],'_',names(msbb_dcn_edgeList[[i]])[j],'.txt',sep=''),sep = '\t',col.names = F,row.names = F)
+    write.table(msbb_plq_dcn_edgeList[[i]][[j]],paste('msbb_dcn_',names(msbb_plq_dcn_edgeList)[i],'_',names(msbb_plq_dcn_edgeList[[i]])[j],'.txt',sep=''),sep = '\t',col.names = F,row.names = F)
+  }
+}
+
