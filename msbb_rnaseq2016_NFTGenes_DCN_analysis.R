@@ -30,11 +30,6 @@ msbb_rnaseq_covariates.merged_final$IFG=read.table("MSBB_RNAseq2016_IFG_covariat
 msbb_rnaseq_covariates.merged_final$PHG=read.table("MSBB_RNAseq2016_PHG_covariates.txt",sep = "\t",header = T,as.is = T)
 msbb_rnaseq_covariates.merged_final$STG=read.table("MSBB_RNAseq2016_STG_covariates.txt",sep = "\t",header = T,as.is = T)
 
-# msbb_rnaseq_covariates.merged_final$FP=msbb_rnaseq_covariates.merged2[grep(pattern="BM10",msbb_rnaseq_covariates.merged2$BrodmannArea),]
-# msbb_rnaseq_covariates.merged_final$IFG=msbb_rnaseq_covariates.merged2[grep(pattern="BM22",msbb_rnaseq_covariates.merged2$BrodmannArea),]
-# msbb_rnaseq_covariates.merged_final$PHG=msbb_rnaseq_covariates.merged2[grep(pattern="BM36",msbb_rnaseq_covariates.merged2$BrodmannArea),]
-# msbb_rnaseq_covariates.merged_final$STG=msbb_rnaseq_covariates.merged2[grep(pattern="BM44",msbb_rnaseq_covariates.merged2$BrodmannArea),]
-
 #Segregate preprocessed data into datastructure
 msbb_rnaseq2016_byRegion$FP=msbb_rnaseq2016_data2.agg[,which(colnames(msbb_rnaseq2016_data2.agg)%in%unlist(lapply(strsplit(x = msbb_rnaseq_covariates.merged_final$FP$sampleIdentifier,split = "_"),`[[`,3)))]
 msbb_rnaseq2016_byRegion$IFG=msbb_rnaseq2016_data2.agg[,which(colnames(msbb_rnaseq2016_data2.agg)%in%unlist(lapply(strsplit(x = msbb_rnaseq_covariates.merged_final$IFG$sampleIdentifier,split = "_"),`[[`,3)))]
@@ -42,10 +37,9 @@ msbb_rnaseq2016_byRegion$PHG=msbb_rnaseq2016_data2.agg[,which(colnames(msbb_rnas
 msbb_rnaseq2016_byRegion$STG=msbb_rnaseq2016_data2.agg[,which(colnames(msbb_rnaseq2016_data2.agg)%in%unlist(lapply(strsplit(x = msbb_rnaseq_covariates.merged_final$STG$sampleIdentifier,split = "_"),`[[`,3)))]
 
 #Separate samples into Low (Control) and High (AD) plaque samples
-lowPlaque_samples=highPlaque_samples=vector(mode = "list",length = 4)
-names(lowPlaque_samples)=names(highPlaque_samples)=names(msbb_rnaseq2016_byRegion)
-lowPlaque_samples=lapply(msbb_rnaseq_covariates.merged_final,function(x)x$sampleIdentifier[which(x$PlaqueMean<=1&x$bbscore!='NA')])
-highPlaque_samples=lapply(msbb_rnaseq_covariates.merged_final,function(x)x$sampleIdentifier[which(x$PlaqueMean>=15&x$bbscore!='NA')])
+braak_12=lapply(msbb_rnaseq_covariates.merged_final,function(x)x$sampleIdentifier[which(x$bbscore>0&x$bbscore<=2&x$bbscore!='NA')])
+braak_34=lapply(msbb_rnaseq_covariates.merged_final,function(x)x$sampleIdentifier[which(x$bbscore>2&x$bbscore<=4&x$bbscore!='NA')])
+braak_56=lapply(msbb_rnaseq_covariates.merged_final,function(x)x$sampleIdentifier[which(x$bbscore>4&x$bbscore<=6&x$bbscore!='NA')])
 
 nc = 15 # number of cores
 blocksize=100000 #Gene pair blocks to compute in parallel
@@ -93,13 +87,15 @@ names(exprs_rank)=names(msbb_rnaseq2016_byRegion)
 #Outer for loop to loop over tissue type
 for(j in 1:4){
   
-  exprs_rank[[j]]=msbb_rnaseq2016_byRegion[[j]][msbb_rnaseq2016_byRegion.final_keep[[j]],]
-  number_of_combinations<-choose(nrow(exprs_rank[[j]]),2)
-  c_exprs_rank=exprs_rank[[j]][,which(colnames(exprs_rank[[j]])%in%unlist(lapply(strsplit(lowPlaque_samples[[j]],split="_"),`[[`,3)))]
-  t_exprs_rank=exprs_rank[[j]][,which(colnames(exprs_rank[[j]])%in%unlist(lapply(strsplit(highPlaque_samples[[j]],split="_"),`[[`,3)))]
+  exprs_rank[[j]]=msbb_rnaseq2016_byRegion[[j]][msbb_rnaseq2016_byRegion.final_keep[[j]],][1:50,]
+  number_of_combinations<-choose(nrow(exprs_rank[[j]][1:50,]),2)
+  c_exprs_rank=exprs_rank[[j]][1:50,which(colnames(exprs_rank[[j]])%in%unlist(lapply(strsplit(braak_12[[j]],split="_"),`[[`,3)))]
+  t_exprs_rank=exprs_rank[[j]][1:50,which(colnames(exprs_rank[[j]])%in%unlist(lapply(strsplit(braak_34[[j]],split="_"),`[[`,3)))]
+  # t2_exprs_rank=exprs_rank[[j]][1:50,which(colnames(exprs_rank[[j]])%in%unlist(lapply(strsplit(braak_56[[j]],split="_"),`[[`,3)))]
   n.c<-ncol(c_exprs_rank)
   n.t<-ncol(t_exprs_rank)
-  gene.names<-rownames(exprs_rank[[j]])
+  # n.t2<-ncol(t2_exprs_rank)
+  gene.names<-rownames(exprs_rank[[j]][1:50,])
   #Parallel diffcorr computation
   i<-0
   start<-i*blocksize+1
@@ -127,7 +123,3 @@ system.time()
 
 
 
-
-braak_12=lapply(msbb_rnaseq_covariates.merged_final,function(x)x$sampleIdentifier[which(x$bbscore>0&x$bbscore<=2&x$bbscore!='NA')])
-braak_34=lapply(msbb_rnaseq_covariates.merged_final,function(x)x$sampleIdentifier[which(x$bbscore>2&x$bbscore<=4&x$bbscore!='NA')])
-braak_56=lapply(msbb_rnaseq_covariates.merged_final,function(x)x$sampleIdentifier[which(x$bbscore>4&x$bbscore<=6&x$bbscore!='NA')])

@@ -3,6 +3,45 @@ library(org.Hs.eg.db)
 library(clusterProfiler)
 
 setwd('/shared/hidelab2/user/md4zsa/Work/Data/MSMM_RNAseq/MSMM_RNAseq_FinalRelease2')
+RewiredUniqueGenes=function(dcn,posThreshold,negThreshold){
+  normal_poscoexp.genes=V(graph.data.frame(d=data.frame(ends(graph = dcn[[1]],es = which(E(dcn[[1]])$weight>posThreshold),names = T)),directed = F))$name
+  disease_poscoexp.genes=V(graph.data.frame(d=data.frame(ends(graph = dcn[[2]],es = which(E(dcn[[2]])$weight>posThreshold),names = T)),directed = F))$name
+  normal_negcoexp.genes=V(graph.data.frame(d=data.frame(ends(graph = dcn[[1]],es = which(E(dcn[[1]])$weight<negThreshold),names = T)),directed = F))$name
+  disease_negcoexp.genes=V(graph.data.frame(d=data.frame(ends(graph = dcn[[2]],es = which(E(dcn[[2]])$weight<negThreshold),names = T)),directed = F))$name
+  #Setup datastructure
+  rewired_unique_genes=vector(mode = 'list',length = 2)
+  names(rewired_unique_genes)=c(names(dcn)[1],names(dcn)[2])
+  rewired_unique_genes[[1]]=rewired_unique_genes[[2]]=vector(mode = 'list',length = 4)
+  names(rewired_unique_genes[[1]])=names(rewired_unique_genes[[2]])=c('PosCoexp_UniqGenes','NegCoexp_UniqGenes','PosCoexp_Degree','NegCoexp_Degree')
+  #For Normal samples, always the first element of datastruct
+  rewired_unique_genes[[1]]$PosCoexp_UniqGenes=V(dcn[[1]])$name[which(V(dcn[[1]])$name%in%setdiff(normal_poscoexp.genes,disease_poscoexp.genes))]
+  rewired_unique_genes[[1]]$NegCoexp_UniqGenes=V(dcn[[1]])$name[which(V(dcn[[1]])$name%in%setdiff(normal_negcoexp.genes,disease_negcoexp.genes))]
+  rewired_unique_genes[[1]]$PosCoexp_Degree=data.frame(Normal_PosCoexp_Unique_Genes=V(dcn[[1]])$name[which(V(dcn[[1]])$name%in%setdiff(normal_poscoexp.genes,disease_poscoexp.genes))],
+                Normal_PosCoexp_Unique_Degree=unname(degree(graph = dcn[[1]],v = which(V(dcn[[1]])$name%in%setdiff(normal_poscoexp.genes,disease_poscoexp.genes)))),
+                Disease_PosCoexp_Genes=0,
+                Diff=unname(degree(graph = dcn[[1]],v = which(V(dcn[[1]])$name%in%setdiff(normal_poscoexp.genes,disease_poscoexp.genes))))-0,stringsAsFactors = F)
+  rewired_unique_genes[[1]]$PosCoexp_Degree=rewired_unique_genes[[1]]$PosCoexp_Degree[order(rewired_unique_genes[[1]]$PosCoexp_Degree$Diff,decreasing = T),]
+  rewired_unique_genes[[1]]$NegCoexp_Degree=data.frame(Normal_NegCoexp_Unique_Genes=V(dcn[[1]])$name[which(V(dcn[[1]])$name%in%setdiff(normal_negcoexp.genes,disease_negcoexp.genes))],
+                                                       Normal_NegCoexp_Unique_Degree=unname(degree(graph = dcn[[1]],v = which(V(dcn[[1]])$name%in%setdiff(normal_negcoexp.genes,disease_negcoexp.genes)))),
+                                                       Disease_NegCoexp_Genes=0,
+                                                       Diff=unname(degree(graph = dcn[[1]],v = which(V(dcn[[1]])$name%in%setdiff(normal_negcoexp.genes,disease_negcoexp.genes))))-0,stringsAsFactors = F)
+  rewired_unique_genes[[1]]$NegCoexp_Degree=rewired_unique_genes[[1]]$NegCoexp_Degree[order(rewired_unique_genes[[1]]$NegCoexp_Degree$Diff,decreasing = T),]
+  #For Disease samples, always the second element of datastruct
+  rewired_unique_genes[[2]]$NegCoexp_UniqGenes=V(dcn[[2]])$name[which(V(dcn[[2]])$name%in%setdiff(disease_negcoexp.genes,normal_negcoexp.genes))]
+  rewired_unique_genes[[2]]$PosCoexp_UniqGenes=V(dcn[[2]])$name[which(V(dcn[[2]])$name%in%setdiff(disease_poscoexp.genes,normal_poscoexp.genes))]
+  rewired_unique_genes[[2]]$PosCoexp_Degree=data.frame(Disease_PosCoexp_Unique_Genes=V(dcn[[2]])$name[which(V(dcn[[2]])$name%in%setdiff(disease_poscoexp.genes,normal_poscoexp.genes))],
+                                Disease_PosCoexp_Unique_Degree=unname(degree(graph = dcn[[2]],v = which(V(dcn[[2]])$name%in%setdiff(disease_poscoexp.genes,normal_poscoexp.genes)))),
+                                Normal_PosCoexp_Genes=0,
+                                Diff=unname(degree(graph = dcn[[2]],v = which(V(dcn[[2]])$name%in%setdiff(disease_poscoexp.genes,normal_poscoexp.genes))))-0,stringsAsFactors = F)
+  rewired_unique_genes[[2]]$PosCoexp_Degree=rewired_unique_genes[[2]]$PosCoexp_Degree[order(rewired_unique_genes[[2]]$PosCoexp_Degree$Diff,decreasing = T),]
+  rewired_unique_genes[[2]]$NegCoexp_Degree=data.frame(Disease_NegCoexp_Unique_Genes=V(dcn[[2]])$name[which(V(dcn[[2]])$name%in%setdiff(disease_negcoexp.genes,normal_negcoexp.genes))],
+                                                       Disease_NegCoexp_Unique_Degree=unname(degree(graph = dcn[[2]],v = which(V(dcn[[2]])$name%in%setdiff(disease_negcoexp.genes,normal_negcoexp.genes)))),
+                                                       Normal_NegCoexp_Genes=0,
+                                                       Diff=unname(degree(graph = dcn[[2]],v = which(V(dcn[[2]])$name%in%setdiff(disease_negcoexp.genes,normal_negcoexp.genes))))-0,stringsAsFactors = F)
+  rewired_unique_genes[[2]]$NegCoexp_Degree=rewired_unique_genes[[2]]$NegCoexp_Degree[order(rewired_unique_genes[[2]]$NegCoexp_Degree$Diff,decreasing = T),]
+  return(rewired_unique_genes)
+}
+
 msbb_rnaseq2016.DCN=msbb_rnaseq2016_R2.DCN=msbb_rnaseq2016_PLQ.DCN=msbb_rnaseq2016_PLQGenes.cluster=vector(mode = "list",length = 4)
 names(msbb_rnaseq2016.DCN)=names(msbb_rnaseq2016_R2.DCN)=names(msbb_rnaseq2016_PLQ.DCN)=names(msbb_rnaseq2016_PLQGenes.cluster)=c("FP","IFG","PHG","STG")
 
@@ -19,6 +58,8 @@ msbb_rnaseq2016_PLQ.DCN$FP=readRDS("FP/PLQ_DCN/FP_PLQGenes_FDR01.DCN.RDS")
 msbb_rnaseq2016_PLQ.DCN$IFG=readRDS("IFG/PLQ_DCN/IFG_PLQGenes_FDR01.DCN.RDS")
 msbb_rnaseq2016_PLQ.DCN$PHG=readRDS("PHG/PLQ_DCN/PHG_PLQGenes_FDR01.DCN.RDS")
 msbb_rnaseq2016_PLQ.DCN$STG=readRDS("STG/PLQ_DCN/STG_PLQGenes_FDR01.DCN.RDS")
+
+
 
 pos_weight=seq(1.25,1.75,by=0.05)
 neg_weight=seq(0.25,0.75,by=0.05)
@@ -67,7 +108,7 @@ names(negcoexp_pgr$FP)=names(negcoexp_pgr$IFG)=names(negcoexp_pgr$PHG)=names(neg
 names(poscoexp_cls$FP)=names(poscoexp_cls$IFG)=names(poscoexp_cls$PHG)=names(poscoexp_cls$STG)=c("Low","High")
 names(negcoexp_cls$FP)=names(negcoexp_cls$IFG)=names(negcoexp_cls$PHG)=names(negcoexp_cls$STG)=c("Low","High")
 
-
+                 
 for(r in 1:4){
   for (w in 1:length(pos_weight)){
     for(c in 1:3){
@@ -107,41 +148,81 @@ saveRDS(negcoexp_pval_vector,'MSBB_NegCoexp_PvalVector.RDS')
 # msbb_plq_dcn.clusters[[3]]=V(msbb_rnaseq2016_PLQ.DCN$PHG$High)$name
 # msbb_plq_dcn.clusters[[4]]=V(msbb_rnaseq2016_PLQ.DCN$STG$High)$name
 # 
-# nc=8
-# blocksize=50
-# for (r in 2:4){
-#   for (w in 1:length(neg_weight)){
-#     for (ont in 4:6){
-#       
-#       network_genes.normal=V(graph.data.frame(d=data.frame(ends(graph = msbb_rnaseq2016.DCN[[r]]$Low,es = which(E(msbb_rnaseq2016.DCN[[r]]$Low)$weight<pos_weight[w]),names = T)),directed = F))$name
-#       network_genes.AD=V(graph.data.frame(d=data.frame(ends(graph = msbb_rnaseq2016.DCN[[r]]$High,es = which(E(msbb_rnaseq2016.DCN[[r]]$High)$weight>pos_weight[w]),names = T)),directed = F))$name
-#       #common_genes=sort(intersect(network_genes.AD,network_genes.normal))
-#       i<-0
-#       start<-i*blocksize+1
-#       end<-min((i+1)*blocksize, common_genes)
-#       go_semsim.normal=go_semsim.AD=c()
-#       while(start < common_genes){
-#         cat(paste("In brain region,",names(msbb_dcn.clusters)[r],"computing semantic similarity for",names(hsGO)[ont],"processing block ...",i,"\n",sep=" "))
-#         input1=network_genes.normal[start:end]
-#         input2=network_genes.AD[start:end]
-#         res.normal = mgeneSim(genes = input1,semData = hsGO[[ont-3]],measure = 'Wang',drop = 'IEA',combine = 'BMA',verbose = T)
-#         res2=rowSums(res.normal)
-#         go_semsim.normal=append(go_semsim.normal,res2,after = length(go_semsim.normal))
-#         res.AD = mgeneSim(genes = input2,semData = hsGO[[ont-3]],measure = 'Wang',drop = 'IEA',combine = 'BMA',verbose = T)
-#         res3=rowSums(res.AD)
-#         go_semsim.AD=append(go_semsim.AD,res3,after = length(go_semsim.AD))
-#         i<-i+1
-#         start<-i*blocksize+1
-#         end<-min((i+1)*blocksize, common_genes)
-#       }
-#       poscoexp_pval_vector[[r]][[w]][[ont-3]]=go_semsim
-#     }
-#   }
-# }
-#     
-#       
-#          
-# 
+nc=8
+blocksize=50
+for (r in 2:4){
+  for (w in 1:length(neg_weight)){
+    for (ont in 4:6){
+
+      poscoexp_network_genes.normal=V(graph.data.frame(d=data.frame(ends(graph = msbb_rnaseq2016.DCN[[r]]$Low,es = which(E(msbb_rnaseq2016.DCN[[r]]$Low)$weight<pos_weight[w]),names = T)),directed = F))$name
+      poscoexp_network_genes.AD=V(graph.data.frame(d=data.frame(ends(graph = msbb_rnaseq2016.DCN[[r]]$High,es = which(E(msbb_rnaseq2016.DCN[[r]]$High)$weight>pos_weight[w]),names = T)),directed = F))$name
+      negcoexp_network_genes.normal=V(graph.data.frame(d=data.frame(ends(graph = msbb_rnaseq2016.DCN[[r]]$Low,es = which(E(msbb_rnaseq2016.DCN[[r]]$Low)$weight<neg_weight[w]),names = T)),directed = F))$name
+      negcoexp_network_genes.AD=V(graph.data.frame(d=data.frame(ends(graph = msbb_rnaseq2016.DCN[[r]]$High,es = which(E(msbb_rnaseq2016.DCN[[r]]$High)$weight>neg_weight[w]),names = T)),directed = F))$name
+      #common_genes=sort(intersect(network_genes.AD,network_genes.normal))
+      i<-0
+      start<-i*blocksize+1
+      end<-min((i+1)*blocksize, length(poscoexp_network_genes.normal))
+      poscoexp_go_semsim.normal=poscoexp_go_semsim.AD=c()
+      while(start < length(poscoexp_network_genes.normal)){
+        cat(paste("In brain region,",names(msbb_rnaseq2016.DCN)[r],"computing semantic similarity for normal genes and ",names(hsGO)[ont-3],"processing block ...",i,"\n",sep=" "))
+        input1=poscoexp_network_genes.normal[start:end]
+        poscoexp_res.normal = mgeneSim(genes = input1,semData = hsGO[[ont-3]],measure = 'Wang',drop = 'IEA',combine = 'BMA',verbose = T)
+        res2=rowSums(poscoexp_res.normal)
+        poscoexp_go_semsim.normal=append(poscoexp_network_genes.normal,res2,after = length(poscoexp_network_genes.normal))
+        i<-i+1
+        start<-i*blocksize+1
+        end<-min((i+1)*blocksize, length(poscoexp_network_genes.normal))
+      }
+      i<-0
+      start<-i*blocksize+1
+      end<-min((i+1)*blocksize, length(poscoexp_network_genes.AD))
+      while(start < length(poscoexp_network_genes.AD)){
+        cat(paste("In brain region,",names(msbb_rnaseq2016.DCN)[r],"computing semantic similarity for AD genes and ",names(hsGO)[ont-3],"processing block ...",i,"\n",sep=" "))
+        input2=poscoexp_network_genes.AD[start:end]
+        poscoexp_res.AD = mgeneSim(genes = input2,semData = hsGO[[ont-3]],measure = 'Wang',drop = 'IEA',combine = 'BMA',verbose = T)
+        res3=rowSums(poscoexp_res.AD)
+        poscoexp_go_semsim.AD=append(poscoexp_go_semsim.AD,res3,after = length(poscoexp_go_semsim.AD))
+        i<-i+1
+        start<-i*blocksize+1
+        end<-min((i+1)*blocksize, length(poscoexp_network_genes.AD))
+      }
+      #For NegCoexp
+      i<-0
+      start<-i*blocksize+1
+      end<-min((i+1)*blocksize, length(negcoexp_network_genes.normal))
+      negcoexp_go_semsim.normal=negcoexp_go_semsim.AD=c()
+      while(start < length(negcoexp_network_genes.normal)){
+        cat(paste("In brain region,",names(msbb_rnaseq2016.DCN)[r],"computing semantic similarity for normal genes and ",names(hsGO)[ont-3],"processing block ...",i,"\n",sep=" "))
+        input3=negcoexp_network_genes.normal[start:end]
+        negcoexp_res.normal = mgeneSim(genes = input3,semData = hsGO[[ont-3]],measure = 'Wang',drop = 'IEA',combine = 'BMA',verbose = T)
+        res2=rowSums(negcoexp_res.normal)
+        negcoexp_go_semsim.normal=append(negcoexp_network_genes.normal,res2,after = length(negcoexp_network_genes.normal))
+        i<-i+1
+        start<-i*blocksize+1
+        end<-min((i+1)*blocksize, length(negcoexp_network_genes.normal))
+      }
+      i<-0
+      start<-i*blocksize+1
+      end<-min((i+1)*blocksize, length(negcoexp_network_genes.AD))
+      while(start < length(negcoexp_network_genes.AD)){
+        cat(paste("In brain region,",names(msbb_rnaseq2016.DCN)[r],"computing semantic similarity for AD genes and ",names(hsGO)[ont-3],"processing block ...",i,"\n",sep=" "))
+        input4=negcoexp_network_genes.AD[start:end]
+        negcoexp_res.AD = mgeneSim(genes = input4,semData = hsGO[[ont-3]],measure = 'Wang',drop = 'IEA',combine = 'BMA',verbose = T)
+        res3=rowSums(negcoexp_res.AD)
+        negcoexp_go_semsim.AD=append(negcoexp_go_semsim.AD,res3,after = length(negcoexp_go_semsim.AD))
+        i<-i+1
+        start<-i*blocksize+1
+        end<-min((i+1)*blocksize, length(negcoexp_network_genes.AD))
+      }
+      poscoexp_pval_vector[[r]][[w]][[ont]]=-log10(wilcox.test(x=poscoexp_go_semsim.normal,y=poscoexp_go_semsim.AD)$p.val)
+      negcoexp_pval_vector[[r]][[w]][[ont]]=-log10(wilcox.test(x=negcoexp_go_semsim.normal,y=negcoexp_go_semsim.AD)$p.val)
+    }
+  }
+}
+
+
+
+
 # df1=cbind(FP_PosCoexp_pval=poscoexp_pval_vector$FP,
 #           IFG_PosCoexp_pval=poscoexp_pval_vector$IFG,
 #           PHG_PosCoexp_pval=poscoexp_pval_vector$PHG,

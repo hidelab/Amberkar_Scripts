@@ -19,6 +19,8 @@ msbb_array19.files=list.files(pattern = "*.tsv",full.names = T)
 msbb_array19.files=msbb_array19.files[-c(18:19)]
 msbb_array19=mapply(FUN = read.table,msbb_array19.files,MoreArgs = list(header=T,sep="\t",as.is=T))
 names(msbb_array19)=c("AC","CN","DLPFC","FP","HP","IFG","ITG","MTG","OVC","PHG","PCC","PCG","PFC","PTMN","SPL","STG","TP")
+msbb_array19.2=lapply(msbb_array19,function(x){rownames(x)<-x$ID;x})
+msbb_array19.fingerprint=lapply(msbb_array19.2,exprs2fingerprint,platform = "GPL96",species = "human",progressBar = T)
 #Select regions that show known regions to be affected!!!
 #msbb_array19=msbb_array19[c("PHG","HP","AC","STG","SPL","DLPFC","OVC")]
 #msbb_array19.SampleperBrainRegion=list()
@@ -374,3 +376,14 @@ for (j in 1:length(names(msbb_array19.AggCorr))){
   dev.off()
 }
 # save(msbb_array19.AggCorr,file="msbb_array19_PathPrint_ContCorrAnalysis.RData")
+df_anno=vector(mode = 'list',length=17)
+names(df_anno)=names(msbb_array19)
+for(i in 1:17){
+  df_anno[[i]]=msbb_array19.covariates[msbb_array19.covariates$BrainBank%in%colnames(msbb_array19.SCE[[i]][msbb_array19.corr_PLQ_PP.IndicesPval005[[i]],]),c(7:12)]
+  rownames(df_anno[[i]])=colnames(msbb_array19.SCE[[i]][msbb_array19.corr_PLQ_PP.IndicesPval005[[i]],])
+}
+for (i in 1:17){
+  jpeg(filename = paste('Heatmap',names(msbb_array19.SCE)[i],'PLQ_PathPrint.jpg',sep = '_'),quality = 300,units = 'px',width = 1500,height = 1500)
+  pheatmap(msbb_array19.SCE[[i]],cluster_rows = T,clustering_distance_rows = 'euclidean',cluster_cols = T,clustering_distance_cols= 'euclidean',annotation = df_anno[[i]],main = paste(names(msbb_array19.SCE)[i],'PLQ_PathPrint',sep = '_'),height = 1500,width = 1500,cellheight = 10,cellwidth = 10)
+  dev.off()
+}

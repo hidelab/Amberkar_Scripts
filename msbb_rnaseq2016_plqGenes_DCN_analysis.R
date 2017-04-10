@@ -51,6 +51,7 @@ msbb_rnaseq2016_PLQ.DCN$FP=msbb_rnaseq2016_PLQ.DCN$IFG=msbb_rnaseq2016_PLQ.DCN$P
 names(msbb_rnaseq2016.DCN$FP)=names(msbb_rnaseq2016.DCN$IFG)=names(msbb_rnaseq2016.DCN$PHG)=names(msbb_rnaseq2016.DCN$STG)=c("Low","High")
 names(msbb_rnaseq2016_PLQ.DCN$FP)=names(msbb_rnaseq2016_PLQ.DCN$IFG)=names(msbb_rnaseq2016_PLQ.DCN$PHG)=names(msbb_rnaseq2016_PLQ.DCN$STG)=c("Low","High")
 
+msmm_rnaseq_PLQgenes_coexp_adjMatrix=readRDS('msmm_rnaseq_PLQgenes_coexp_adjMatrix.RDS')
 msbb_rnaseq2016.DCN$FP=readRDS("FP/DCN/FP_DCN_FDR01.RDS")
 msbb_rnaseq2016.DCN$IFG=readRDS("IFG/DCN/IFG_DCN_FDR01.RDS")
 msbb_rnaseq2016.DCN$PHG=readRDS("PHG/DCN/PHG_DCN_FDR01.RDS")
@@ -59,6 +60,12 @@ msbb_rnaseq2016_PLQ.DCN$FP=readRDS("FP/PLQ_DCN/FP_PLQGenes_FDR01.DCN.RDS")
 msbb_rnaseq2016_PLQ.DCN$IFG=readRDS("IFG/PLQ_DCN/IFG_PLQGenes_FDR01.DCN.RDS")
 msbb_rnaseq2016_PLQ.DCN$PHG=readRDS("PHG/PLQ_DCN/PHG_PLQGenes_FDR01.DCN.RDS")
 msbb_rnaseq2016_PLQ.DCN$STG=readRDS("STG/PLQ_DCN/STG_PLQGenes_FDR01.DCN.RDS")
+#Write DCNs in graph format
+for (t in 1:4){
+  for (p in 1:2){
+    write.graph(graph = msbb_rnaseq2016_PLQ.DCN[[t]][[p]],file = paste(names(msbb_rnaseq2016_PLQ.DCN)[t],names(msbb_rnaseq2016_PLQ.DCN[[t]])[p],'PLQ_DCN.gml',sep = "_"),format = 'gml')
+  }
+}
 
 msbb_rnaseq2016_FP_uniq_rewired=RewiredUniqueGenes(dcn = msbb_rnaseq2016.DCN$FP,posThreshold = 1.5,negThreshold = 0.5)
 msbb_rnaseq2016_IFG_uniq_rewired=RewiredUniqueGenes(dcn = msbb_rnaseq2016.DCN$IFG,posThreshold = 1.5,negThreshold = 0.5)
@@ -66,7 +73,7 @@ msbb_rnaseq2016_PHG_uniq_rewired=RewiredUniqueGenes(dcn = msbb_rnaseq2016.DCN$PH
 msbb_rnaseq2016_STG_uniq_rewired=RewiredUniqueGenes(dcn = msbb_rnaseq2016.DCN$STG,posThreshold = 1.5,negThreshold = 0.5)
 
 msbb_rnaseq2016_PLQ.PosCoexp=msbb_rnaseq2016_PLQ.NegCoexp=msbb_rnaseq2016_PLQGenes_PosCoexp.rewiredDF=msbb_rnaseq2016_PLQGenes_NegCoexp.rewiredDF=msbb_rnaseq2016_PLQGenes=vector(mode = "list",length = 4)
-names(msbb_rnaseq2016_PLQGenes)=names(msbb_rnaseq2016_PLQ.PosCoexp)=names(msbb_rnaseq2016_PLQ.NegCoexp)=names(msbb_rnaseq2016_PLQGenes_PosCoexp.rewiredDF)=names(msbb_rnaseq2016_PLQGenes_NegCoexp.rewiredDF)=names(msbb_rnaseq2016_PLQGenes.cluster)
+names(msbb_rnaseq2016_PLQGenes)=names(msbb_rnaseq2016_PLQ.PosCoexp)=names(msbb_rnaseq2016_PLQ.NegCoexp)=names(msbb_rnaseq2016_PLQGenes_PosCoexp.rewiredDF)=names(msbb_rnaseq2016_PLQGenes_NegCoexp.rewiredDF)=c('FP','IFG','PHG','STG')
 msbb_rnaseq2016_PLQ.PosCoexp$FP=msbb_rnaseq2016_PLQ.PosCoexp$IFG=msbb_rnaseq2016_PLQ.PosCoexp$PHG=msbb_rnaseq2016_PLQ.PosCoexp$STG=vector(mode = "list",length = 2)
 msbb_rnaseq2016_PLQ.NegCoexp$FP=msbb_rnaseq2016_PLQ.NegCoexp$IFG=msbb_rnaseq2016_PLQ.NegCoexp$PHG=msbb_rnaseq2016_PLQ.NegCoexp$STG=vector(mode = "list",length = 2)
 names(msbb_rnaseq2016_PLQ.PosCoexp$FP)=names(msbb_rnaseq2016_PLQ.NegCoexp$FP)=c("Low","High")
@@ -414,7 +421,7 @@ PLQ_Diff_Rewiring=list(FP_PLQ_PosCoexp_Gain=msbb_rnaseq2016_AllAnalyses$FP$PLQ_P
                        STG_PLQ_NegCoexp_Loss=msbb_rnaseq2016_AllAnalyses$STG$PLQ_NegCoexp_Loss)
 
 #Cell-type marker analysis
-zhang_celltype_ADgenes=read.xls('../../../BrainExpression_Datasets/Zhang_19BrainRegions_Paper/13073_2016_355_MOESM1_ESM.xlsx',skip=1,,sheet=3,header=T,as.is=T)
+zhang_celltype_ADgenes=read.xls('../../../BrainExpression_Datasets/Zhang_19BrainRegions_Paper/Zhang_BrainCelltype_Markers.xlsx',skip=1,,sheet=3,header=T,as.is=T)
 zhang_celltype_ADgenes.list=zhang_celltype_PLQ_ADgenes.list=vector(mode = 'list',length = 5)
 names(zhang_celltype_ADgenes.list)=names(zhang_celltype_PLQ_ADgenes.list)=sort(unique(zhang_celltype_ADgenes$Cell.type))
 zhang_celltype_ADgenes.list$Astrocytes=zhang_celltype_ADgenes$Gene.symbol[grep(pattern = names(zhang_celltype_ADgenes.list)[1],zhang_celltype_ADgenes$Cell.type)]
@@ -509,7 +516,62 @@ for (i in 1:4){
     #colnames(msbb_dcn_edgeList[[i]][[j]])=c('LABEL1','LABEL2','WEIGHT')
     cat(paste('Writing edge list for brain region ',names(msbb_dcn_edgeList)[i],' and sample type ',names(msbb_dcn_edgeList[[i]])[j],'...\n',sep=''))
     write.table(msbb_dcn_edgeList[[i]][[j]],paste('msbb_dcn_',names(msbb_dcn_edgeList)[i],'_',names(msbb_dcn_edgeList[[i]])[j],'.txt',sep=''),sep = '\t',col.names = F,row.names = F)
+    cat(paste('Writing edge list for brain region ',names(msbb_dcn_edgeList)[i],' and sample type ',names(msbb_dcn_edgeList[[i]])[j],'...\n',sep=''))
     write.table(msbb_plq_dcn_edgeList[[i]][[j]],paste('msbb_dcn_',names(msbb_plq_dcn_edgeList)[i],'_',names(msbb_plq_dcn_edgeList[[i]])[j],'.txt',sep=''),sep = '\t',col.names = F,row.names = F)
   }
 }
 
+#Determine lost gene pairs for various cutoff thresholds
+#Test diff edge weight cutoff thresholds
+low_cutoffs=seq(from=-0.25+1,to=-0.5+1,by = -0.01)
+high_cutoffs=seq(from=0.25+1,to=0.5+1,by = 0.01)
+rewired_edges=rewired_degree=rewired_betweenness=vector(mode = 'list',length = 4)
+names(rewired_edges)=names(rewired_degree)=names(rewired_betweenness)=names(msbb_rnaseq2016_byRegion)
+rewired_edges$FP=rewired_edges$IFG=rewired_edges$PHG=rewired_edges$STG=vector(mode = 'list')
+rewired_degree$FP=rewired_degree$IFG=rewired_degree$PHG=rewired_degree$STG=vector(mode = 'list')
+rewired_betweenness$FP=rewired_betweenness$FP=rewired_betweenness$FP=rewired_betweenness$FP=vector(mode = 'list')
+names(rewired_edges$FP)=names(rewired_edges$IFG)=names(rewired_edges$PHG)=names(rewired_edges$STG)=high_cutoffs
+names(rewired_degree$FP)=names(rewired_degree$IFG)=names(rewired_degree$PHG)=names(rewired_degree$STG)=high_cutoffs
+names(rewired_betweenness$FP)=names(rewired_betweenness$IFG)=names(rewired_betweenness$PHG)=names(rewired_betweenness$STG)=high_cutoffs
+for (t in 1:4){
+  for (c in 1:length(high_cutoffs)){
+    msbb_rnaseq2016_PLQ.PosCoexp[[t]]$Low=graph.data.frame(d=data.frame(ends(graph = msbb_rnaseq2016_PLQ.DCN[[t]]$Low,es = which(E(msbb_rnaseq2016_PLQ.DCN[[t]]$Low)$weight>high_cutoffs[c]),names = T)),directed = F)
+    E(msbb_rnaseq2016_PLQ.PosCoexp[[t]]$Low)$weight=E(msbb_rnaseq2016_PLQ.DCN[[t]]$Low)$weight[which(E(msbb_rnaseq2016_PLQ.DCN[[t]]$Low)$weight>high_cutoffs[c])]
+    
+    msbb_rnaseq2016_PLQ.PosCoexp[[t]]$High=graph.data.frame(d=data.frame(ends(graph = msbb_rnaseq2016_PLQ.DCN[[t]]$High,es = which(E(msbb_rnaseq2016_PLQ.DCN[[t]]$High)$weight>high_cutoffs[c]),names = T)),directed = F)
+    E(msbb_rnaseq2016_PLQ.PosCoexp[[t]]$High)$weight=E(msbb_rnaseq2016_PLQ.DCN[[t]]$High)$weight[which(E(msbb_rnaseq2016_PLQ.DCN[[t]]$High)$weight>high_cutoffs[c])]
+    msbb_rnaseq2016_PLQGenes_PosCoexp.rewiredDF[[t]]=data.frame(Common_Genes=intersect(V(msbb_rnaseq2016_PLQ.PosCoexp[[t]]$Low)$name,V(msbb_rnaseq2016_PLQ.PosCoexp[[t]]$High)$name),
+                                                                Low=degree(graph = msbb_rnaseq2016_PLQ.PosCoexp[[t]]$Low,v = intersect(V(msbb_rnaseq2016_PLQ.PosCoexp[[t]]$Low)$name,V(msbb_rnaseq2016_PLQ.PosCoexp[[t]]$High)$name)),
+                                                                High=degree(graph = msbb_rnaseq2016_PLQ.PosCoexp[[t]]$High,v = intersect(V(msbb_rnaseq2016_PLQ.PosCoexp[[t]]$Low)$name,V(msbb_rnaseq2016_PLQ.PosCoexp[[t]]$High)$name)),
+                                                                Difference=degree(graph = msbb_rnaseq2016_PLQ.PosCoexp[[t]]$Low,v = intersect(V(msbb_rnaseq2016_PLQ.PosCoexp[[t]]$Low)$name,V(msbb_rnaseq2016_PLQ.PosCoexp[[t]]$High)$name))-degree(graph = msbb_rnaseq2016_PLQ.PosCoexp[[t]]$High,v = intersect(V(msbb_rnaseq2016_PLQ.PosCoexp[[t]]$Low)$name,V(msbb_rnaseq2016_PLQ.PosCoexp[[t]]$High)$name)),
+                                                                Difference_BWN=betweenness(graph = msbb_rnaseq2016_PLQ.PosCoexp[[t]]$Low,v = intersect(V(msbb_rnaseq2016_PLQ.PosCoexp[[t]]$Low)$name,V(msbb_rnaseq2016_PLQ.PosCoexp[[t]]$High)$name))-betweenness(graph = msbb_rnaseq2016_PLQ.PosCoexp[[t]]$High,v = intersect(V(msbb_rnaseq2016_PLQ.PosCoexp[[t]]$Low)$name,V(msbb_rnaseq2016_PLQ.PosCoexp[[t]]$High)$name)),stringsAsFactors = F)
+    msbb_rnaseq2016_PLQGenes_PosCoexp.rewiredDF[[t]]=msbb_rnaseq2016_PLQGenes_PosCoexp.rewiredDF[[t]][order(msbb_rnaseq2016_PLQGenes_PosCoexp.rewiredDF[[t]]$Difference,decreasing = T),]
+    rewired_edges[[t]][[c]]=length(E(msbb_rnaseq2016_PLQ.PosCoexp[[t]]$Low))-length(E(msbb_rnaseq2016_PLQ.PosCoexp[[t]]$High))
+    rewired_degree[[t]][[c]]=msbb_rnaseq2016_PLQGenes_PosCoexp.rewiredDF[[t]]$Difference[msbb_rnaseq2016_PLQGenes_PosCoexp.rewiredDF[[t]]$Difference>0]
+    rewired_betweenness[[t]][[c]]=msbb_rnaseq2016_PLQGenes_PosCoexp.rewiredDF[[t]]$Difference_BWN[msbb_rnaseq2016_PLQGenes_PosCoexp.rewiredDF[[t]]$Difference_BWN>0]
+  }  
+}
+
+rw_bwn_fp=data.frame(Cutoff_threshold=high_cutoffs-1,rw_betweenness=unname(unlist(lapply(rewired_betweenness$FP,sum))),stringsAsFactors = F)
+rw_deg_fp=data.frame(Cutoff_threshold=high_cutoffs-1,rw_degree=unname(unlist(lapply(rewired_degree$FP,sum))),stringsAsFactors = F)
+rw_edge_fp=data.frame(Cutoff_threshold=high_cutoffs-1,rw_edges=unlist(rewired_edges$FP),stringsAsFactors = F)
+g1=ggplot(rw_edge_fp,aes(x=Cutoff_threshold,y=rw_edges))+geom_point()+geom_smooth(method = 'loess')+ggtitle(label = 'Rewired Edges - FP',subtitle = '#rewired edges across edge cutoff thresholds')
+g2=ggplot(rw_deg_fp,aes(x=Cutoff_threshold,y=rw_degree))+geom_point()+geom_smooth(method = 'loess')+ggtitle(label = 'Rewired Degrees - FP',subtitle = '#rewired genes across edge cutoff thresholds')
+multiplot(g1,g2,cols=2)
+
+rw_bwn_ifg=data.frame(Cutoff_threshold=high_cutoffs-1,rw_betweenness=unname(unlist(lapply(rewired_betweenness$IFG,sum))),stringsAsFactors = F)
+rw_deg_ifg=data.frame(Cutoff_threshold=high_cutoffs-1,rw_degree=unname(unlist(lapply(rewired_degree$IFG,sum))),stringsAsFactors = F)
+rw_edge_ifg=data.frame(Cutoff_threshold=high_cutoffs-1,rw_edges=unlist(rewired_edges$IFG),stringsAsFactors = F)
+g3=ggplot(rw_edge_ifg,aes(x=Cutoff_threshold,y=rw_edges))+geom_point()+geom_smooth(method = 'loess')+ggtitle(label = 'Rewired Edges - IFG',subtitle = '#rewired edges across edge cutoff thresholds')
+g4=ggplot(rw_deg_ifg,aes(x=Cutoff_threshold,y=rw_degree))+geom_point()+geom_smooth(method = 'loess')+ggtitle(label = 'Rewired Degrees - IFG',subtitle = '#rewired genes across edge cutoff thresholds')
+multiplot(g3,g4,cols=2)
+
+rw_bwn_phg=data.frame(Cutoff_threshold=high_cutoffs-1,rw_betweenness=unname(unlist(lapply(rewired_betweenness$PHG,sum))),stringsAsFactors = F)
+rw_deg_phg=data.frame(Cutoff_threshold=high_cutoffs-1,rw_degree=unname(unlist(lapply(rewired_degree$PHG,sum))),stringsAsFactors = F)
+rw_edge_phg=data.frame(Cutoff_threshold=high_cutoffs-1,rw_edges=unlist(rewired_edges$PHG),stringsAsFactors = F)
+g5=ggplot(rw_edge_phg,aes(x=Cutoff_threshold,y=rw_edges))+geom_point()+geom_smooth(method = 'loess')+ggtitle(label = 'Rewired Edges - PHG',subtitle = '#rewired edges across edge cutoff thresholds')
+g6=ggplot(rw_deg_phg,aes(x=Cutoff_threshold,y=rw_degree))+geom_point()+geom_smooth(method = 'loess')+ggtitle(label = 'Rewired Degrees - PHG',subtitle = '#rewired genes across edge cutoff thresholds')
+multiplot(g5,g6,cols=2)
+
+
+rw=data.frame(Cutoff_threshold=high_cutoffs-1,Nr_RewiredEdges_FP=unlist(lapply(rewired_edges$FP,sum)),Nr_RewiredEdges_IFG=unlist(lapply(rewired_edges$IFG,sum)),Nr_RewiredEdges_PHG=unlist(lapply(rewired_edges$PHG,sum)),Nr_RewiredEdges_STG=unlist(lapply(rewired_edges$STG,sum)),stringsAsFactors = F)

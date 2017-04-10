@@ -3,11 +3,9 @@ library(data.table)
 require(parallel)
 library(org.Hs.eg.db)
 
-
 setwd("/shared/hidelab2/user/md4zsa/Work/Data/MSMM_RNAseq/MSMM_RNAseq_FinalRelease2/")
 #Read data and preprocess - remove unmapped/reseq samples
 msbb_rnaseq2016_data=read.table("AMP-AD_MSBB_MSSM_IlluminaHiSeq2500_normalized_counts_September_2016.txt",sep="\t",header = T,as.is = T)
-
 msbb_rnaseq_covariates=read.csv("MSBB_RNAseq_covariates.csv",header = T,as.is = T)
 msbb_rnaseq_clinical_covariates=read.csv("MSBB_clinical.csv",header = T,as.is = T)
 colnames(msbb_rnaseq2016_data)=unlist(lapply(strsplit(x = colnames(msbb_rnaseq2016_data),split = "X"),`[[`,2))
@@ -46,10 +44,10 @@ highPlaque_samples=lapply(msbb_rnaseq_covariates.merged_final,function(x)x$sampl
 #Read PLQ associated genes
 msbb_rnaseq2016_PLQGenes=vector(mode = "list",length = 4)
 names(msbb_rnaseq2016_PLQGenes)=names(msbb_rnaseq2016_byRegion)
-msbb_rnaseq2016_PLQGenes$FP=read.table("FP_allPLQ_AssocGenes.txt",sep = "\t",header = T,as.is = T)
-msbb_rnaseq2016_PLQGenes$IFG=read.table("IFG_allPLQ_AssocGenes.txt",sep = "\t",header = T,as.is = T)
-msbb_rnaseq2016_PLQGenes$PHG=read.table("PHG_allPLQ_AssocGenes.txt",sep = "\t",header = T,as.is = T)
-msbb_rnaseq2016_PLQGenes$STG=read.table("STG_allPLQ_AssocGenes.txt",sep = "\t",header = T,as.is = T)
+msbb_rnaseq2016_PLQGenes$FP=read.table("PLQ_Assoc_Genes/FP_allPLQ_AssocGenes.txt",sep = "\t",header = T,as.is = T)
+msbb_rnaseq2016_PLQGenes$IFG=read.table("PLQ_Assoc_Genes/IFG_allPLQ_AssocGenes.txt",sep = "\t",header = T,as.is = T)
+msbb_rnaseq2016_PLQGenes$PHG=read.table("PLQ_Assoc_Genes/PHG_allPLQ_AssocGenes.txt",sep = "\t",header = T,as.is = T)
+msbb_rnaseq2016_PLQGenes$STG=read.table("PLQ_Assoc_Genes/STG_allPLQ_AssocGenes.txt",sep = "\t",header = T,as.is = T)
 #Compute FDR for all regions
 msbb_rnaseq2016_PLQGenes_Rho.padj=lapply(msbb_rnaseq2016_PLQGenes,function(x)p.adjust(x$Rho.p,method="fdr"))
 msbb_rnaseq2016_PLQGenes$FP$Rho.padj=msbb_rnaseq2016_PLQGenes_Rho.padj$FP
@@ -97,13 +95,13 @@ ProcessElement <- function(ic){
   return(tmp)
 }
 
-msbb_rnaseq2016_byRegion.final_keep=lapply(msbb_rnaseq2016_byRegion,function(x)rowSums(x>0)>=ncol(x)/3)
+msbb_rnaseq2016_byRegion.final_keep=lapply(msbb_rnaseq2016_byRegion,function(x)x[rowSums(x>0)>=ncol(x)/3,])
 
 exprs_rank=vector(mode = "list",length = 4)
 names(exprs_rank)=names(msbb_rnaseq2016_byRegion)
 for (j in 1:4){
   
-  exprs_rank[[j]]=msbb_rnaseq2016_byRegion[[j]][msbb_rnaseq2016_byRegion.final_keep[[j]],]
+  exprs_rank[[j]]=msbb_rnaseq2016_byRegion.final_keep[[j]]
   exprs_rank[[j]]=exprs_rank[[j]][which(rownames(exprs_rank[[j]])%in%msbb_rnaseq2016_PLQGenes2[[j]]$Genes),]
   number_of_combinations<-choose(nrow(exprs_rank[[j]]),2)
   c_exprs_rank=exprs_rank[[j]][,which(colnames(exprs_rank[[j]])%in%unlist(lapply(strsplit(lowPlaque_samples[[j]],split="_"),`[[`,3)))]

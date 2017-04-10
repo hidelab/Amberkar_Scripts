@@ -20,16 +20,17 @@ msbb_rnaseq2016_data2.agg=aggregate(x=msbb_rnaseq2016_data2[,-1],by=list(geneSym
 rownames(msbb_rnaseq2016_data2.agg)=msbb_rnaseq2016_data2.agg$geneSymbol
 msbb_rnaseq2016_data2.agg=msbb_rnaseq2016_data2.agg[,-1]
 colnames(msbb_rnaseq2016_data2.agg)=gsub(pattern = "X",replacement = "",x = colnames(msbb_rnaseq2016_data2.agg))
+colnames(msbb_rnaseq2016_data2)=gsub(pattern = "X",replacement = "",x = colnames(msbb_rnaseq2016_data2))
 
 msbb_rnaseq_covariates.merged_final$FP=msbb_rnaseq_covariates.merged2[grep(pattern="BM10",msbb_rnaseq_covariates.merged2$BrodmannArea),]
 msbb_rnaseq_covariates.merged_final$IFG=msbb_rnaseq_covariates.merged2[grep(pattern="BM22",msbb_rnaseq_covariates.merged2$BrodmannArea),]
 msbb_rnaseq_covariates.merged_final$PHG=msbb_rnaseq_covariates.merged2[grep(pattern="BM36",msbb_rnaseq_covariates.merged2$BrodmannArea),]
 msbb_rnaseq_covariates.merged_final$STG=msbb_rnaseq_covariates.merged2[grep(pattern="BM44",msbb_rnaseq_covariates.merged2$BrodmannArea),]
 
-msbb_rnaseq2016_byRegion$FP=msbb_rnaseq2016_data2.agg[,which(colnames(msbb_rnaseq2016_data2.agg)%in%unlist(lapply(strsplit(x = msbb_rnaseq_covariates.merged2$sampleIdentifier[which(msbb_rnaseq_covariates.merged2$BrodmannArea=="BM10")],split = "_"),`[[`,3)))]
-msbb_rnaseq2016_byRegion$IFG=msbb_rnaseq2016_data2.agg[,which(colnames(msbb_rnaseq2016_data2.agg)%in%unlist(lapply(strsplit(x = msbb_rnaseq_covariates.merged2$sampleIdentifier[which(msbb_rnaseq_covariates.merged2$BrodmannArea=="BM44")],split = "_"),`[[`,3)))]
-msbb_rnaseq2016_byRegion$PHG=msbb_rnaseq2016_data2.agg[,which(colnames(msbb_rnaseq2016_data2.agg)%in%unlist(lapply(strsplit(x = msbb_rnaseq_covariates.merged2$sampleIdentifier[which(msbb_rnaseq_covariates.merged2$BrodmannArea=="BM36")],split = "_"),`[[`,3)))]
-msbb_rnaseq2016_byRegion$STG=msbb_rnaseq2016_data2.agg[,which(colnames(msbb_rnaseq2016_data2.agg)%in%unlist(lapply(strsplit(x = msbb_rnaseq_covariates.merged2$sampleIdentifier[which(msbb_rnaseq_covariates.merged2$BrodmannArea=="BM22")],split = "_"),`[[`,3)))]
+msbb_rnaseq2016_byRegion$FP=msbb_rnaseq2016_data2.agg[,which(colnames(msbb_rnaseq2016_data2.agg)%in%msbb_rnaseq_covariates.merged_final$FP$barcode)]
+msbb_rnaseq2016_byRegion$IFG=msbb_rnaseq2016_data2.agg[,which(colnames(msbb_rnaseq2016_data2.agg)%in%msbb_rnaseq_covariates.merged_final$IFG$barcode)]
+msbb_rnaseq2016_byRegion$PHG=msbb_rnaseq2016_data2.agg[,which(colnames(msbb_rnaseq2016_data2.agg)%in%msbb_rnaseq_covariates.merged_final$PHG$barcode)]
+msbb_rnaseq2016_byRegion$STG=msbb_rnaseq2016_data2.agg[,which(colnames(msbb_rnaseq2016_data2.agg)%in%msbb_rnaseq_covariates.merged_final$STG$barcode)]
 
 lowPlaque_samples=highPlaque_samples=vector(mode = "list",length = 4)
 names(lowPlaque_samples)=names(highPlaque_samples)=names(msbb_rnaseq2016_byRegion)
@@ -39,7 +40,7 @@ broadman_area=c("BM10","BM44","BM36","BM22")
 nc=12
 for (r in 1:length(broadman_area)){
 i=0
-blocksize=300
+blocksize=100
 blocks=round(length(rownames(msbb_rnaseq2016_byRegion[[r]]))/blocksize,digits = 0)
 start<-i*blocksize+1
 end<-min((i+1)*blocksize, length(rownames(msbb_rnaseq2016_byRegion[[r]])))
