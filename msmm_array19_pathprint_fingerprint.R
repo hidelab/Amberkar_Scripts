@@ -1,0 +1,43 @@
+library(limma)
+library(Biobase)
+library(jetset)
+library(pathprint)
+library(metaArray)
+library(doMC)
+library(pheatmap)
+library(entropy)
+library(Rarity)
+setwd("/shared/hidelab2/user/md4zsa/Work/Data/MSMM_Array/MSBB_Array19/Normalised_Data")
+remove_ZeroSumPathways=function(x,y)list(x[-y,])
+msbb_array19.files=list.files(pattern = "*.tsv",full.names = T)
+msbb_array19.files=msbb_array19.files[-c(18:19)]
+msbb_array19=mapply(FUN = read.table,msbb_array19.files,MoreArgs = list(header=T,sep="\t",as.is=T))
+names(msbb_array19)=c("AC","CN","DLPFC","FP","HP","IFG","ITG","MTG","OVC","PHG","PCC","PCG","PFC","PTMN","SPL","STG","TP")
+msbb_array19.2=lapply(msbb_array19,function(x){rownames(x)<-x$ID;x})
+msbb_array19.fingerprint=lapply(lapply(msbb_array19.2,function(x)x[,-c(1:4)]),exprs2fingerprint,platform = "GPL96",species = "human",progressBar = T)
+msbb_array19_fingerprint.noZeromSumPathways=mapply(remove_ZeroSumPathways,msbb_array19.fingerprint,msbb_array19_fingerprint.ZeroSumPathways)
+msbb_array19_fingerprint.HighEntropy05_Indices=lapply(lapply(msbb_array19_fingerprint.noZeromSumPathways,getEntropy,1),function(x)unname(which(x>0.25)))
+msbb_array19_fingerprint.HighEntropy05_Fingerprint=mapply(FUN = function(x,y)x[y,],msbb_array19_fingerprint.noZeromSumPathways,msbb_array19_fingerprint.HighEntropy05_Indices)
+msbb_array19_fingerprint_HighEntropy05_Fingerprint.Core=Reduce(intersect,lapply(msbb_array19_fingerprint.HighEntropy05_Fingerprint,rownames))
+msbb_array19_fingerprint_HighEntropy05.CoreFingerprint=lapply(msbb_array19_fingerprint.HighEntropy05_Fingerprint,function(x)x[which(rownames(x)%in%msbb_array19_fingerprint_HighEntropy05_Fingerprint.Core),])
+CoreFingerprint.df=data.frame(msbb_array19_fingerprint_HighEntropy05.CoreFingerprint,stringsAsFactors = F)
+msbb_array19.corr_PLQ_PP_SigPathways=mapply(FUN = function(x,y)x[y,1],msbb_array19.corr_PLQ_PP,msbb_array19.corr_PLQ_PP.IndicesPval005)
+msbb_PLQ_PP_CoreFingerprint_Overlap=data.frame(BrainRegion=names(lapply(lapply(msbb_array19.corr_PLQ_PP_SigPathways,intersect,rownames(CoreFingerprint.df)),length)),OverlapPathways=as.numeric(unlist(unname(lapply(lapply(msbb_array19.corr_PLQ_PP_SigPathways,intersect,rownames(CoreFingerprint.df)),length)))),stringsAsFactors = F)
+
+msbb_array19.HighPLQ_Samples=lapply(msbb_array19_fingerprint_HighEntropy05.CoreFingerprint,function(x)colnames(x)[which(colnames(x)%in%msbb_array19.covariates$BrainBank[which(msbb_array19.covariates$PLQ_Mn>15)])])
+msbb_array19_fingerprint_HighEntropy05.CoreFingerprint_HighPLQ=mapply(FUN = function(x,y)x[,y],msbb_array19_fingerprint_HighEntropy05.CoreFingerprint,msbb_array19.HighPLQ_Samples)
+HighPLQ_CoreFingerprint.df=data.frame(msbb_array19_fingerprint_HighEntropy05.CoreFingerprint_HighPLQ,stringsAsFactors = F)
+
+msbb_array19.LowPLQ_Samples=lapply(msbb_array19_fingerprint_HighEntropy05.CoreFingerprint,function(x)colnames(x)[which(colnames(x)%in%msbb_array19.covariates$BrainBank[which(msbb_array19.covariates$PLQ_Mn<1)])])
+msbb_array19_fingerprint_HighEntropy05.CoreFingerprint_LowPLQ=mapply(FUN = function(x,y)x[,y],msbb_array19_fingerprint_HighEntropy05.CoreFingerprint,msbb_array19.LowPLQ_Samples)
+LowPLQ_CoreFingerprint.df=data.frame(msbb_array19_fingerprint_HighEntropy05.CoreFingerprint_LowPLQ,stringsAsFactors = F)
+
+anno_df=data.frame(BrainRegion=unlist(lapply(strsplit(x = colnames(CoreFingerprint.df),split = "\\."),`[[`,1)),stringsAsFactors = F)
+anno_df2=data.frame(BrainRegion=unlist(lapply(strsplit(x = colnames(HighPLQ_CoreFingerprint.df),split = "\\."),`[[`,1)),stringsAsFactors = F)
+anno_df3=data.frame(BrainRegion=unlist(lapply(strsplit(x = colnames(LowPLQ_CoreFingerprint.df),split = "\\."),`[[`,1)),stringsAsFactors = F)
+rownames(anno_df)=colnames(CoreFingerprint.df)
+rownames(anno_df2)=colnames(HighPLQ_CoreFingerprint.df)
+rownames(anno_df3)=colnames(LowPLQ_CoreFingerprint.df)
+
+#PathPrint on PLQ bins
+
