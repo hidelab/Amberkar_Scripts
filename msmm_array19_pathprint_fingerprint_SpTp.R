@@ -1,5 +1,4 @@
 library(pathprint)
-library(pheatmap)
 library(org.Hs.eg.db)
 library(entropy)
 

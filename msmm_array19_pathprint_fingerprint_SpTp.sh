@@ -2,9 +2,9 @@
 #Job time 
 #-l h_rt=96:00:00 
 #Request resources 
-#-l rmem=8G 
+#-l rmem=12G 
 #Cores 
-#$ -pe openmp 16 
+#$ -pe openmp 8 
 #Job Name 
 #-N MSBB_SpTp
 module load dev/intel-compilers/17.0.0
