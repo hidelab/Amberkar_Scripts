@@ -117,6 +117,8 @@ for(i in 1:633){
     
   }
 }
+saveRDS(msbb_array19_BrainRegion.SCE,"msbb_array19_BrainRegion_SCE.RDS")
+saveRDS(msbb_array19_BrainRegion.diffPathways,"msbb_array19_BrainRegion_diffPathways.RDS")
 #length(plq_mean_values)
 ns=c(37,38,69,72,75,81,5,13,15,23,83,89,46,47,68,78,80,76)
 msbb_array19_SpTp.SCE=vector(mode = "list",length = length(names(plq_mean_values[-ns])))
@@ -133,6 +135,7 @@ for(i in as.numeric(names(msbb_array19_SpTp.SCE))){
   }
   
 }
+saveRDS(msbb_array19_SpTp.SCE,"msbb_array19_SpTp_SCE.RDS")
 
 
 
