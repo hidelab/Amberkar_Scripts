@@ -2,6 +2,8 @@ library(org.Hs.eg.db)
 library(data.table)
 
 #Read PPI data, Irefindex v14.0 (http://irefindex.org/wiki/index.php?title=README_MITAB2.6_for_iRefIndex)
+#PPI data has been filtered for duplicates, non-human PPI and interactions without a curated gene ID
+setwd("/shared/hidelab2/shared/")
 hs_ppi_table=fread('iref14_Human_UP_noDup_table.txt',sep = '\t',header = T,data.table = T,showProgress = T)
 #Remove isoforms and collapse to gene level
 hs_ppi.Isoform_A=grep(pattern = '-',x = hs_ppi_table$V1,value = F)
