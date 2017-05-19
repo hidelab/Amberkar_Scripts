@@ -1,5 +1,6 @@
 library(org.Hs.eg.db)
 library(data.table)
+library(igraph)
 
 #Read PPI data, Irefindex v14.0 (http://irefindex.org/wiki/index.php?title=README_MITAB2.6_for_iRefIndex)
 #PPI data has been filtered for duplicates, non-human PPI and interactions without a curated gene ID
