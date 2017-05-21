@@ -3,6 +3,7 @@ library(parallel)
 library(cocor)
 library(org.Hs.eg.db)
 library(igraph)
+library(gtools)
 
 setwd("/shared/hidelab2/user/md4zsa/Work/Data/AMP-AD_RNAseq_ReSeq/Normalised_covariate_corrected_NoResiduals")
 mayo_reseq_data=fread("MAYO/MAYO_CBE_TCX_netResidualExpression.tsv",sep="\t",header=T,data.table=F)
@@ -41,8 +42,8 @@ ProcessElement <- function(ic){
   
   # get correlation between the summaries for the unique genes
   tmp = data.frame(Gene.A=gene.names[A],Gene.B=gene.names[B])
-  c_cortest<-cor.test(unname(unlist(c_A)), unname(unlist(c_B)), method="pearson")
-  t_cortest<-cor.test(unname(unlist(t_A)), unname(unlist(t_B)), method="pearson")
+  c_cortest<-cor.test(unname(unlist(c_A)), unname(unlist(c_B)), method="spearman")
+  t_cortest<-cor.test(unname(unlist(t_A)), unname(unlist(t_B)), method="spearman")
   rc<-unname(cor.test(unlist(c_A),unlist(c_B))$estimate)
   rt<-unname(cor.test(unlist(t_A),unlist(t_B))$estimate)
   # diffcor<-cocor.indep.groups(rc, rt, n.c, n.t)
@@ -98,3 +99,20 @@ for(t in 1:2){
 }
   cat(paste("Done!"))
 }
+
+setwd("/shared/hidelab2/user/md4zsa/Work/Data/AMP-AD_RNAseq_ReSeq/Normalised_covariate_corrected_NoResiduals/MAYO/results")
+system("awk 'FNR==1 && NR!=1 { while (/^<header>/) getline; }    1 {print}' mayo_reseq_CER*.txt >MAYO_ReSeq_CER_DiffCorr_Results.txt")
+system("awk 'FNR==1 && NR!=1 { while (/^<header>/) getline; }    1 {print}' mayo_reseq_TCX*.txt >MAYO_ReSeq_TCX_DiffCorr_Results.txt")
+allResults_CER=fread("MAYO_ReSeq_CER_DiffCorr_Results.txt",sep = "\t",header = T,data.table = T,showProgress = T)
+allResults_TCX=fread("MAYO_ReSeq_TCX_DiffCorr_Results.txt",sep = "\t",header = T,data.table = T,showProgress = T)
+allResults_CER$FDR=p.adjust(p = allResults_CER$p.cocor,method = "fdr")
+allResults_CER$FDR.c=p.adjust(p = allResults_CER$p.c,method = "fdr")
+allResults_CER$FDR.t=p.adjust(p = allResults_CER$p.t,method = "fdr")
+allResults_TCX$FDR=p.adjust(p = allResults_TCX$p.cocor,method = "fdr")
+allResults_TCX$FDR.c=p.adjust(p = allResults_TCX$p.c,method = "fdr")
+allResults_TCX$FDR.t=p.adjust(p = allResults_TCX$p.t,method = "fdr")
+
+
+fwrite(allResults_CER,"MAYO_ReSeq_CER_DiffCorr_Results_FDR.txt",sep="\t",col.names = T,row.names = F,nThread = 12,buffMB = 100,showProgress = T)
+fwrite(allResults_TCX,"MAYO_ReSeq_TCX_DiffCorr_Results_FDR.txt",sep="\t",col.names = T,row.names = F,nThread = 12,buffMB = 100,showProgress = T)
+
