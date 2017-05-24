@@ -59,7 +59,7 @@ i<-0
 blocksize=100000
 start<-i*blocksize+1
 end<-min((i+1)*blocksize, number_of_combinations)
-
+setwd("./MSMM/results_PHG")
 #str(Reduce(intersect,lapply(lapply(exprs_rank,function(x)x[which((rowSums(x>0)>=ncol(x)/3)==T),]),rownames)))
 while(start < number_of_combinations){
   input<-start:end
@@ -73,12 +73,12 @@ while(start < number_of_combinations){
   result <- as.data.frame(result)
   result <- data.frame(result,stringsAsFactors = F)
   #Write results, use fwrite instead of write.table for faster processing
-  fwrite(result, file=paste("results_PHG/mssm_reseq_PHG_cocor_tmp", i, ".txt",sep = ""), sep="\t",col.names = T,row.names = F,buffMB = 100,nThread = 16,quote = F)
+  fwrite(result, file=paste("mssm_reseq_PHG_cocor_tmp", i, ".txt",sep = ""), sep="\t",col.names = T,row.names = F,buffMB = 100,nThread = 16,quote = F)
   i<-i+1
   start<-i*blocksize+1
   end<-min((i+1)*blocksize, number_of_combinations)
 }
-setwd("./MSMM/results_PHG")
+
 #Remove headers from tmp files and combine in a single one
 system(paste("find . -name '*.txt'|grep 'tmp'|xargs -n 1 tail -n +2 ",paste(">MSMM_ReSeq_PHG",sep = "_",collapse = "_"),"_allResults_DiffCorr.txt",sep = ""))
 allResults_FDR=fread(input = list.files(pattern = "*allResults_DiffCorr.txt"),sep = "\t",header = F,showProgress = T,data.table = F,strip.white = T,stringsAsFactors = F)
