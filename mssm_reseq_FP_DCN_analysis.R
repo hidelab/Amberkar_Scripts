@@ -54,7 +54,7 @@ t_exprs_rank=msmm_data[,which(colnames(msmm_data)%in%msmm_reseq_design_matrix$Sa
 n.c<-ncol(c_exprs_rank)
 n.t<-ncol(t_exprs_rank)
 gene.names<-rownames(msmm_data)
-dir.create("results_FP",showWarnings = T,mode = "0777")
+dir.create("./MSMM/results_FP",showWarnings = T,mode = "0777")
 i<-0
 blocksize=100000
 start<-i*blocksize+1
@@ -78,7 +78,7 @@ while(start < number_of_combinations){
   start<-i*blocksize+1
   end<-min((i+1)*blocksize, number_of_combinations)
 }
-setwd("./MSMM/results_FP/")
+setwd("./MSMM/results_FP")
 #Remove headers from tmp files and combine in a single one
 system(paste("find . -name '*.txt'|grep 'tmp'|xargs -n 1 tail -n +2 ",paste(">MSMM_ReSeq_FP",sep = "_",collapse = "_"),"_allResults_DiffCorr.txt",sep = ""))
 allResults_FDR=fread(input = list.files(pattern = "*allResults_DiffCorr.txt"),sep = "\t",header = F,showProgress = T,data.table = F,strip.white = T,stringsAsFactors = F)

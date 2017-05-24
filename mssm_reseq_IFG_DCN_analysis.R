@@ -78,7 +78,7 @@ while(start < number_of_combinations){
   start<-i*blocksize+1
   end<-min((i+1)*blocksize, number_of_combinations)
 }
-setwd("results_IFG/")
+setwd("/MSMM/results_IFG")
 #Remove headers from tmp files and combine in a single one
 system(paste("find . -name '*.txt'|grep 'tmp'|xargs -n 1 tail -n +2 ",paste(">MSMM_ReSeq_IFG",sep = "_",collapse = "_"),"_allResults_DiffCorr.txt",sep = ""))
 allResults_FDR=fread(input = list.files(pattern = "*allResults_DiffCorr.txt"),sep = "\t",header = F,showProgress = T,data.table = F,strip.white = T,stringsAsFactors = F)
