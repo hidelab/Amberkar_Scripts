@@ -4,7 +4,6 @@ library(parallel)
 library(data.table)
 
 ncore = detectCores()
-blocksize=100000
 ProcessElement <- function(ic){
   A = ceiling((sqrt(8*(ic+1)-7)+1)/2)
   B = ic-choose(floor(1/2+sqrt(2*ic)),2)
@@ -55,9 +54,9 @@ t_exprs_rank=msmm_data[,which(colnames(msmm_data)%in%msmm_reseq_design_matrix$Sa
 n.c<-ncol(c_exprs_rank)
 n.t<-ncol(t_exprs_rank)
 gene.names<-rownames(msmm_data)
-dir.create("results_PHG",showWarnings = T,mode = "0777")
+dir.create("./MSMM/results_PHG",showWarnings = T,mode = "0777")
 i<-0
-blocksize=50
+blocksize=100000
 start<-i*blocksize+1
 end<-min((i+1)*blocksize, number_of_combinations)
 

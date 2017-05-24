@@ -4,7 +4,6 @@ library(parallel)
 library(data.table)
 
 ncore = detectCores()
-blocksize=100000
 ProcessElement <- function(ic){
   A = ceiling((sqrt(8*(ic+1)-7)+1)/2)
   B = ic-choose(floor(1/2+sqrt(2*ic)),2)
@@ -57,7 +56,7 @@ n.t<-ncol(t_exprs_rank)
 gene.names<-rownames(msmm_data)
 dir.create("results_FP",showWarnings = T,mode = "0777")
 i<-0
-blocksize=50
+blocksize=100000
 start<-i*blocksize+1
 end<-min((i+1)*blocksize, number_of_combinations)
 
@@ -79,7 +78,7 @@ while(start < number_of_combinations){
   start<-i*blocksize+1
   end<-min((i+1)*blocksize, number_of_combinations)
 }
-setwd("results_FP/")
+setwd("./MSMM/results_FP/")
 #Remove headers from tmp files and combine in a single one
 system(paste("find . -name '*.txt'|grep 'tmp'|xargs -n 1 tail -n +2 ",paste(">MSMM_ReSeq_FP",sep = "_",collapse = "_"),"_allResults_DiffCorr.txt",sep = ""))
 allResults_FDR=fread(input = list.files(pattern = "*allResults_DiffCorr.txt"),sep = "\t",header = F,showProgress = T,data.table = F,strip.white = T,stringsAsFactors = F)
