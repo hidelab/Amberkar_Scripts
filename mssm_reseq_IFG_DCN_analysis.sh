@@ -2,7 +2,7 @@
 #Job time 
 #-l h_rt=120:00:00 
 #Request resources 
-#-l rmem=16G 
+#-l rmem=12G 
 #Cores 
 #$ -pe openmp 8 
 #Job Name 
