@@ -7,6 +7,6 @@
 #$ -pe openmp 8 
 #Job Name 
 #-N MSMM_ReSeq_FP_DCN
-module load module load apps/R/3.3.1
-module load module load compilers/gcc/6.2
+module load apps/R/3.4.0/intel-17.0-parallel
+module load dev/intel-compilers/17.0.0
 R CMD BATCH --no-save --no-restore /shared/hidelab2/user/md4zsa/Work/Amberkar_Scripts/mssm_reseq_FP_DCN_analysis.R
