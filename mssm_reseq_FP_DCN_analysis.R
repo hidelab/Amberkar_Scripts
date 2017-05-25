@@ -57,12 +57,12 @@ gene.names<-rownames(msmm_data)
 dir.create("./MSMM/results_FP",showWarnings = T,mode = "0777")
 #setwd("./MSMM/results_FP")
 i<-0
-blocksize=100
+blocksize=100000
 start<-i*blocksize+1
 end<-min((i+1)*blocksize, number_of_combinations)
 
 #str(Reduce(intersect,lapply(lapply(exprs_rank,function(x)x[which((rowSums(x>0)>=ncol(x)/3)==T),]),rownames)))
-while(start < 1000){
+while(start < number_of_combinations){
   input<-start:end
   pb = txtProgressBar(min=0,max=length(input),style=3,initial=0)
   cat("\n")
