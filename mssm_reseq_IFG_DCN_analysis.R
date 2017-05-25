@@ -59,7 +59,7 @@ i<-0
 blocksize=100000
 start<-i*blocksize+1
 end<-min((i+1)*blocksize, number_of_combinations)
-setwd("./MSMM/results_IFG")
+
 #str(Reduce(intersect,lapply(lapply(exprs_rank,function(x)x[which((rowSums(x>0)>=ncol(x)/3)==T),]),rownames)))
 while(start < number_of_combinations){
   input<-start:end
