@@ -63,7 +63,7 @@ ProcessElement <- function(ic){
   setTxtProgressBar(pb,ic %% blocksize)
   return(tmp)
 }
-for(t in 1:2){
+for(t in 2:2){
   exprs_rank=mayo_reseq_data.final_keep[[t]]
   number_of_combinations<-choose(nrow(exprs_rank),2)
   Control_samples=grep("Control",colnames(mayo_reseq_data.final_keep[[t]]))
@@ -74,7 +74,7 @@ for(t in 1:2){
   n.t<-ncol(t_exprs_rank)
   gene.names<-rownames(exprs_rank)
 
-  i<-770
+  i<-0
   start<-i*blocksize+1
   end<-min((i+1)*blocksize, number_of_combinations)
 
