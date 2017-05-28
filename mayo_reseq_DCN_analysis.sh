@@ -4,7 +4,7 @@
 #Request resources 
 #-l rmem=12G 
 #Cores 
-#$ -pe openmp 8 
+#$ -pe openmp 12 
 #Job Name 
 #-N MAYO_ReSeq_DCN
 module load apps/R/3.3.1
