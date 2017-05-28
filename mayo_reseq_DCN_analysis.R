@@ -74,7 +74,7 @@ for(t in 2:2){
   n.t<-ncol(t_exprs_rank)
   gene.names<-rownames(exprs_rank)
 
-  i<-306
+  i<-543
   start<-i*blocksize+1
   end<-min((i+1)*blocksize, number_of_combinations)
 
