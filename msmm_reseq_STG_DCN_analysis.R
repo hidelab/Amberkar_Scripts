@@ -53,7 +53,7 @@ n.c<-ncol(c_exprs_rank)
 n.t<-ncol(t_exprs_rank)
 gene.names<-rownames(msmm_data)
 dir.create("./MSMM/results_STG",showWarnings = T,mode = "0777")
-i<-442
+i<-857
 blocksize=100000
 start<-i*blocksize+1
 end<-min((i+1)*blocksize, number_of_combinations)
