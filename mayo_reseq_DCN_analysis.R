@@ -34,36 +34,43 @@ ProcessElement <- function(ic){
   A = ceiling((sqrt(8*(ic+1)-7)+1)/2)
   B = ic-choose(floor(1/2+sqrt(2*ic)),2)
   
-  c_A = c_exprs_rank[A,]
-  c_B = c_exprs_rank[B,]
+  c_A = as.numeric(c_counts[A,])
+  c_B = as.numeric(c_counts[B,])
   
-  t_A = t_exprs_rank[A,]
-  t_B = t_exprs_rank[B,]
+  t_A = as.numeric(t_counts[A,])
+  t_B = as.numeric(t_counts[B,])
   
   # get correlation between the summaries for the unique genes
-  tmp = data.frame(Gene.A=gene.names[A],Gene.B=gene.names[B])
-  c_cortest<-cor.test(unname(unlist(c_A)), unname(unlist(c_B)), method="spearman")
-  t_cortest<-cor.test(unname(unlist(t_A)), unname(unlist(t_B)), method="spearman")
-  rc<-unname(cor.test(unlist(c_A),unlist(c_B))$estimate)
-  rt<-unname(cor.test(unlist(t_A),unlist(t_B))$estimate)
-  # diffcor<-cocor.indep.groups(rc, rt, n.c, n.t)
-  tmp$r.c<-rc
-  tmp$p.c<-c_cortest$p.value
-  tmp$n.c<-n.c
-  tmp$r.t<-rt
-  tmp$p.t<-t_cortest$p.value
-  tmp$n.t<-n.t
-  tmp$p.cocor<-NA
-  tmp$abs.corr.change<-abs(rt-rc)
+  tmp = data.frame(IC= ic, Gene.A=gene.names[A], Gene.B=gene.names[B], r.c=NA, p.c=NA, n.c=NA, r.t=NA, p.t=NA, n.t=NA, p.cocor=NA)
+  #if( (var(c_A) * var(c_B))!=0)
+  tmp$n.c<-sum(!is.na(c_A + c_B))
+  if (tmp$n.c >=10)
+  {
+    c_cortest<-cor.test(c_A, c_B, method="spearman")
+    tmp$r.c<-c_cortest$estimate
+    tmp$p.c<-c_cortest$p.value
+  }
+  
+  #if( (var(t_A) * var(t_B))!=0)
+  tmp$n.t<-sum(!is.na(t_A + t_B))
+  if(tmp$n.t >=10)
+  {
+    t_cortest<-cor.test(t_A, t_B, method="spearman")
+    tmp$r.t<-t_cortest$estimate
+    tmp$p.t<-t_cortest$p.value
+  }
+  
   if ( (!is.na(tmp$r.c)) && (!is.na(tmp$r.t)) )
   {
     diffcor<-cocor.indep.groups(tmp$r.c, tmp$r.t, tmp$n.c, tmp$n.t)
     tmp$p.cocor<-diffcor@fisher1925$p.value
   }
+  
+  #setTxtProgressBar(pb,ic %% n_part)
   setTxtProgressBar(pb,ic %% blocksize)
   return(tmp)
 }
-for(t in 2:2){
+for(t in 1:2){
   exprs_rank=mayo_reseq_data.final_keep[[t]]
   number_of_combinations<-choose(nrow(exprs_rank),2)
   Control_samples=grep("Control",colnames(mayo_reseq_data.final_keep[[t]]))
@@ -74,7 +81,7 @@ for(t in 2:2){
   n.t<-ncol(t_exprs_rank)
   gene.names<-rownames(exprs_rank)
 
-  i<-543
+  i<-0
   start<-i*blocksize+1
   end<-min((i+1)*blocksize, number_of_combinations)
 
