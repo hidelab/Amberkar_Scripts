@@ -48,15 +48,14 @@ ProcessElement <- function(ic){
 setwd("/shared/hidelab2/user/md4zsa/Work/Data/AMP-AD_RNAseq_ReSeq/Normalised_covariate_corrected_NoResiduals")
 msmm_data=fread("./MSMM/MSSM_FP_STG_PHG_IFG_netResidualExpression.tsv",sep="\t",header=T,data.table=F,showProgress=T)
 rownames(msmm_data)=msmm_data$ensembl_gene_id
-ensembl_geneSymbol_map=mapIds2(IDs = gene.names,IDFrom = "ENSEMBL",IDTo = "SYMBOL")
-msmm_data2=msmm_data[-which(rownames(msmm_data)%in%mapIds2(IDs = gene.names,IDFrom = "ENSEMBL",IDTo = "SYMBOL")[[2]]),]
+ensembl_geneSymbol_map=mapIds2(IDs = msmm_data$ensembl_gene_id,IDFrom = "ENSEMBL",IDTo = "SYMBOL")
+msmm_data2=msmm_data[-which(rownames(msmm_data)%in%mapIds2(IDs = msmm_data$ensembl_gene_id,IDFrom = "ENSEMBL",IDTo = "SYMBOL")[[2]]),]
 msmm_data2$gene_symbol=mapIds2(IDs = rownames(msmm_data2),IDFrom = "ENSEMBL",IDTo = "SYMBOL")[[1]][,2]
 msmm_data2.agg=aggregate(x=msmm_data2[,-c(1,957)],by=list(Symbol=msmm_data2$gene_symbol),mean)
 rownames(msmm_data2.agg)=msmm_data2.agg$Symbol
 msmm_data2.agg=msmm_data2.agg[,-1]
-
 msmm_reseq_design_matrix=read.table("./MSMM/MSSM_FP_STG_PHG_IFG_Design.tsv",sep = "\t",header = T,as.is = T)
-number_of_combinations=choose(nrow(msmm_data),2)
+number_of_combinations=choose(nrow(msmm_data2.agg),2)
 
 c_exprs_rank=msmm_data2.agg[,which(colnames(msmm_data2.agg)%in%msmm_reseq_design_matrix$SampleID[msmm_reseq_design_matrix$BrainRegion.DiagnosisFP.CONTROL==1])]#16035
 t_exprs_rank=msmm_data2.agg[,which(colnames(msmm_data2.agg)%in%msmm_reseq_design_matrix$SampleID[msmm_reseq_design_matrix$BrainRegion.DiagnosisFP.AD==1])]#12000
