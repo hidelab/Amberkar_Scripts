@@ -5,6 +5,13 @@ library(data.table)
 library(igraph)
 
 ncore = detectCores()
+mapIds2<-function(IDs,IDFrom,IDTo){
+  idmap=mapIds(x = org.Hs.eg.db,keys = IDs,column = IDTo,keytype = IDFrom,multiVals = "first")
+  na_vec=names(idmap[is.na(idmap)==T])
+  idmap=idmap[is.na(idmap)==F]
+  idmap_df=data.frame("From"=names(idmap),"To"=unlist(unname(idmap)),stringsAsFactors = F)
+  return(list(map=idmap_df,noMap=na_vec))
+}
 ProcessElement <- function(ic){
   A = ceiling((sqrt(8*(ic+1)-7)+1)/2)
   B = ic-choose(floor(1/2+sqrt(2*ic)),2)
