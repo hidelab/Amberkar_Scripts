@@ -8,25 +8,32 @@ library(gtools)
 setwd("/shared/hidelab2/user/md4zsa/Work/Data/AMP-AD_RNAseq_ReSeq/Normalised_covariate_corrected_NoResiduals")
 mayo_reseq_data=fread("MAYO/MAYO_CBE_TCX_netResidualExpression.tsv",sep="\t",header=T,data.table=F)
 rownames(mayo_reseq_data)=mayo_reseq_data$ensembl_gene_id
+ensembl_geneSymbol_map=mapIds2(IDs = mayo_reseq_data$ensembl_gene_id,IDFrom = "ENSEMBL",IDTo = "SYMBOL")
+mayo_reseq_data2=mayo_reseq_data[-which(mayo_reseq_data$ensembl_gene_id%in%mapIds2(IDs = mayo_reseq_data$ensembl_gene_id,IDFrom = "ENSEMBL",IDTo = "SYMBOL")[[2]]),]
+mayo_reseq_data2$gene_symbol=mapIds2(IDs = mayo_reseq_data$ensembl_gene_id,IDFrom = "ENSEMBL",IDTo = "SYMBOL")[[1]][,2]
+mayo_reseq_data2.agg=aggregate(x=mayo_reseq_data2[,-c(1,529)],by=list(Symbol=mayo_reseq_data2$gene_symbol),mean)
+rownames(mayo_reseq_data2.agg)=mayo_reseq_data2.agg$Symbol
+mayo_reseq_data2.agg=mayo_reseq_data2.agg[,-1]
 mayo_covariates_CER=fread("MAYO/MayoRNAseq_RNAseq_CBE_covariates.csv",sep="\t",header=T,data.table=F)
 mayo_covariates_TCX=fread("MAYO/MayoRNAseq_RNAseq_TCX_covariates.csv",sep="\t",header=T,data.table=F)
 mayo_reseq_dataList=vector(mode="list",length=2)
 names(mayo_reseq_dataList)=c("CER","TCX")
 mayo_reseq_dataList$CER=mayo_reseq_dataList$TCX=vector(mode="list",length=2)
 names(mayo_reseq_dataList$CER)=names(mayo_reseq_dataList$TCX)=c("Control","AD")
-mayo_reseq_dataList$CER$Control=mayo_reseq_data[,grep(pattern = paste(mayo_covariates_CER$SampleID[grep(pattern = "Control",x = mayo_covariates_CER$Diagnosis)],collapse = "|"),x = colnames(mayo_reseq_data))]
-mayo_reseq_dataList$CER$AD=mayo_reseq_data[,grep(pattern = paste(mayo_covariates_CER$SampleID[grep(pattern = "AD",x = mayo_covariates_CER$Diagnosis)],collapse = "|"),x = colnames(mayo_reseq_data))]
-mayo_reseq_dataList$TCX$Control=mayo_reseq_data[,grep(pattern = paste(mayo_covariates_TCX$ID[grep(pattern = "Control",x = mayo_covariates_TCX$Diagnosis)],collapse = "|"),x = colnames(mayo_reseq_data))]
-mayo_reseq_dataList$TCX$AD=mayo_reseq_data[,grep(pattern = paste(mayo_covariates_TCX$ID[grep(pattern = "AD",x = mayo_covariates_TCX$Diagnosis)],collapse = "|"),x = colnames(mayo_reseq_data))]
+mayo_reseq_dataList$CER$Control=mayo_reseq_data2.agg[,grep(pattern = paste(mayo_covariates_CER$SampleID[grep(pattern = "Control",x = mayo_covariates_CER$Diagnosis)],collapse = "|"),x = colnames(mayo_reseq_data2.agg))]
+mayo_reseq_dataList$CER$AD=mayo_reseq_data2.agg[,grep(pattern = paste(mayo_covariates_CER$SampleID[grep(pattern = "AD",x = mayo_covariates_CER$Diagnosis)],collapse = "|"),x = colnames(mayo_reseq_data2.agg))]
+mayo_reseq_dataList$TCX$Control=mayo_reseq_data2.agg[,grep(pattern = paste(mayo_covariates_TCX$ID[grep(pattern = "Control",x = mayo_covariates_TCX$Diagnosis)],collapse = "|"),x = colnames(mayo_reseq_data2.agg))]
+mayo_reseq_dataList$TCX$AD=mayo_reseq_data2.agg[,grep(pattern = paste(mayo_covariates_TCX$ID[grep(pattern = "AD",x = mayo_covariates_TCX$Diagnosis)],collapse = "|"),x = colnames(mayo_reseq_data2.agg))]
 
 mayo_reseq_data.final_keep=vector(mode = "list",length = 2)
 names(mayo_reseq_data.final_keep)=c("CER","TCX")
 d1=do.call("cbind",mayo_reseq_dataList$CER)
 d2=do.call("cbind",mayo_reseq_dataList$TCX)
+
 rownames(d1)=rownames(mayo_reseq_dataList$CER$Control)
 rownames(d2)=rownames(mayo_reseq_dataList$TCX$Control)
-mayo_reseq_data.final_keep$CER=d1[which((rowSums(d1>0)>=ncol(d1)/3)==T),]
-mayo_reseq_data.final_keep$TCX=d2[which((rowSums(d2>0)>=ncol(d2)/3)==T),]
+mayo_reseq_data.final_keep$CER=d1
+mayo_reseq_data.final_keep$TCX=d2
 
 ncore = detectCores()
 blocksize=100000

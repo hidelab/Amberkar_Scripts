@@ -46,6 +46,13 @@ ProcessElement <- function(ic){
   setTxtProgressBar(pb,ic %% blocksize)
   return(tmp)
 }
+mapIds2<-function(IDs,IDFrom,IDTo){
+  idmap=mapIds(x = org.Hs.eg.db,keys = IDs,column = IDTo,keytype = IDFrom,multiVals = "first")
+  na_vec=names(idmap[is.na(idmap)==T])
+  idmap=idmap[is.na(idmap)==F]
+  idmap_df=data.frame("From"=names(idmap),"To"=unlist(unname(idmap)),stringsAsFactors = F)
+  return(list(map=idmap_df,noMap=na_vec))
+}
 setwd("/shared/hidelab2/user/md4zsa/Work/Data/AMP-AD_RNAseq_ReSeq/Normalised_covariate_corrected_NoResiduals")
 mayo_reseq_data=fread("MAYO/MAYO_CBE_TCX_netResidualExpression.tsv",sep="\t",header=T,data.table=F)
 rownames(mayo_reseq_data)=mayo_reseq_data$ensembl_gene_id
