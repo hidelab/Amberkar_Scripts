@@ -4,6 +4,7 @@ library(cocor)
 library(org.Hs.eg.db)
 library(igraph)
 library(gtools)
+
 ncore = detectCores()
 blocksize=100000
 ProcessElement <- function(ic){
@@ -65,11 +66,11 @@ mayo_reseq_data2.agg=mayo_reseq_data2.agg[,-1]
 mayo_covariates_CER=fread("MAYO/MayoRNAseq_RNAseq_CBE_covariates.csv",sep="\t",header=T,data.table=F)
 
 exprs_rank=mayo_reseq_data2.agg
-c_exprs_rank=mayo_reseq_data2.agg[,grep(pattern = paste(mayo_covariates_CER$ID[grep(pattern = "Control",x = mayo_covariates_CER$Diagnosis)],collapse = "|"),x = colnames(mayo_reseq_data2.agg))]
-t_exprs_rank=mayo_reseq_data2.agg[,grep(pattern = paste(mayo_covariates_CER$ID[grep(pattern = "AD",x = mayo_covariates_CER$Diagnosis)],collapse = "|"),x = colnames(mayo_reseq_data2.agg))]
+c_counts=mayo_reseq_data2.agg[,grep(pattern = paste(mayo_covariates_CER$ID[grep(pattern = "Control",x = mayo_covariates_CER$Diagnosis)],collapse = "|"),x = colnames(mayo_reseq_data2.agg))]
+t_counts=mayo_reseq_data2.agg[,grep(pattern = paste(mayo_covariates_CER$ID[grep(pattern = "AD",x = mayo_covariates_CER$Diagnosis)],collapse = "|"),x = colnames(mayo_reseq_data2.agg))]
 number_of_combinations<-choose(nrow(exprs_rank),2)
-n.c<-ncol(c_exprs_rank)
-n.t<-ncol(t_exprs_rank)
+n.c<-ncol(c_counts)
+n.t<-ncol(t_counts)
 gene.names<-rownames(exprs_rank)
 i<-0
 start<-i*blocksize+1
@@ -88,7 +89,7 @@ while(start < number_of_combinations){
     result <- data.frame(result,stringsAsFactors = F)
     #result$FDR<-p.adjust(result$p.cocor, method="fdr")
     #result[,c(3:8,10:11)]=round(result[,c(3:8,10:11)],digits = 3)
-    write.table(result, file=paste0("MAYO/results/mayo_reseq_CER_",names(mayo_reseq_data.final_keep)[t],"_cocor_tmp", i, ".txt"), sep="\t", row.names=FALSE, quote = FALSE)
+    write.table(result, file=paste0("MAYO/results/mayo_reseq_CER_cocor_tmp", i, ".txt"), sep="\t", row.names=FALSE, quote = FALSE)
     i<-i+1
     start<-i*blocksize+1
     end<-min((i+1)*blocksize, number_of_combinations)
