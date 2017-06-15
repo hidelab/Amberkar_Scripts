@@ -64,10 +64,10 @@ msmm_data2.agg=msmm_data2.agg[,-1]
 msmm_reseq_design_matrix=read.table("./MSMM/MSSM_FP_STG_PHG_IFG_Design.tsv",sep = "\t",header = T,as.is = T)
 number_of_combinations=choose(nrow(msmm_data2.agg),2)
 
-c_exprs_rank=msmm_data2.agg[,which(colnames(msmm_data2.agg)%in%msmm_reseq_design_matrix$SampleID[msmm_reseq_design_matrix$BrainRegion.DiagnosisFP.CONTROL==1])]#16035
-t_exprs_rank=msmm_data2.agg[,which(colnames(msmm_data2.agg)%in%msmm_reseq_design_matrix$SampleID[msmm_reseq_design_matrix$BrainRegion.DiagnosisFP.AD==1])]#12000
-n.c<-ncol(c_exprs_rank)
-n.t<-ncol(t_exprs_rank)
+c_counts=msmm_data2.agg[,which(colnames(msmm_data2.agg)%in%msmm_reseq_design_matrix$SampleID[msmm_reseq_design_matrix$BrainRegion.DiagnosisFP.CONTROL==1])]#16035
+t_counts=msmm_data2.agg[,which(colnames(msmm_data2.agg)%in%msmm_reseq_design_matrix$SampleID[msmm_reseq_design_matrix$BrainRegion.DiagnosisFP.AD==1])]#12000
+n.c<-ncol(c_counts)
+n.t<-ncol(t_counts)
 gene.names<-rownames(msmm_data2.agg)
 dir.create("./MSMM/results_FP",showWarnings = T,mode = "0777")
 #setwd("./MSMM/results_FP")
