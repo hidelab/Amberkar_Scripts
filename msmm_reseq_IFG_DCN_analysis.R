@@ -70,7 +70,7 @@ n.c<-ncol(c_counts)
 n.t<-ncol(t_counts)
 gene.names<-rownames(msmm_data2.agg)
 dir.create("./MSMM/results_IFG",showWarnings = T,mode = "0777")
-i<-0
+i<-436
 blocksize=100000
 start<-i*blocksize+1
 end<-min((i+1)*blocksize, number_of_combinations)
