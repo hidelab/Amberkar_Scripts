@@ -71,7 +71,7 @@ n.t<-ncol(t_counts)
 gene.names<-rownames(msmm_data2.agg)
 dir.create("./MSMM/results_FP",showWarnings = T,mode = "0777")
 #setwd("./MSMM/results_FP")
-i<-403
+i<-870
 blocksize=100000
 start<-i*blocksize+1
 end<-min((i+1)*blocksize, number_of_combinations)
