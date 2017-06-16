@@ -4,6 +4,7 @@ library(cocor)
 library(org.Hs.eg.db)
 library(igraph)
 library(gtools)
+
 ncore = detectCores()
 blocksize=100000
 ProcessElement <- function(ic){
@@ -71,7 +72,7 @@ number_of_combinations<-choose(nrow(exprs_rank),2)
 n.c<-ncol(c_counts)
 n.t<-ncol(t_counts)
 gene.names<-rownames(exprs_rank)
-i<-0
+i<-244
 start<-i*blocksize+1
 end<-min((i+1)*blocksize, number_of_combinations)
 while(start < number_of_combinations){
