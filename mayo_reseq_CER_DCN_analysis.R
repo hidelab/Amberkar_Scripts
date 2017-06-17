@@ -72,7 +72,7 @@ number_of_combinations<-choose(nrow(exprs_rank),2)
 n.c<-ncol(c_counts)
 n.t<-ncol(t_counts)
 gene.names<-rownames(exprs_rank)
-i<-66
+i<-137
 start<-i*blocksize+1
 end<-min((i+1)*blocksize, number_of_combinations)
 while(start < number_of_combinations){
