@@ -72,7 +72,7 @@ gene.names2=gene.names[which(gene.names%in%mapIds2(IDs = gene.names,IDFrom = "EN
 number_of_combinations=choose(length(gene.names2),2)
 dir.create("cocor_results",showWarnings = T,mode = "0777")
 
-i=0
+i=601
 blocksize=100000
 start<-i*blocksize+1
 end<-min((i+1)*blocksize, number_of_combinations)
