@@ -102,7 +102,7 @@ number_of_combinations=choose(length(gene.names),2)
 dir.create("cocor_results",showWarnings = T,mode = "0777")
 
 i=1183
-blocksize=1000
+blocksize=100000
 start<-i*blocksize+1
 end<-min((i+1)*blocksize, number_of_combinations)
 
