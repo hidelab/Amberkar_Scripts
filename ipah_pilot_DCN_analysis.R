@@ -15,74 +15,74 @@ jaccard=function(A,B){
   jc=set_cardinality(intersect(A,B))/set_cardinality(union(A,B))
   return(jc)
 }
+ProcessElement <- function(ic){
+  A = ceiling((sqrt(8*(ic+1)-7)+1)/2)
+  B = ic-choose(floor(1/2+sqrt(2*ic)),2)
+
+  c_A = as.numeric(c_counts[A,])
+  c_B = as.numeric(c_counts[B,])
+
+  t_A = as.numeric(t_counts[A,])
+  t_B = as.numeric(t_counts[B,])
+
+  # get correlation between the summaries for the unique genes
+  tmp = data.frame(IC= ic, Gene.A=gene.names[A], Gene.B=gene.names[B], r.c=NA, p.c=NA, n.c=NA, r.t=NA, p.t=NA, n.t=NA, p.cocor=NA)
+  #if( (var(c_A) * var(c_B))!=0)
+  tmp$n.c<-sum(!is.na(c_A + c_B))
+  if (tmp$n.c >=5)
+  {
+    c_cortest<-cor.test(c_A, c_B, method="spearman")
+    tmp$r.c<-c_cortest$estimate
+    tmp$p.c<-c_cortest$p.value
+  }
+
+  #if( (var(t_A) * var(t_B))!=0)
+  tmp$n.t<-sum(!is.na(t_A + t_B))
+  if(tmp$n.t >=5)
+  {
+    t_cortest<-cor.test(t_A, t_B, method="spearman")
+    tmp$r.t<-t_cortest$estimate
+    tmp$p.t<-t_cortest$p.value
+  }
+
+  if ( (!is.na(tmp$r.c)) && (!is.na(tmp$r.t)) )
+  {
+    diffcor<-cocor.indep.groups(tmp$r.c, tmp$r.t, tmp$n.c, tmp$n.t)
+    tmp$p.cocor<-diffcor@fisher1925$p.value
+  }
+
+  #setTxtProgressBar(pb,ic %% n_part)
+  setTxtProgressBar(pb,ic %% blocksize)
+  return(tmp)
+}
 # ProcessElement <- function(ic){
 #   A = ceiling((sqrt(8*(ic+1)-7)+1)/2)
 #   B = ic-choose(floor(1/2+sqrt(2*ic)),2)
 #   
-#   c_A = as.numeric(c_counts[A,])
-#   c_B = as.numeric(c_counts[B,])
+#   c_A = c_exprs_rnk[A,]
+#   c_B = c_exprs_rnk[B,]
 #   
-#   t_A = as.numeric(t_counts[A,])
-#   t_B = as.numeric(t_counts[B,])
+#   t_A = t_exprs_rnk[A,]
+#   t_B = t_exprs_rnk[B,]
 #   
 #   # get correlation between the summaries for the unique genes
-#   tmp = data.frame(IC= ic, Gene.A=gene.names[A], Gene.B=gene.names[B], r.c=NA, p.c=NA, n.c=NA, r.t=NA, p.t=NA, n.t=NA, p.cocor=NA)
-#   #if( (var(c_A) * var(c_B))!=0)
-#   tmp$n.c<-sum(!is.na(c_A + c_B))
-#   if (tmp$n.c >=10)
-#   {
-#     c_cortest<-cor.test(c_A, c_B, method="spearman")
-#     tmp$r.c<-c_cortest$estimate
-#     tmp$p.c<-c_cortest$p.value
-#   }
+#   tmp = data.frame(Gene.A=gene.names[A],Gene.B=gene.names[B])
+#   c_cortest<-cor.test(unname(unlist(c_A)), unname(unlist(c_B)), method="spearman")
+#   t_cortest<-cor.test(unname(unlist(t_A)), unname(unlist(t_B)), method="spearman")
+#   rc<-c_cortest$estimate
+#   rt<-t_cortest$estimate
+#   diffcor<-cocor.indep.groups(rc, rt, n.c, n.t)
+#   tmp$r.c<-rc
+#   tmp$p.c<-c_cortest$p.value
+#   tmp$n.c<-n.c
+#   tmp$r.t<-rt
+#   tmp$p.t<-t_cortest$p.value
+#   tmp$n.t<-n.t
+#   tmp$p.cocor<-diffcor@fisher1925$p.value
 #   
-#   #if( (var(t_A) * var(t_B))!=0)
-#   tmp$n.t<-sum(!is.na(t_A + t_B))
-#   if(tmp$n.t >=10)
-#   {
-#     t_cortest<-cor.test(t_A, t_B, method="spearman")
-#     tmp$r.t<-t_cortest$estimate
-#     tmp$p.t<-t_cortest$p.value
-#   }
-#   
-#   if ( (!is.na(tmp$r.c)) && (!is.na(tmp$r.t)) )
-#   {
-#     diffcor<-cocor.indep.groups(tmp$r.c, tmp$r.t, tmp$n.c, tmp$n.t)
-#     tmp$p.cocor<-diffcor@fisher1925$p.value
-#   }
-#   
-#   #setTxtProgressBar(pb,ic %% n_part)
-#   setTxtProgressBar(pb,ic %% blocksize)
+#   setTxtProgressBar(pb,ic)
 #   return(tmp)
 # }
-ProcessElement <- function(ic){
-  A = ceiling((sqrt(8*(ic+1)-7)+1)/2)
-  B = ic-choose(floor(1/2+sqrt(2*ic)),2)
-  
-  c_A = c_exprs_rnk[A,]
-  c_B = c_exprs_rnk[B,]
-  
-  t_A = t_exprs_rnk[A,]
-  t_B = t_exprs_rnk[B,]
-  
-  # get correlation between the summaries for the unique genes
-  tmp = data.frame(Gene.A=gene.names[A],Gene.B=gene.names[B])
-  c_cortest<-cor.test(unname(unlist(c_A)), unname(unlist(c_B)), method="spearman")
-  t_cortest<-cor.test(unname(unlist(t_A)), unname(unlist(t_B)), method="spearman")
-  rc<-c_cortest$estimate
-  rt<-t_cortest$estimate
-  diffcor<-cocor.indep.groups(rc, rt, n.c, n.t)
-  tmp$r.c<-rc
-  tmp$p.c<-c_cortest$p.value
-  tmp$n.c<-n.c
-  tmp$r.t<-rt
-  tmp$p.t<-t_cortest$p.value
-  tmp$n.t<-n.t
-  tmp$p.cocor<-diffcor@fisher1925$p.value
-  
-  setTxtProgressBar(pb,ic)
-  return(tmp)
-}
 ncore=12
 setwd("/shared/hidelab2/user/md4zsa/Work/Data/IPAH")
 
@@ -93,15 +93,15 @@ ipah_metadata$External.ID[ipah_metadata$group=="HV"]=gsub(pattern = "_v1",replac
 ipah_counts.filtered1=ipah_counts.normalised[-which(rownames(ipah_counts.normalised)%in%mapIds2(IDs = rownames(ipah_counts.normalised),IDFrom = "ENSEMBL",IDTo = "SYMBOL")[[2]]),]
 ipah_counts.filtered2=ipah_counts.filtered1[rowSums(ipah_counts.filtered1>0)>=ncol(ipah_counts.filtered1)/3,]
 
-c_exprs_rnk=ipah_counts.filtered2[,grep(pattern = paste(ipah_metadata$External.ID[ipah_metadata$group=="HV"],collapse = "|"),x = colnames(ipah_counts.filtered2))]
-t_exprs_rnk=ipah_counts.filtered2[,grep(pattern = paste(ipah_metadata$External.ID[ipah_metadata$group=="IPAH"],collapse = "|"),x = colnames(ipah_counts.filtered2))]
-n.c=ncol(c_exprs_rnk)
-n.t=ncol(t_exprs_rnk)
+c_counts=ipah_counts.filtered2[,grep(pattern = paste(ipah_metadata$External.ID[ipah_metadata$group=="HV"],collapse = "|"),x = colnames(ipah_counts.filtered2))]
+t_counts=ipah_counts.filtered2[,grep(pattern = paste(ipah_metadata$External.ID[ipah_metadata$group=="IPAH"],collapse = "|"),x = colnames(ipah_counts.filtered2))]
+n.c=ncol(c_counts)
+n.t=ncol(t_counts)
 gene.names=rownames(ipah_counts.filtered2)
 number_of_combinations=choose(length(gene.names),2)
 dir.create("cocor_results",showWarnings = T,mode = "0777")
 
-i=1183
+i=0
 blocksize=100000
 start<-i*blocksize+1
 end<-min((i+1)*blocksize, number_of_combinations)
