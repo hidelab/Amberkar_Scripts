@@ -92,7 +92,7 @@ while(start < number_of_combinations){
   result <- as.data.frame(result)
   result <- data.frame(result,stringsAsFactors = F)
   #Write results, use fwrite instead of write.table for faster processing
-  fwrite(result, file=paste("./cocor_results/ipah_cocor_tmp_150bp_", i, ".txt",sep = ""), sep="\t",col.names = T,row.names = F,buffMB = 100,nThread = 16,quote = F)
+  fwrite(result, file=paste("./cocor_results_150bp/ipah_cocor_tmp_150bp_", i, ".txt",sep = ""), sep="\t",col.names = T,row.names = F,buffMB = 100,nThread = 16,quote = F)
   i<-i+1
   start<-i*blocksize+1
   end<-min((i+1)*blocksize, number_of_combinations)
