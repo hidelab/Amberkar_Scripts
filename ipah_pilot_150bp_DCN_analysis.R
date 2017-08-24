@@ -74,7 +74,7 @@ gene.names=rownames(ipah_counts.filtered2)
 number_of_combinations=choose(length(gene.names),2)
 dir.create("cocor_results_150bp",showWarnings = T,mode = "0777")
 
-i=84
+i=101
 blocksize=100000
 start<-i*blocksize+1
 end<-min((i+1)*blocksize, number_of_combinations)
