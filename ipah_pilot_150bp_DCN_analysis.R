@@ -59,7 +59,7 @@ ProcessElement <- function(ic){
 ncore=12
 setwd("/shared/hidelab2/user/md4zsa/Work/Data/IPAH")
 
-ipah_150bp_counts.normalised=data.frame(readRDS("IPAH_150bp_normCounts.RDS"),stringsAsFactors = F)
+ipah_150bp_counts.normalised=data.frame(readRDS("IPAH_75bp_normCounts.RDS"),stringsAsFactors = F)
 rownames(ipah_150bp_counts.normalised)=unlist(lapply(strsplit(x = rownames(ipah_150bp_counts.normalised),split = "\\."),`[[`,1))
 ipah_metadata=readRDS("lawrie_sample_group.RDS")
 ipah_metadata$External.ID[ipah_metadata$group=="HV"]=gsub(pattern = "_v1",replacement = "",x = ipah_metadata$External.ID[ipah_metadata$group=="HV"])
@@ -74,7 +74,7 @@ gene.names=rownames(ipah_counts.filtered2)
 number_of_combinations=choose(length(gene.names),2)
 dir.create("cocor_results_150bp",showWarnings = T,mode = "0777")
 
-i=747
+i=1387
 blocksize=100000
 start<-i*blocksize+1
 end<-min((i+1)*blocksize, number_of_combinations)
