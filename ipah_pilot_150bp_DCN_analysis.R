@@ -59,7 +59,7 @@ ProcessElement <- function(ic){
 ncore=12
 setwd("/shared/hidelab2/user/md4zsa/Work/Data/IPAH")
 
-ipah_150bp_counts.normalised=data.frame(readRDS("IPAH_75bp_normCounts.RDS"),stringsAsFactors = F)
+ipah_150bp_counts.normalised=data.frame(readRDS("IPAH_150bp_normCounts.RDS"),stringsAsFactors = F)
 rownames(ipah_150bp_counts.normalised)=unlist(lapply(strsplit(x = rownames(ipah_150bp_counts.normalised),split = "\\."),`[[`,1))
 ipah_metadata=readRDS("lawrie_sample_group.RDS")
 ipah_metadata$External.ID[ipah_metadata$group=="HV"]=gsub(pattern = "_v1",replacement = "",x = ipah_metadata$External.ID[ipah_metadata$group=="HV"])
