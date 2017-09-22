@@ -77,7 +77,7 @@ dir.create("./MAYO/results_corrPval",showWarnings = T,mode = "0777")
 i<-0
 start<-i*blocksize+1
 end<-min((i+1)*blocksize, number_of_combinations)
-while(start < 5){
+while(start < number_of_combinations){
     input<-start:end
     pb = txtProgressBar(min=0,max=length(input),style=3,initial=0)
     cat("\n")
