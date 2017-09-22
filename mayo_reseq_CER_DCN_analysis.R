@@ -66,13 +66,15 @@ mayo_reseq_data2.agg=mayo_reseq_data2.agg[,-1]
 mayo_covariates_CER=fread("MAYO/MayoRNAseq_RNAseq_CBE_covariates.csv",sep="\t",header=T,data.table=F)
 
 exprs_rank=mayo_reseq_data2.agg
-c_counts=mayo_reseq_data2.agg[,grep(pattern = paste(mayo_covariates_CER$ID[grep(pattern = "Control",x = mayo_covariates_CER$Diagnosis)],collapse = "|"),x = colnames(mayo_reseq_data2.agg))]
-t_counts=mayo_reseq_data2.agg[,grep(pattern = paste(mayo_covariates_CER$ID[grep(pattern = "AD",x = mayo_covariates_CER$Diagnosis)],collapse = "|"),x = colnames(mayo_reseq_data2.agg))]
+c_counts=mayo_reseq_data2.agg[,grep(pattern = paste(mayo_covariates_CER$SampleID[grep(pattern = "Control",x = mayo_covariates_CER$Diagnosis)],collapse = "|"),x = colnames(mayo_reseq_data2.agg))]
+t_counts=mayo_reseq_data2.agg[,grep(pattern = paste(mayo_covariates_CER$SampleID[grep(pattern = "AD",x = mayo_covariates_CER$Diagnosis)],collapse = "|"),x = colnames(mayo_reseq_data2.agg))]
 number_of_combinations<-choose(nrow(exprs_rank),2)
 n.c<-ncol(c_counts)
 n.t<-ncol(t_counts)
 gene.names<-rownames(exprs_rank)
-i<-137
+dir.create("results_corrPval",showWarnings = T,mode = "0777")
+
+i<-0
 start<-i*blocksize+1
 end<-min((i+1)*blocksize, number_of_combinations)
 while(start < number_of_combinations){
@@ -89,19 +91,19 @@ while(start < number_of_combinations){
     result <- data.frame(result,stringsAsFactors = F)
     #result$FDR<-p.adjust(result$p.cocor, method="fdr")
     #result[,c(3:8,10:11)]=round(result[,c(3:8,10:11)],digits = 3)
-    write.table(result, file=paste0("MAYO/results/mayo_reseq_CER_cocor_tmp", i, ".txt"), sep="\t", row.names=FALSE, quote = FALSE)
+    write.table(result, file=paste0("MAYO/results_corrPval/mayo_reseq_CER_cocor_corrPval_tmp", i, ".txt"), sep="\t", row.names=FALSE, quote = FALSE)
     i<-i+1
     start<-i*blocksize+1
     end<-min((i+1)*blocksize, number_of_combinations)
   }
 
-setwd("/shared/hidelab2/user/md4zsa/Work/Data/AMP-AD_RNAseq_ReSeq/Normalised_covariate_corrected_NoResiduals/MAYO/results")
-system("awk 'FNR==1 && NR!=1 { while (/^<header>/) getline; }    1 {print}' mayo_reseq_CER*.txt >MAYO_ReSeq_CER_DiffCorr_Results.txt")
+setwd("/shared/hidelab2/user/md4zsa/Work/Data/AMP-AD_RNAseq_ReSeq/Normalised_covariate_corrected_NoResiduals/MAYO/results_corrPval")
+system("awk 'FNR==1 && NR!=1 { while (/^<header>/) getline; }    1 {print}' mayo_reseq_CER*.txt >MAYO_ReSeq_CER_corrPval_DiffCorr_Results.txt")
 
-allResults_CER=fread("MAYO_ReSeq_CER_DiffCorr_Results.txt",sep = "\t",header = T,data.table = T,showProgress = T)
+allResults_CER=fread("MAYO_ReSeq_CER_corrPval_DiffCorr_Results.txt",sep = "\t",header = T,data.table = T,showProgress = T)
 allResults_CER$FDR=p.adjust(p = allResults_CER$p.cocor,method = "fdr")
 allResults_CER$FDR.c=p.adjust(p = allResults_CER$p.c,method = "fdr")
 allResults_CER$FDR.t=p.adjust(p = allResults_CER$p.t,method = "fdr")
-fwrite(allResults_CER,"MAYO_ReSeq_CER_DiffCorr_Results_FDR.txt",sep="\t",col.names = T,row.names = F,nThread = 12,buffMB = 100,showProgress = T)
+fwrite(allResults_CER,"MAYO_ReSeq_CER_corrPval_DiffCorr_Results_FDR.txt",sep="\t",col.names = T,row.names = F,nThread = 12,buffMB = 100,showProgress = T)
 
 
