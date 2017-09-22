@@ -72,12 +72,12 @@ number_of_combinations<-choose(nrow(exprs_rank),2)
 n.c<-ncol(c_counts)
 n.t<-ncol(t_counts)
 gene.names<-rownames(exprs_rank)
-dir.create("results_corrPval",showWarnings = T,mode = "0777")
+dir.create("./MAYO/results_corrPval",showWarnings = T,mode = "0777")
 
 i<-0
 start<-i*blocksize+1
 end<-min((i+1)*blocksize, number_of_combinations)
-while(start < number_of_combinations){
+while(start < 5){
     input<-start:end
     pb = txtProgressBar(min=0,max=length(input),style=3,initial=0)
     cat("\n")
