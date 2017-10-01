@@ -1,8 +1,8 @@
 #!/bin/bash 
 #Job time 
-#-l h_rt=96:00:00 
+#$-l h_rt=120:00:00 
 #Request resources 
-#-l rmem=12G 
+#$-l rmem=12G 
 #Cores 
 #$-pe openmp 12 
 #Job Name 
