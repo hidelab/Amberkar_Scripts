@@ -132,7 +132,7 @@ mapIds2<-function(IDs,IDFrom,IDTo){
 # }
 
 #Set working directory
-setwd("/shared/hidelab2/user/md4zsa/Work/Data/AMP-AD_RNAseq_ReSeq/Normalised_covariate_corrected_NoResiduals")
+setwd("/shared/hidelab2/user/md4zsa/Work/Data/AMP-AD_RNAseq_ReSeq/Normalised_covariate_corrected_NoResiduals/MAYO")
 #Download data from Synapse
 mayo_reseq_data_pointer<-synGet(id='syn8466826')
 mayo_reseq_data=fread(mayo_reseq_data_pointer@filePath,sep = "\t",header = T,stringsAsFactors = F,showProgress = T,data.table = F)
@@ -156,7 +156,7 @@ mayo_reseq_cer_data=mayo_reseq_data2.agg[,which(colnames(mayo_reseq_data2.agg)%i
 #Segragate Control and AD samples
 tcx_c_counts=mayo_reseq_tcx_data[,mayo_covariates$SampleID[grep(pattern = "TCX.Control",mayo_covariates$BrainRegion.Diagnosis)]]
 tcx_t_counts=mayo_reseq_tcx_data[,mayo_covariates$SampleID[grep(pattern = "TCX.AD",mayo_covariates$BrainRegion.Diagnosis)]]
-tcx_DCe=DCe(exprs.1 = tcx_c_counts,exprs.2 = tcx_t_counts,r.method = "spearman",p = 0.1)
+tcx_DCe=DCe(exprs.1 = tcx_c_counts,exprs.2 = tcx_t_counts,r.method = "spearman",p = 0.05,link.method = "qth",cutoff = 0.05)
 saveRDS(tcx_DCe,"TCX_DCe_AnalysisResults.RDS")
 proc.time()
 cat(paste("Completed!"))

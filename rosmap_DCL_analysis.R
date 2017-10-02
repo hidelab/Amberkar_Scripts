@@ -151,7 +151,7 @@ rosmap_reseq_data2.agg=rosmap_reseq_data2.agg[,-1]
 #Segragate Control and AD samples
 c_counts=rosmap_reseq_data2.agg[,rosmap_covariates$SampleID[rosmap_covariates$Diagnosis=="CONTROL"]]
 t_counts=rosmap_reseq_data2.agg[,rosmap_covariates$SampleID[rosmap_covariates$Diagnosis=="AD"]]
-rosmap_DCe=DCe(exprs.1 = c_counts,exprs.2 = t_counts,r.method = "spearman",p = 0.1)
+rosmap_DCe=DCe(exprs.1 = c_counts,exprs.2 = t_counts,r.method = "spearman",p = 0.05,link.method = "qth",cutoff = 0.05)
 saveRDS(rosmap_DCe,"ROSMAP_DCe_AnalysisResults.RDS")
 proc.time()
 cat(paste("Completed!"))

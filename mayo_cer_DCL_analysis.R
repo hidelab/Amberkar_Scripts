@@ -160,7 +160,7 @@ mayo_reseq_cer_data=mayo_reseq_data2.agg[,which(colnames(mayo_reseq_data2.agg)%i
 #Segragate Control and AD samples
 cer_c_counts=mayo_reseq_cer_data[,mayo_covariates$SampleID[grep(pattern = "CER.Control",mayo_covariates$BrainRegion.Diagnosis)]]
 cer_t_counts=mayo_reseq_cer_data[,mayo_covariates$SampleID[grep(pattern = "CER.AD",mayo_covariates$BrainRegion.Diagnosis)]]
-cer_DCe=DCe(exprs.1 = cer_c_counts,exprs.2 = cer_t_counts,r.method = "spearman",p = 0.1)
+cer_DCe=DCe(exprs.1 = cer_c_counts,exprs.2 = cer_t_counts,r.method = "spearman",p = 0.05,link.method = "qth",cutoff = 0.05)
 saveRDS(cer_DCe,"CER_DCe_AnalysisResults.RDS")
 proc.time()
 cat(paste("Completed!"))
