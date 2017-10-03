@@ -7,6 +7,8 @@
 #$-pe openmp 12 
 #Job Name 
 #$-N MAYO_TCX_DCe
+#Queue
+#$-P hidelab
 
 
 module load apps/R/3.4.0/gcc-4.8.5
