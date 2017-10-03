@@ -4,7 +4,7 @@
 #Request resources 
 #$-l rmem=12G 
 #Cores 
-#$-pe openmp 12 
+#$-pe openmp 8 
 #Job Name 
 #$-N ROSMAP_DCe
 #Queue

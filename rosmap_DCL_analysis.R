@@ -148,11 +148,21 @@ rosmap_reseq_data2.agg=aggregate(x=rosmap_reseq_data2[,-c(1,634)],by=list(Symbol
 rownames(rosmap_reseq_data2.agg)=rosmap_reseq_data2.agg$Symbol
 rosmap_reseq_data2.agg=rosmap_reseq_data2.agg[,-1]
 
+#Read TF-Target interactions, preprocess data
+regnet_tf2target=fread("/shared/hidelab2/user/md4zsa/Work/Data/TF_Databases/RegNetwork_human_regulators2.txt",header = T,sep = "\t",showProgress = T,data.table = F)%>%filter(evidence=="Experimental")%>%select(c(regulator_symbol,target_symbol))
+
 #Segragate Control and AD samples
-c_counts=rosmap_reseq_data2.agg[,rosmap_covariates$SampleID[rosmap_covariates$Diagnosis=="CONTROL"]]
-t_counts=rosmap_reseq_data2.agg[,rosmap_covariates$SampleID[rosmap_covariates$Diagnosis=="AD"]]
-rosmap_DCe=DCe(exprs.1 = c_counts,exprs.2 = t_counts,r.method = "spearman",p = 0.05,link.method = "qth",cutoff = 0.05)
+rosmap_c_counts=rosmap_reseq_data2.agg[,rosmap_covariates$SampleID[rosmap_covariates$Diagnosis=="CONTROL"]]
+rosmap_t_counts=rosmap_reseq_data2.agg[,rosmap_covariates$SampleID[rosmap_covariates$Diagnosis=="AD"]]
+rosmap_DCp=DCp(exprs.1 = rosmap_c_counts,exprs.2 = rosmap_t_counts,r.method = "spearman",link.method = "qth",cutoff = 0.05,N = 1000)
+rosmap_DCe=DCe(exprs.1 = rosmap_c_counts,exprs.2 = rosmap_t_counts,r.method = "spearman",p = 0.05,link.method = "qth",cutoff = 0.05)
+rosmap_DCsum.res=DCsum(rosmap_DCp,rosmap_DCe,DCpcutoff=0.05,DCecutoff=0.05)
+rosmap_DRsort.res=DRsort(DCGs = rosmap_DCsum.res$DCGs,DCLs = rosmap_DCsum.res$DCLs,tf2target = regnet_tf2target,expGenes = rosmap_reseq_data2.agg)
+saveRDS(rosmap_DCp,"ROSMAP_DCp_AnalysisResults.RDS")
 saveRDS(rosmap_DCe,"ROSMAP_DCe_AnalysisResults.RDS")
+saveRDS(rosmap_DCsum.res,"ROSMAP_DCsum_AnalysisResults.RDS")
+saveRDS(rosmap_DRsort.res,"ROSMAP_DRsort_AnalysisResults.RDS")
+
 proc.time()
 cat(paste("Completed!"))
 stopCluster(cl)
