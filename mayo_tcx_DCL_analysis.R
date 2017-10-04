@@ -48,14 +48,20 @@ regnet_tf2target=fread("/shared/hidelab2/user/md4zsa/Work/Data/TF_Databases/RegN
 #Segragate Control and AD samples
 tcx_c_counts=mayo_reseq_tcx_data[,mayo_covariates$SampleID[grep(pattern = "TCX.Control",mayo_covariates$BrainRegion.Diagnosis)]]
 tcx_t_counts=mayo_reseq_tcx_data[,mayo_covariates$SampleID[grep(pattern = "TCX.AD",mayo_covariates$BrainRegion.Diagnosis)]]
-tcx_DCp=DCp(exprs.1 = tcx_c_counts,exprs.2 = tcx_t_counts,r.method = "spearman",link.method = "qth",cutoff = 0.05,N = 1000)
+#tcx_DCp=DCp(exprs.1 = tcx_c_counts,exprs.2 = tcx_t_counts,r.method = "spearman",link.method = "qth",cutoff = 0.05,N = 1000)
 tcx_DCe=DCe(exprs.1 = tcx_c_counts,exprs.2 = tcx_t_counts,r.method = "spearman",p = 0.05,link.method = "qth",cutoff = 0.05)
-tcx_DCsum.res=DCsum(tcx_DCp,tcx_DCe,DCpcutoff=0.05,DCecutoff=0.05)
-tcx_DRsort.res=DRsort(DCGs = tcx_DCsum.res$DCGs,DCLs = tcx_DCsum.res$DCLs,tf2target = regnet_tf2target,expGenes = mayo_reseq_tcx_data)
-saveRDS(tcx_DCp,"TCX_DCp_AnalysisResults.RDS")
-saveRDS(tcx_DCe,"TCX_DCe_AnalysisResults.RDS")
-saveRDS(tcx_DCsum.res,"TCX_DCsum_AnalysisResults.RDS")
-saveRDS(tcx_DRsort.res,"TCX_DRsort_AnalysisResults.RDS")
+saveRDS(tcx_DCe,"TCX_DCe_Results.RDS")
+
+DCecutoff = 0.25
+tcx_DCe.DCG <- tcx_DCe$DCGs[tcx_DCe$DCGs[, "q"] < DCecutoff, ]
+tcx_DCe.DCG <- data.frame(DCG = rownames(tcx_DCe.DCG), tcx_DCe.DCG)
+DCG<-tcx_DCe.DCG
+x<-tcx_DCe$DCLs
+x<-subset(x, subset=(Gene.1 %in% rownames(DCG) | Gene.2 %in% rownames(DCG) ))
+expGenes<-rownames(tcx_DCe$DCGs)
+tcx_DRsort.res<- DRsort(DCG, x, regnet_tf2target, expGenes)
+saveRDS(tcx_DRsort.res,"TCX_DRsort_Results.RDS")
+
 proc.time()
 cat(paste("Completed!"))
 stopCluster(cl)

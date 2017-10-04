@@ -25,7 +25,7 @@ setwd("/shared/hidelab2/user/md4zsa/Work/Data/AMP-AD_RNAseq_ReSeq/Normalised_cov
 #Download data from Synapse
 mayo_reseq_data_pointer<-synGet(id='syn8466826')
 mayo_reseq_data=fread(mayo_reseq_data_pointer@filePath,sep = "\t",header = T,stringsAsFactors = F,showProgress = T,data.table = F)
-#Read ROSMAP covariates
+#Read mayo_cer covariates
 mayo_covariates_pointer <- synGet(id='syn8466814')
 mayo_covariates=read.table(mayo_covariates_pointer@filePath,header = T,sep = "\t",stringsAsFactors = F)
 
@@ -47,14 +47,22 @@ regnet_tf2target=fread("/shared/hidelab2/user/md4zsa/Work/Data/TF_Databases/RegN
 #Segragate Control and AD samples
 cer_c_counts=mayo_reseq_cer_data[,mayo_covariates$SampleID[grep(pattern = "CER.Control",mayo_covariates$BrainRegion.Diagnosis)]]
 cer_t_counts=mayo_reseq_cer_data[,mayo_covariates$SampleID[grep(pattern = "CER.AD",mayo_covariates$BrainRegion.Diagnosis)]]
-cer_DCp=DCp(exprs.1 = cer_c_counts,exprs.2 = cer_t_counts,r.method = "spearman",link.method = "qth",cutoff = 0.05,N = 1000)
+#cer_DCp=DCp(exprs.1 = cer_c_counts,exprs.2 = cer_t_counts,r.method = "spearman",link.method = "qth",cutoff = 0.05,N = 1000)
 cer_DCe=DCe(exprs.1 = cer_c_counts,exprs.2 = cer_t_counts,r.method = "spearman",p = 0.05,link.method = "qth",cutoff = 0.05)
-cer_DCsum.res=DCsum(cer_DCp,cer_DCe,DCpcutoff=0.05,DCecutoff=0.05)
-cer_DRsort.res=DRsort(DCGs = cer_DCsum.res$DCGs,DCLs = cer_DCsum.res$DCLs,tf2target = regnet_tf2target,expGenes = mayo_reseq_cer_data)
-saveRDS(cer_DCp,"CER_DCp_AnalysisResults.RDS")
+#cer_DCsum.res=DCsum(cer_DCp,cer_DCe,DCpcutoff=0.05,DCecutoff=0.05)
+#cer_DRsort.res=DRsort(DCGs = cer_DCsum.res$DCGs,DCLs = cer_DCsum.res$DCLs,tf2target = regnet_tf2target,expGenes = mayo_reseq_cer_data)
+#saveRDS(cer_DCp,"CER_DCp_AnalysisResults.RDS")
 saveRDS(cer_DCe,"CER_DCe_AnalysisResults.RDS")
-saveRDS(cer_DCsum.res,"CER_DCsum_AnalysisResults.RDS")
-saveRDS(cer_DRsort.res,"CER_DRsort_AnalysisResults.RDS")
+
+DCecutoff = 0.25
+cer_DCe.DCG <- cer_DCe$DCGs[cer_DCe$DCGs[, "q"] < DCecutoff, ]
+cer_DCe.DCG <- data.frame(DCG = rownames(cer_DCe.DCG), cer_DCe.DCG)
+DCG<-cer_DCe.DCG
+x<-cer_DCe$DCLs
+x<-subset(x, subset=(Gene.1 %in% rownames(DCG) | Gene.2 %in% rownames(DCG) ))
+expGenes<-rownames(cer_DCe$DCGs)
+cer_DRsort.res<- DRsort(DCG, x, regnet_tf2target, expGenes)
+saveRDS(cer_DRsort.res,"CER_DRsort_Results.RDS")
 
 proc.time()
 cat(paste("Completed!"))
