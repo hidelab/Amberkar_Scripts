@@ -1,6 +1,5 @@
 library(igraph)
 library(foreach)
-library(cocor)
 library(synapseClient)
 library(data.table)
 library(org.Hs.eg.db)
@@ -21,13 +20,13 @@ mapIds2<-function(IDs,IDFrom,IDTo){
   return(list(map=idmap_df,noMap=na_vec))
 }
 #Set working directory
-setwd("/shared/hidelab2/user/md4zsa/Work/Data/AMP-AD_RNAseq_ReSeq/Normalised_covariate_corrected_NoResiduals")
+setwd("/shared/hidelab2/user/md4zsa/Work/Data/AMP-AD_RNAseq_ReSeq/Normalised_covariate_corrected_NoResiduals/ROSMAP")
 #Download data from Synapse
 rosmap_reseq_data_pointer<-synGet(id='syn8456719')
 rosmap_reseq_data=fread(rosmap_reseq_data_pointer@filePath,sep = "\t",header = T,stringsAsFactors = F,showProgress = T)
 
 #Read ROSMAP covariates
-rosmap_covariates=read.table("ROSMAP/ROSMAP_DLPFC_Covariates.tsv",header = T,sep = "\t",stringsAsFactors = F)
+rosmap_covariates=read.table("ROSMAP_DLPFC_Covariates.tsv",header = T,sep = "\t",stringsAsFactors = F)
 
 #Collapse Ensembl IDs to gene symbols. For multiple Ensembl IDs for same gene, compute average expression
 ensembl_geneSymbol_map=mapIds2(IDs = rosmap_reseq_data$ensembl_gene_id,IDFrom = "ENSEMBL",IDTo = "SYMBOL")
@@ -43,14 +42,20 @@ regnet_tf2target=fread("/shared/hidelab2/user/md4zsa/Work/Data/TF_Databases/RegN
 #Segragate Control and AD samples
 rosmap_c_counts=rosmap_reseq_data2.agg[,rosmap_covariates$SampleID[rosmap_covariates$Diagnosis=="CONTROL"]]
 rosmap_t_counts=rosmap_reseq_data2.agg[,rosmap_covariates$SampleID[rosmap_covariates$Diagnosis=="AD"]]
-rosmap_DCp=DCp(exprs.1 = rosmap_c_counts,exprs.2 = rosmap_t_counts,r.method = "spearman",link.method = "qth",cutoff = 0.05,N = 1000)
+#rosmap_DCp=DCp(exprs.1 = rosmap_c_counts,exprs.2 = rosmap_t_counts,r.method = "spearman",link.method = "qth",cutoff = 0.05,N = 1000)
 rosmap_DCe=DCe(exprs.1 = rosmap_c_counts,exprs.2 = rosmap_t_counts,r.method = "spearman",p = 0.05,link.method = "qth",cutoff = 0.05)
-rosmap_DCsum.res=DCsum(rosmap_DCp,rosmap_DCe,DCpcutoff=0.05,DCecutoff=0.05)
-rosmap_DRsort.res=DRsort(DCGs = rosmap_DCsum.res$DCGs,DCLs = rosmap_DCsum.res$DCLs,tf2target = regnet_tf2target,expGenes = rosmap_reseq_data2.agg)
-saveRDS(rosmap_DCp,"ROSMAP_DCp_AnalysisResults.RDS")
-saveRDS(rosmap_DCe,"ROSMAP_DCe_AnalysisResults.RDS")
-saveRDS(rosmap_DCsum.res,"ROSMAP_DCsum_AnalysisResults.RDS")
-saveRDS(rosmap_DRsort.res,"ROSMAP_DRsort_AnalysisResults.RDS")
+saveRDS(rosmap_DCe,"ROSMAP_DCe_res.RDS")
+
+DCecutoff = 0.25
+rosmap_DCe.DCG <- rosmap_DCe$DCGs[rosmap_DCe$DCGs[, "q"] < DCecutoff, ]
+rosmap_DCe.DCG <- data.frame(DCG = rownames(rosmap_DCe.DCG), rosmap_DCe.DCG)
+DCG <-rosmap_DCe.DCG
+x<-rosmap_DCe$DCLs
+x<-subset(x, subset=(Gene.1 %in% rownames(DCG) | Gene.2 %in% rownames(DCG) ))
+expGenes<-rownames(rosmap_DCe$DCGs)
+rosmap_DRsort.res<- DRsort(DCG, x, regnet_tf2target, expGenes)
+saveRDS(rosmap_DRsort.res,"ROSMAP_DCe_DRsort.res.RDS")
+#saveRDS(rosmap_DCe,"ROSMAP_DCe_AnalysisResults.RDS")
 
 proc.time()
 cat(paste("Completed!"))
