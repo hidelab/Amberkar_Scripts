@@ -7,7 +7,7 @@ library(org.Hs.eg.db)
 library(doParallel)
 library(DCGL)
 
-synapseLogin(username = "s.amberkar@sheffield.ac.uk",apiKey = "evb/5m+/10KmKAOP2vS1G6+a20iWAQlDosD9UfoQhvvFUdip/R/kZCzuk3jYecQ7zti5F4ZePz8djJQ8PoRC6Q==",rememberMe = T)
+synapseLogin()
 cl=makeCluster(8)
 registerDoParallel(cl)
 #Define functions to be used
@@ -31,7 +31,7 @@ msbb_covariates=read.table(msbb_reseq_covariates_pointer@filePath,header = T,sep
 ensembl_geneSymbol_map=mapIds2(IDs = msbb_reseq_data$ensembl_gene_id,IDFrom = "ENSEMBL",IDTo = "SYMBOL")
 msbb_reseq_data2=msbb_reseq_data[-which(msbb_reseq_data$ensembl_gene_id%in%mapIds2(IDs = msbb_reseq_data$ensembl_gene_id,IDFrom = "ENSEMBL",IDTo = "SYMBOL")[[2]]),]
 msbb_reseq_data2$gene_symbol=mapIds2(IDs = msbb_reseq_data2$ensembl_gene_id,IDFrom = "ENSEMBL",IDTo = "SYMBOL")[[1]][,2]
-msbb_reseq_data2.agg=aggregate(x=msbb_reseq_data2[,-c(1,634)],by=list(Symbol=msbb_reseq_data2$gene_symbol),mean)
+msbb_reseq_data2.agg=aggregate(x=msbb_reseq_data2[,-c(1,'gene_symbol')],by=list(Symbol=msbb_reseq_data2$gene_symbol),mean)
 rownames(msbb_reseq_data2.agg)=msbb_reseq_data2.agg$Symbol
 msbb_reseq_data2.agg=msbb_reseq_data2.agg[,-1]
 
