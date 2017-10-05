@@ -23,7 +23,7 @@ mapIds2<-function(IDs,IDFrom,IDTo){
 setwd("/shared/hidelab2/user/md4zsa/Work/Data/AMP-AD_RNAseq_ReSeq/Normalised_covariate_corrected_NoResiduals/MSMM")
 #Download data from Synapse
 msbb_reseq_data_pointer<-synGet(id='syn8485027')
-msbb_reseq_data=fread(msbb_reseq_data_pointer@filePath,sep = "\t",header = T,stringsAsFactors = F,showProgress = T)
+msbb_reseq_data=fread("MSSM_FP_STG_PHG_IFG_netResidualExpression.tsv",sep = "\t",header = T,stringsAsFactors = F,data.table = F,showProgress = T)
 msbb_reseq_covariates_pointer<-synGet(id='syn11024323')
 msbb_covariates=read.table(msbb_reseq_covariates_pointer@filePath,header = T,sep = "\t",stringsAsFactors = F)
 
