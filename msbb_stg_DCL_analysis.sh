@@ -7,8 +7,7 @@
 #$-pe openmp 8 
 #Job Name 
 #$-N MSBB_STG_DCe
-#Queue
-#$-P hidelab
+
 
 module load apps/R/3.3.1
 module load compilers/gcc/6.2
