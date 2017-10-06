@@ -46,7 +46,7 @@ rosmap_t_counts=rosmap_reseq_data2.agg[,rosmap_covariates$SampleID[rosmap_covari
 rosmap_DCe=DCe(exprs.1 = rosmap_c_counts,exprs.2 = rosmap_t_counts,r.method = "spearman",p = 0.05,link.method = "qth",cutoff = 0.05)
 saveRDS(rosmap_DCe,"ROSMAP_DCe_res.RDS")
 
-DCecutoff = 0.25
+DCecutoff = 0.05
 rosmap_DCe.DCG <- rosmap_DCe$DCGs[rosmap_DCe$DCGs[, "q"] < DCecutoff, ]
 rosmap_DCe.DCG <- data.frame(DCG = rownames(rosmap_DCe.DCG), rosmap_DCe.DCG)
 DCG <-rosmap_DCe.DCG
@@ -54,7 +54,7 @@ x<-rosmap_DCe$DCLs
 x<-subset(x, subset=(Gene.1 %in% rownames(DCG) | Gene.2 %in% rownames(DCG) ))
 expGenes<-rownames(rosmap_DCe$DCGs)
 rosmap_DRsort.res<- DRsort(DCG, x, regnet_tf2target, expGenes)
-saveRDS(rosmap_DRsort.res,"ROSMAP_DCe_DRsort.res.RDS")
+saveRDS(rosmap_DRsort.res,"ROSMAP_DCe_DRsort_q005.res.RDS")
 #saveRDS(rosmap_DCe,"ROSMAP_DCe_AnalysisResults.RDS")
 
 proc.time()

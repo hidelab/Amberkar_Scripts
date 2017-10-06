@@ -52,7 +52,7 @@ tcx_t_counts=mayo_reseq_tcx_data[,mayo_covariates$SampleID[grep(pattern = "TCX.A
 tcx_DCe=DCe(exprs.1 = tcx_c_counts,exprs.2 = tcx_t_counts,r.method = "spearman",p = 0.05,link.method = "qth",cutoff = 0.05)
 saveRDS(tcx_DCe,"TCX_DCe_Results.RDS")
 
-DCecutoff = 0.25
+DCecutoff = 0.05
 tcx_DCe.DCG <- tcx_DCe$DCGs[tcx_DCe$DCGs[, "q"] < DCecutoff, ]
 tcx_DCe.DCG <- data.frame(DCG = rownames(tcx_DCe.DCG), tcx_DCe.DCG)
 DCG<-tcx_DCe.DCG
@@ -60,7 +60,7 @@ x<-tcx_DCe$DCLs
 x<-subset(x, subset=(Gene.1 %in% rownames(DCG) | Gene.2 %in% rownames(DCG) ))
 expGenes<-rownames(tcx_DCe$DCGs)
 tcx_DRsort.res<- DRsort(DCG, x, regnet_tf2target, expGenes)
-saveRDS(tcx_DRsort.res,"TCX_DRsort_Results.RDS")
+saveRDS(tcx_DRsort.res,"TCX_DRsort_Results_q005.RDS")
 
 proc.time()
 cat(paste("Completed!"))
