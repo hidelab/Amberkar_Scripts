@@ -1,10 +1,9 @@
 #!/bin/bash 
 #Job time 
-#$-l h_rt=12:00:00 
+#$-l h_rt=08:00:00 
 #Request resources 
-#$-l rmem=12G 
-#Cores 
-#$-pe openmp 8 
+#$-l rmem=64G 
+#$-l mem=64G
 #Job Name 
 #$-N ROSMAP_DCe
 #Queue

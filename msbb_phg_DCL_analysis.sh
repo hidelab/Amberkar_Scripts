@@ -6,7 +6,8 @@
 #$-l mem=64G
 #Job Name 
 #$-N MSBB_PHG_DCe
-
+#Queue
+#$-P hidelab
 
 
 module load apps/R/3.3.1
