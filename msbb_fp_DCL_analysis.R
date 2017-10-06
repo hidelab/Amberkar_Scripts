@@ -6,6 +6,8 @@ library(data.table)
 library(org.Hs.eg.db)
 library(doParallel)
 library(DCGL)
+library(dplyr)
+library(magrittr)
 
 synapseLogin()
 cl=makeCluster(8)
