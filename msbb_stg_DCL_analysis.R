@@ -31,7 +31,7 @@ msbb_covariates=read.table(msbb_reseq_covariates_pointer@filePath,header = T,sep
 ensembl_geneSymbol_map=mapIds2(IDs = msbb_reseq_data$ensembl_gene_id,IDFrom = "ENSEMBL",IDTo = "SYMBOL")
 msbb_reseq_data2=msbb_reseq_data[-which(msbb_reseq_data$ensembl_gene_id%in%mapIds2(IDs = msbb_reseq_data$ensembl_gene_id,IDFrom = "ENSEMBL",IDTo = "SYMBOL")[[2]]),]
 msbb_reseq_data2$gene_symbol=mapIds2(IDs = msbb_reseq_data2$ensembl_gene_id,IDFrom = "ENSEMBL",IDTo = "SYMBOL")[[1]][,2]
-msbb_reseq_data2.agg=aggregate(x=msbb_reseq_data2[,-c(1,'gene_symbol')],by=list(Symbol=msbb_reseq_data2$gene_symbol),mean)
+msbb_reseq_data2.agg=aggregate(x=msbb_reseq_data2[,-c(1,dim(msbb_reseq_data2)[2])],by=list(Symbol=msbb_reseq_data2$gene_symbol),mean)
 rownames(msbb_reseq_data2.agg)=msbb_reseq_data2.agg$Symbol
 msbb_reseq_data2.agg=msbb_reseq_data2.agg[,-1]
 
