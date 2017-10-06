@@ -3,12 +3,12 @@
 #$-l h_rt=16:00:00 
 #Request resources 
 #$-l rmem=12G 
+#$-l mem=12G
 #Cores 
 #$-pe openmp 8 
 #Job Name 
 #$-N MAYO_CER_DCe
-#Queue
-#$-P hidelab
+
 
 module load apps/R/3.3.1
 module load compilers/gcc/6.2
