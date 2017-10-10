@@ -1,0 +1,5 @@
+cocor_parallel_test/AMP-AD_MSBB_MSSM_IlluminaHiSeq2500_final.TMM_normalized.race_age_RIN_PMI_batch_corrected.tsv filter=lfs diff=lfs merge=lfs -text
+cocor_parallel_test/AMP-AD_MSBB_MSSM_IlluminaHiSeq2500.sample.meta.tsv filter=lfs diff=lfs merge=lfs -text
+cocor_parallel_test/AMP-AD_MSBB_MSSM_IlluminaHiSeq2500_raw_counts_final.tsv filter=lfs diff=lfs merge=lfs -text
+cocor_parallel_test/AMP-AD_MSBB_MSSM_meta.traits.tsv filter=lfs diff=lfs merge=lfs -text
+cocor_parallel_test/cocor_parallel_test.R filter=lfs diff=lfs merge=lfs -text

@@ -55,34 +55,34 @@ ProcessElement <- function(ic){
   setTxtProgressBar(pb,ic %% blocksize)
   return(tmp)
 }
-# ProcessElement <- function(ic){
-#   A = ceiling((sqrt(8*(ic+1)-7)+1)/2)
-#   B = ic-choose(floor(1/2+sqrt(2*ic)),2)
-#   
-#   c_A = c_exprs_rnk[A,]
-#   c_B = c_exprs_rnk[B,]
-#   
-#   t_A = t_exprs_rnk[A,]
-#   t_B = t_exprs_rnk[B,]
-#   
-#   # get correlation between the summaries for the unique genes
-#   tmp = data.frame(Gene.A=gene.names[A],Gene.B=gene.names[B])
-#   c_cortest<-cor.test(unname(unlist(c_A)), unname(unlist(c_B)), method="spearman")
-#   t_cortest<-cor.test(unname(unlist(t_A)), unname(unlist(t_B)), method="spearman")
-#   rc<-c_cortest$estimate
-#   rt<-t_cortest$estimate
-#   diffcor<-cocor.indep.groups(rc, rt, n.c, n.t)
-#   tmp$r.c<-rc
-#   tmp$p.c<-c_cortest$p.value
-#   tmp$n.c<-n.c
-#   tmp$r.t<-rt
-#   tmp$p.t<-t_cortest$p.value
-#   tmp$n.t<-n.t
-#   tmp$p.cocor<-diffcor@fisher1925$p.value
-#   
-#   setTxtProgressBar(pb,ic)
-#   return(tmp)
-# }
+ProcessElement <- function(ic){
+  A = ceiling((sqrt(8*(ic+1)-7)+1)/2)
+  B = ic-choose(floor(1/2+sqrt(2*ic)),2)
+
+  c_A = c_exprs_rnk[A,]
+  c_B = c_exprs_rnk[B,]
+
+  t_A = t_exprs_rnk[A,]
+  t_B = t_exprs_rnk[B,]
+
+  # get correlation between the summaries for the unique genes
+  tmp = data.frame(Gene.A=gene.names[A],Gene.B=gene.names[B])
+  c_cortest<-cor.test(unname(unlist(c_A)), unname(unlist(c_B)), method="spearman")
+  t_cortest<-cor.test(unname(unlist(t_A)), unname(unlist(t_B)), method="spearman")
+  rc<-c_cortest$estimate
+  rt<-t_cortest$estimate
+  diffcor<-cocor.indep.groups(rc, rt, n.c, n.t)
+  tmp$r.c<-rc
+  tmp$p.c<-c_cortest$p.value
+  tmp$n.c<-n.c
+  tmp$r.t<-rt
+  tmp$p.t<-t_cortest$p.value
+  tmp$n.t<-n.t
+  tmp$p.cocor<-diffcor@fisher1925$p.value
+
+  setTxtProgressBar(pb,ic)
+  return(tmp)
+}
 ncore=12
 setwd("/shared/hidelab2/user/md4zsa/Work/Data/IPAH")
 
@@ -101,7 +101,7 @@ gene.names=rownames(ipah_counts.filtered2)
 number_of_combinations=choose(length(gene.names),2)
 dir.create("cocor_results",showWarnings = T,mode = "0777")
 
-i=1267
+i=1390
 blocksize=100000
 start<-i*blocksize+1
 end<-min((i+1)*blocksize, number_of_combinations)

@@ -1,0 +1,270 @@
+---
+title: "IPAH DEG & DCN Analysis2"
+author: "Sandeep Amberkar"
+date: "22/08/2017"
+output:
+  html_document: default
+  rmarkdown::html_document:
+    theme: leonids
+---
+
+```{r setup, include=FALSE,echo=FALSE,message=F}
+library(DESeq2)
+library(dplyr)
+library(org.Hs.eg.db)
+library(plotly)
+library(ggplot2)
+library(d3vennR)
+venn_tooltip <- function( venn ){
+  venn$x$tasks[length(venn$x$tasks)+1] <- list(
+      htmlwidgets::JS('
+function(){
+var div = d3.select(this);
+
+// add a tooltip
+var tooltip = d3.select("body").append("div")
+  .attr("class", "venntooltip")
+  .style("position", "absolute")
+  .style("text-align", "center")
+  .style("width", 128)
+  .style("height", 16)
+  .style("background", "#333")
+  .style("color","#ddd")
+  .style("padding","2px")
+  .style("border","0px")
+  .style("border-radius","8px")
+  .style("opacity",0);
+
+div.selectAll("path")
+  .style("stroke-opacity", 0)
+  .style("stroke", "#fff")
+  .style("stroke-width", 0)
+
+// add listeners to all the groups to display tooltip on mousover
+div.selectAll("g")
+.on("mouseover", function(d, i) {
+
+  // sort all the areas relative to the current item
+  venn.sortAreas(div, d);
+
+  // Display a tooltip with the current size
+  tooltip.transition().duration(400).style("opacity", .9);
+  tooltip.text(d.size);
+
+  // highlight the current path
+  var selection = d3.select(this).transition("tooltip").duration(400);
+  selection.select("path")
+  .style("stroke-width", 3)
+    .style("fill-opacity", d.sets.length == 1 ? .4 : .1)
+  .style("stroke-opacity", 1);
+})
+
+.on("mousemove", function() {
+  tooltip.style("left", (d3.event.pageX) + "px")
+  .style("top", (d3.event.pageY - 28) + "px");
+})
+
+.on("mouseout", function(d, i) {
+  tooltip.transition().duration(400).style("opacity", 0);
+  var selection = d3.select(this).transition("tooltip").duration(400);
+  selection.select("path")
+  .style("stroke-width", 0)
+  .style("fill-opacity", d.sets.length == 1 ? .25 : .0)
+  .style("stroke-opacity", 0);
+});
+}
+      ')
+  )
+  venn
+}
+mapIds2<-function(IDs,IDFrom,IDTo){
+  idmap=mapIds(x = org.Hs.eg.db,keys = IDs,column = IDTo,keytype = IDFrom,multiVals = "first")
+  na_vec=names(idmap[is.na(idmap)==T])
+  idmap=idmap[is.na(idmap)==F]
+  idmap_df=data.frame("From"=names(idmap),"To"=unlist(unname(idmap)),stringsAsFactors = F)
+  return(list(map=idmap_df,noMap=na_vec))
+}
+```
+
+The pilot dataset contains 43 samples; 11 healthy volunteers, 32 IPAH cases. These were analysed using read lengths of 75 and 150bp in independent sequencing runs.
+Both these datasets were analysed to identify differentially expressed genes. 
+```{r preprocess_data,echo=F,message=F}
+#setwd("/Users/sandeepamberkar/Work/Collaborations/IPAH/")
+load("/Users/sandeepamberkar/Work/Collaborations/IPAH/Lawrie_03_29_2017_salmon_150bp.RData")
+ipah_150bp_rawCounts=data.frame(apply(txi$counts,2,round,digits=0),stringsAsFactors = F)
+load("/Users/sandeepamberkar/Work/Collaborations/IPAH/Lawrie_03_30_2017_salmon_75bp.RData")
+ipah_75bp_rawCounts=data.frame(apply(txi$counts,2,round,digits=0),stringsAsFactors = F)
+ipah_metadata=readRDS("/Users/sandeepamberkar/Work/Collaborations/IPAH/lawrie_sample_group.RDS")
+colnames(ipah_150bp_rawCounts)=gsub(pattern = "^X|_v1",replacement = "",x = colnames(ipah_150bp_rawCounts))
+colnames(ipah_75bp_rawCounts)=gsub(pattern = "^X|_v1",replacement = "",x = colnames(ipah_75bp_rawCounts))
+ipah_colData=matrix(NA,nrow=43,ncol=2)
+rownames(ipah_colData)=colnames(ipah_150bp_rawCounts)
+colnames(ipah_colData)=c("condition","type")
+ipah_colData[33:43,1]="HV"
+ipah_colData[1:32,1]="IPAH"
+ipah_colData[,2]="paired-end"
+```
+##Differential expression
+###DEG comparison
+
+```{r DEG_tables,echo=F,message=F}
+library(DT)
+ipah_75bp.dds=DESeqDataSetFromMatrix(countData = ipah_75bp_rawCounts,colData = ipah_colData,design = ~condition)
+ipah_150bp.dds=DESeqDataSetFromMatrix(countData = ipah_150bp_rawCounts,colData = ipah_colData,design = ~condition)
+ipah_75bp.dds=DESeq(ipah_75bp.dds)
+ipah_150bp.dds=DESeq(ipah_150bp.dds)
+
+ipah_75bp.res=data.frame(results(ipah_75bp.dds,pAdjustMethod = "BH"),stringsAsFactors = F)
+ipah_150bp.res=data.frame(results(ipah_150bp.dds,pAdjustMethod = "BH"),stringsAsFactors = F)
+ipah_75bp.res2=data.frame(apply(ipah_75bp.res[which(abs(ipah_75bp.res$log2FoldChange)>1.2&ipah_75bp.res$padj<0.05),-6],2,round,digits=2),padj=ipah_75bp.res$padj[which(abs(ipah_75bp.res$log2FoldChange)>1.2&ipah_75bp.res$padj<0.05)],stringsAsFactors = F)
+ipah_75bp.res2$symbol=unname(mapIds(x = org.Hs.eg.db,keys = unlist(lapply(strsplit(x = rownames(ipah_75bp.res2),split = "\\."),`[[`,1)),column = "SYMBOL",keytype = "ENSEMBL"))
+
+ipah_150bp.res2=data.frame(apply(ipah_150bp.res[which(abs(ipah_150bp.res$log2FoldChange)>1.2&ipah_150bp.res$padj<0.05),-6],2,round,digits=2),padj=ipah_150bp.res$padj[which(abs(ipah_150bp.res$log2FoldChange)>1.2&ipah_150bp.res$padj<0.05)],stringsAsFactors = F)
+ipah_150bp.res2$symbol=unname(mapIds(x = org.Hs.eg.db,keys = unlist(lapply(strsplit(x = rownames(ipah_150bp.res2),split = "\\."),`[[`,1)),column = "SYMBOL",keytype = "ENSEMBL"))
+ipah_75bp.res2$Description=mapIds(x = org.Hs.eg.db,keys=unlist(lapply(strsplit(x = rownames(ipah_75bp.res2),split = "\\."),`[[`,1)),keytype = "ENSEMBL",column = "GENENAME")
+ipah_150bp.res2$Description=mapIds(x = org.Hs.eg.db,keys=unlist(lapply(strsplit(x = rownames(ipah_150bp.res2),split = "\\."),`[[`,1)),keytype = "ENSEMBL",column = "GENENAME")
+ipah_75bp.res2=ipah_75bp.res2[,c(8:6,2)]
+ipah_150bp.res2=ipah_150bp.res2[,c(8:6,2)]
+ipah_venn=d3vennR(data = list(
+  list(sets=list("IPAH_75bp"),size=length(ipah_75bp.res2$symbol)),
+  list(sets=list("IPAH_150bp"),size=length(ipah_150bp.res2$symbol)),
+  list(sets=list("IPAH_75bp","IPAH_150bp"),size=length(intersect(ipah_75bp.res2$symbol,ipah_150bp.res2$symbol)))
+))
+venn_tooltip(ipah_venn)
+ipah_allDEGs.table=matrix(NA,nrow=length(ipah_75bp.res2$symbol),ncol=3)
+ipah_allDEGs.table[,1]=ipah_75bp.res2$symbol
+ipah_allDEGs.table[1:length(ipah_150bp.res2$symbol),2]=ipah_150bp.res2$symbol
+ipah_allDEGs.table[1:length(intersect(ipah_150bp.res2$symbol,ipah_75bp.res2$symbol)),3]=intersect(ipah_150bp.res2$symbol,ipah_75bp.res2$symbol)
+colnames(ipah_allDEGs.table)=c("IPAH_75bp_DEG","IPAH_150bp_DEG","Overlapping.DEGs")
+datatable(data = data.frame(ipah_allDEGs.table),caption = "IPAH DEGs comparison")
+#datatable(ipah_75bp.res2[order(ipah_75bp.res2$log2FoldChange,decreasing = T),],caption = "75 bp DEGs, sorted by logFC")
+#datatable(ipah_150bp.res2[order(ipah_150bp.res2$log2FoldChange,decreasing = T),],caption = "150 bp DEGs, sorted by logFC")
+```
+
+###DEG Plots
+```{r plots, echo=FALSE,message=F}
+ipah_75bp.res=data.frame(results(ipah_75bp.dds,pAdjustMethod = "BH"),stringsAsFactors = F)
+ipah_150bp.res=data.frame(results(ipah_150bp.dds,pAdjustMethod = "BH"),stringsAsFactors = F)
+ipah_75bp.res[which(abs(ipah_75bp.res["log2FoldChange"])>1.2 & ipah_75bp.res["padj"]<=0.05),"group"]="Significant_FC"
+ipah_75bp.res[-which(abs(ipah_75bp.res["log2FoldChange"])>1.2 & ipah_75bp.res["padj"]<=0.05),"group"]="NotSignificant"
+ipah_75bp.res$color="grey"
+ipah_75bp.res$color[which(ipah_75bp.res$group=="Significant_FC")]="red"
+
+ipah_150bp.res[which(abs(ipah_150bp.res["log2FoldChange"])>1.2 & ipah_150bp.res["padj"]<=0.05),"group"]="Significant_FC"
+ipah_150bp.res[-which(abs(ipah_150bp.res["log2FoldChange"])>1.2 & ipah_150bp.res["padj"]<=0.05),"group"]="NotSignificant"
+ipah_150bp.res$color="grey"
+ipah_150bp.res$color[which(ipah_150bp.res$group=="Significant_FC")]="red"
+
+
+ipah_75bp.res$symbol=mapIds(x = org.Hs.eg.db,keys=unlist(lapply(strsplit(x = rownames(ipah_75bp.res),split = "\\."),`[[`,1)),keytype = "ENSEMBL",column = "SYMBOL")
+
+ipah_150bp.res$symbol=mapIds(x = org.Hs.eg.db,keys=unlist(lapply(strsplit(x = rownames(ipah_150bp.res),split = "\\."),`[[`,1)),keytype = "ENSEMBL",column = "SYMBOL")
+
+f <- list(
+     family = "Arial, monospace",
+     size = 18,
+     color = "#7f7f7f")
+x <- list(
+  title = "FoldChange",
+  titlefont = f
+)
+y <- list(
+  title = "-log10(padj)",
+  titlefont = f
+)
+p1=plot_ly(data = ipah_75bp.res,x=ipah_75bp.res$log2FoldChange,y=-log10(ipah_75bp.res$padj),text=paste("Gene:",ipah_75bp.res$symbol,"log2FC:",round(-log10(ipah_75bp.res$padj),digits = 2),sep=" "),mode="markers",color=ipah_75bp.res$group,colors=c("grey","red"))%>%layout(title ="Volcano Plot") %>%layout(xaxis=x,yaxis=y,title="IPAH 75bp DEG\n p<0.05")
+p2=plot_ly(data = ipah_150bp.res,x=ipah_150bp.res$log2FoldChange,y= -log10(ipah_150bp.res$padj),text=paste("Gene:",ipah_150bp.res$symbol,"log2FC:",round(-log10(ipah_150bp.res$padj),digits = 2),sep=" "),mode="markers",color=ipah_150bp.res$group,colors=c("grey","red"))%>%layout(title ="Volcano Plot") %>%layout(xaxis=x,yaxis=y,title="IPAH 150bp DEG\n p<0.05")
+
+par(mfrow=c(2,1))
+htmltools::tagList(list(p1,p2))
+
+#p=ggplot(ipah_75bp.res2,aes(log2FoldChange,-log10(padj)))+geom_point(aes(col=sig))+scale_color_manual(values=c("black","red"))
+
+
+```
+
+##Reactome pathway enrichment
+
+The differentially expressed transcripts were mapped to EntrezIDs and then tested for enrichment in Reactome pathways. 
+
+```{r ReactomePA,message=F,eval=T,echo=F}
+library(clusterProfiler)
+library(ReactomePA)
+ipah_75bp.ReactomPathways=data.frame(enrichPathway(gene = mapIds2(IDs = unlist(lapply(strsplit(rownames(ipah_75bp.res2),split = "\\."),`[[`,1)),IDFrom = "ENSEMBL",IDTo = "ENTREZID")[[1]][,2],organism = "human",pvalueCutoff = 0.05,pAdjustMethod = "BH"))
+ipah_75bp.ReactomPathways[,c(5:7)]=round(ipah_75bp.ReactomPathways[,c(5:7)],digits = 4)
+ipah_75bp.ReactomPathways$geneID=unlist(lapply(strsplit(ipah_75bp.ReactomPathways$geneID,split = "/"),function(x)paste(mapIds2(IDs = x,IDTo = "SYMBOL",IDFrom = "ENTREZID")[[1]][,2],collapse = ",")))
+datatable(ipah_75bp.ReactomPathways[order(ipah_75bp.ReactomPathways$p.adjust,decreasing = F),c(2,5:6,8)],caption = "IPAH 75bp DEGs enriched Reactome pathways")
+
+ipah_150bp.ReactomPathways=data.frame(enrichPathway(gene = mapIds2(IDs = unlist(lapply(strsplit(rownames(ipah_150bp.res2),split = "\\."),`[[`,1)),IDFrom = "ENSEMBL",IDTo = "ENTREZID")[[1]][,2],organism = "human",pvalueCutoff = 0.05,pAdjustMethod = "BH"))
+ipah_150bp.ReactomPathways[,c(5:7)]=round(ipah_150bp.ReactomPathways[,c(5:7)],digits = 4)
+ipah_150bp.ReactomPathways$geneID=unlist(lapply(strsplit(ipah_150bp.ReactomPathways$geneID,split = "/"),function(x)paste(mapIds2(IDs = x,IDTo = "SYMBOL",IDFrom = "ENTREZID")[[1]][,2],collapse = ",")))
+datatable(ipah_150bp.ReactomPathways[order(ipah_150bp.ReactomPathways$p.adjust,decreasing = F),c(2,5:6,8)],caption = "IPAH 150bp DEGs enriched Reactome pathways")
+```
+
+##Differential Coexpression Network analysis
+To build Differential Coexpression Networks (DCNs), differential correlation was computed for approx. ~187 million pairwise Ensembl gene IDs. Basically, the statistical test determines the probability of a gene pair <b>A--B</b> changing its coexpression between healthy and IPAH cases. From the ~187 million gene pairs, 17835 genes with 229k differential coexpression interactions were identified at FDR 5%. 
+
+Separate DCNs were built for healthy and IPAH samples and were identical except for their edge weights. These edge weights were the Spearman Rho of the gene pairs as computed for their respective sample type. Next, using the 270 curated IPAH variants, a directed Random Walk with Restart (RWR) approach was used to derive functional subnetworks of the variants. Downstream enrichment analysis revelead relevant pathways & processes.
+
+```{r dcn_analysis,echo=F,message=F}
+library(igraph)
+library(clusterProfiler)
+
+ipah_pSubnet=read.graph("/Users/sandeepamberkar/Work/Collaborations/IPAH/IPAH_DCN_pSubnet.gml",format = "gml")
+ipah_pSubnet_ReactomePathways=data.frame(enrichPathway(gene = mapIds2(IDs = V(ipah_pSubnet)$name,IDFrom = "SYMBOL",IDTo = "ENTREZID")[[1]][,2],organism = "human",pvalueCutoff = 0.01,pAdjustMethod = "BH"))
+ipah_pSubnet_ReactomePathways$geneID=unlist(lapply(strsplit(ipah_pSubnet_ReactomePathways$geneID,split = "/"),function(x)paste(mapIds2(IDs = x,IDTo = "SYMBOL",IDFrom = "ENTREZID")[[1]][,2],collapse = ",")))
+ipah_pSubnet_ReactomePathways=ipah_pSubnet_ReactomePathways[,c(2,6,8)]
+datatable(ipah_pSubnet_ReactomePathways[order(ipah_pSubnet_ReactomePathways$p.adjust,decreasing = F),],caption = "IPAH Subnet enriched Reactome pathways")
+
+
+hs_ppi.df=read.table("/Users/sandeepamberkar/Work/Data/PPI-Data/iref14_Human_UP_noDup_table.txt",sep = "\t",header=T,as.is=T)
+hs_ppi=graph.data.frame(d = hs_ppi.df[,c(2:3)],directed = F)
+V(hs_ppi)$name[grep(pattern = "-[0-9]",x = V(hs_ppi)$name)]=gsub(pattern = "-[0-9]",replacement = "",V(hs_ppi)$name[grep(pattern = "-[0-9]",x = V(hs_ppi)$name)])
+hs_ppi=delete_vertices(graph = hs_ppi,v=mapIds2(IDs = V(hs_ppi)$name,IDFrom = "UNIPROT",IDTo = "SYMBOL")[[2]])
+V(hs_ppi)$name=mapIds2(IDs = V(hs_ppi)$name,IDFrom = "UNIPROT",IDTo = "SYMBOL")[[1]][,2]
+```
+##Compare DEGs (75bp vs. 150bp)
+To compare DEGs obtained from the 2 datasets, we compared the <i>connectivity</i> i.e. degree of the DEGs in a human-PPI network generated from a curated interaction set from iRefindex v14.0. We used Wilcox test to determine if the degree distributions of the DEGs were significantly different.
+```{r deg_comparison,echo=F,message=F,out.width='100%',out.width='100%'}
+hs_ppi.df=read.table("/Users/sandeepamberkar/Work/Data/PPI-Data/iref14_Human_UP_noDup_table.txt",sep = "\t",header=T,as.is=T)
+hs_ppi=graph.data.frame(d = hs_ppi.df[,c(2:3)],directed = F)
+V(hs_ppi)$name[grep(pattern = "-[0-9]",x = V(hs_ppi)$name)]=gsub(pattern = "-[0-9]",replacement = "",V(hs_ppi)$name[grep(pattern = "-[0-9]",x = V(hs_ppi)$name)])
+hs_ppi=delete_vertices(graph = hs_ppi,v=mapIds2(IDs = V(hs_ppi)$name,IDFrom = "UNIPROT",IDTo = "SYMBOL")[[2]])
+V(hs_ppi)$name=mapIds2(IDs = V(hs_ppi)$name,IDFrom = "UNIPROT",IDTo = "SYMBOL")[[1]][,2]
+V(hs_ppi)$deg=degree(graph = hs_ppi,loops = F)
+hs_ppi_75bp.deg=data.frame(Degree=V(hs_ppi)$deg[which(V(hs_ppi)$name%in%ipah_75bp.res2$symbol)])
+hs_ppi_150bp.deg=data.frame(Degree=V(hs_ppi)$deg[which(V(hs_ppi)$name %in% ipah_150bp.res2$symbol)])
+hs_ppi_75bp.deg$readLength="75bp"
+hs_ppi_150bp.deg$readLength="150bp"
+readLenghts_degree=rbind(hs_ppi_75bp.deg,hs_ppi_150bp.deg)
+#wilcox.test(x = hs_ppi_75bp.deg$Degree,y=hs_ppi_150bp.deg$Degree)
+comp_deg_plot=ggplot(readLenghts_degree,aes(Degree,fill=readLength))+geom_density(alpha=0.25)+annotate("text", x = 100, y = 0.06, label = paste("italic(Wilcox.p) ==", round(wilcox.test(x = hs_ppi_75bp.deg$Degree,y=hs_ppi_150bp.deg$Degree)[[3]],digits = 4),sep = ""),parse = TRUE)+ggtitle(label = "IPAH-Degree distribution of DEGs")
+comp_deg_plot
+```
+
+###Compare DCNs (75bp vs. 150bp)
+
+```{r dcn_compare,message=F,echo=F,out.width='100%',out.width='100%'}
+library(igraph)
+ipah_75_diffcorr=readRDS("/Users/sandeepamberkar/Work/Collaborations/IPAH/IPAH_75bp_NormCountMatrices_FDR05.RDS")
+ipah_150_diffcorr=readRDS("/Users/sandeepamberkar/Work/Collaborations/IPAH/IPAH_150bp_NormCountMatrices_FDR05_wenbin.RDS")
+ipah_75_DCN.HV=ipah_75_DCN.IPAH=graph.data.frame(d=ipah_75_diffcorr[,c(1:2)],directed = F)
+E(ipah_75_DCN.HV)$weight=ipah_75_diffcorr$r.c+1
+E(ipah_75_DCN.IPAH)$weight=ipah_75_diffcorr$r.t+1
+ipah_150_DCN.HV=ipah_150_DCN.IPAH=graph.data.frame(d=ipah_150_diffcorr[,c(1:2)],directed = F)
+E(ipah_150_DCN.HV)$weight=ipah_150_diffcorr$r.c+1
+E(ipah_150_DCN.IPAH)$weight=ipah_150_diffcorr$r.t+1
+
+V(ipah_75_DCN.IPAH)$deg=degree(graph = ipah_75_DCN.IPAH,loops = F)
+V(ipah_150_DCN.IPAH)$deg=degree(graph = ipah_150_DCN.IPAH,loops = F)
+ipah_75_DCN_IPAH.deg=data.frame(Degree=log10(V(ipah_75_DCN.IPAH)$deg),stringsAsFactors = F)
+ipah_150_DCN_IPAH.deg=data.frame(Degree=log10(V(ipah_150_DCN.IPAH)$deg),stringsAsFactors = F)
+ipah_75_DCN_IPAH.deg$readLength="75bp"
+ipah_150_DCN_IPAH.deg$readLength="150bp"
+readLenghts_DCN_degree=rbind(ipah_75_DCN_IPAH.deg,ipah_150_DCN_IPAH.deg)
+#wilcox.test(x = hs_ppi_75bp.deg$Degree,y=hs_ppi_150bp.deg$Degree)
+comp_dcn_plot=ggplot(readLenghts_DCN_degree,aes(Degree,fill=readLength))+geom_density(alpha=0.25)+xlim(0,4)+xlab('log10(Degree)')+annotate("text", x = 2.5, y = 0.5, label = paste("italic(Wilcox.p) ==",wilcox.test(x = ipah_75_DCN_IPAH.deg$Degree,y=ipah_150_DCN_IPAH.deg$Degree)[[3]],sep = ""),parse = TRUE)+ggtitle(label = "IPAH-Degree distribution of DCNs")
+comp_dcn_plot
+```
+
+

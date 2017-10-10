@@ -19,7 +19,7 @@ for (i in 1:4){
 tanzi_damaging_snps=as.data.frame(read.xls('../../../../Collaborations/Tanzi_WGS/Damaging_exonic_SNPs.xlsx',sheet = 1),stringsAsFactors = F)
 tanzi_protective_snps=as.data.frame(read.xls('../../../../Collaborations/Tanzi_WGS/Protective_exonic_SNPs.xlsx',sheet = 1),stringsAsFactors = F)
 #Read curated PPI table
-hs_ppi_table=fread('../../../../Data/PPI-Data/iref14_Human_UP_noDup_table.txt',sep = '\t',header = T,data.table = T,showProgress = T)
+hs_ppi_table=fread('/Users/sandeepamberkar/Work/Data/PPI-Data/iref14_Human_UP_noDup_table.txt',sep = '\t',header = T,data.table = T,showProgress = T)
 #Remove isoforms and collapse to gene level
 hs_ppi.Isoform_A=grep(pattern = '-',x = hs_ppi_table$V1,value = F)
 names(hs_ppi.Isoform_A)=grep(pattern = '-',x = hs_ppi_table$V1,value = T)

@@ -49,7 +49,7 @@ regnet_tf2target=fread("/shared/hidelab2/user/md4zsa/Work/Data/TF_Databases/RegN
 tcx_c_counts=mayo_reseq_tcx_data[,mayo_covariates$SampleID[grep(pattern = "TCX.Control",mayo_covariates$BrainRegion.Diagnosis)]]
 tcx_t_counts=mayo_reseq_tcx_data[,mayo_covariates$SampleID[grep(pattern = "TCX.AD",mayo_covariates$BrainRegion.Diagnosis)]]
 #tcx_DCp=DCp(exprs.1 = tcx_c_counts,exprs.2 = tcx_t_counts,r.method = "spearman",link.method = "qth",cutoff = 0.05,N = 1000)
-tcx_DiffCoexp=diffcoexp(exprs.1 = tcx_c_counts,exprs.2 = tcx_t_counts,rth=0.6, qth=0.1, r.diffth=0.0, q.diffth=0.1)
+tcx_DiffCoexp=diffcoexp(exprs.1 = tcx_c_counts,exprs.2 = tcx_t_counts,rth=0.0, qth=0.1, r.diffth=0.0, q.diffth=0.1)
 tcx_DRsort=DRsort(DCGs = tcx_DiffCoexp$DCGs,DCLs = tcx_DiffCoexp$DCLs,tf2target = regnet_tf2target,expGenes = rownames(mayo_reseq_tcx_data))
 saveRDS(tcx_DiffCoexp,"TCX_DiffCoexp_noLFC_Results.RDS")
 saveRDS(tcx_DRsort,"TCX_DiffCoexp_DRsort_noLFC.res.RDS")

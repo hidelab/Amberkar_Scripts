@@ -1,0 +1,95 @@
+---
+title: "IPAH Differential Expression Analysis"
+author: "Sandeep Amberkar"
+date: "23/07/2017"
+output: 
+  html_document:
+    theme: hpstr
+    highlight: tango
+
+---
+
+```{r setup, echo=F,eval=T,message=F}
+library(data.table)
+library(cocor)
+library(parallel)
+library(org.Hs.eg.db)
+library(DESeq2)
+mapIds2<-function(IDs,IDFrom,IDTo){
+  idmap=mapIds(x = org.Hs.eg.db,keys = IDs,column = IDTo,keytype = IDFrom,multiVals = "first")
+  na_vec=names(idmap[is.na(idmap)==T])
+  idmap=idmap[is.na(idmap)==F]
+  idmap_df=data.frame("From"=names(idmap),"To"=unlist(unname(idmap)),stringsAsFactors = F)
+  return(list(map=idmap_df,noMap=na_vec))
+}
+
+```
+
+## Datasets
+
+The pilot dataset consists of 43 samples, described as below:
+```{r table,echo=F,results="asis"}
+library(pander)
+setwd("/Users/sandeepamberkar/Work/Collaborations/IPAH/")
+ipah_metadata=readRDS("/Users/sandeepamberkar/Work/Collaborations/IPAH/lawrie_sample_group.RDS")
+ipah_150bp_counts=readRDS("/Users/sandeepamberkar/Work/Collaborations/IPAH/IPAH_150bp_normCounts.RDS")
+ipah_75bp_counts=readRDS("/Users/sandeepamberkar/Work/Collaborations/IPAH/IPAH_75bp_normCounts.RDS")
+ipah_metadata$External.ID[which(ipah_metadata$group=="HV")]=gsub(pattern="_v1",replacement="",x=ipah_metadata$External.ID[which(ipah_metadata$group=="HV")])
+healthy_150bp_samples=grep(paste(ipah_metadata$External.ID[which(ipah_metadata$group=="HV")],collapse="|"),ipah_150bp_counts,value=T)
+ipah_samples=grep(paste(ipah_metadata$External.ID[which(ipah_metadata$group=="IPAH")],collapse="|"),,value=T)
+healthy_counts.df=data.frame(lapply(lapply(healthy_samples,function(x)fread(input=x,sep="\t",header=T,stringsAsFactors=F,showProgress=T,data.table=F)),`[[`,4),stringsAsFactors=F)
+ipah_counts.df=data.frame(lapply(lapply(ipah_samples,function(x)fread(input=x,sep="\t",header=T,stringsAsFactors=F,showProgress=T,data.table=F)),`[[`,4),stringsAsFactors=F)
+colnames(healthy_counts.df)=unlist(lapply(strsplit(x=healthy_samples,split="/"),`[[`,8))
+colnames(ipah_counts.df)=unlist(lapply(strsplit(x=ipah_samples,split="/"),`[[`,8))
+f1=fread(count_files[1],sep="\t",header=T,stringsAsFactors=F,data.table=F)
+rownames(ipah_counts.df)=f1$Name
+rownames(healthy_counts.df)=f1$Name
+
+sample_table=data.frame(IPAH=length(ipah_samples),Healthy=length(healthy_samples),stringsAsFactors = F)
+
+pander(sample_table,caption = "IPAH samples pilot dataset")
+```
+
+```{r deg_analysis,echo=F,eval=T,message=F}
+library(DT)
+library(clusterProfiler)
+library(ReactomePA)
+library(biomaRt)
+ipah_colData=matrix(NA,sum(length(healthy_samples),length(ipah_samples)),ncol=2)
+ipah_colData[,1]=c(rep("HV",length(healthy_samples)),rep("IPAH",length(ipah_samples)))
+ipah_colData[,2]=rep("paired-end",sum(length(healthy_samples),length(ipah_samples)))
+rownames(ipah_colData)=c(colnames(healthy_counts.df),colnames(ipah_counts.df))
+ipah_colData=data.frame(condition=ipah_colData[,1],type=ipah_colData[,2],stringsAsFactors = F)
+ipah_all_samples.df=data.frame(healthy_counts.df,ipah_counts.df,stringsAsFactors = F)
+ipah_all_samples.df=data.frame(apply(ipah_all_samples.df,2,round,digits=0))
+colnames(ipah_all_samples.df)=gsub(pattern = "^X",replacement = "",x = colnames(ipah_all_samples.df))
+rownames(ipah_all_samples.df)=f1$Name
+
+ipah_all_samples.dds=DESeqDataSetFromMatrix(countData = ipah_all_samples.df,colData = ipah_colData,design = ~condition)
+ipah_all_samples.dds=ipah_all_samples.dds[rowSums(counts(ipah_all_samples.dds))>1,]
+ipah_all_samples.dds=DESeq(ipah_all_samples.dds)
+ipah_all_samples.results=data.frame(results(ipah_all_samples.dds)[which((results(ipah_all_samples.dds)[,6]<=0.05)&(abs(results(ipah_all_samples.dds)[,2]>log2(2)))),],stringsAsFactors = F)
+ipah_all_samples.results[,c(1:6)]=round(ipah_all_samples.results[,c(1:6)],digits = 3)
+ipah_all_samples.results=ipah_all_samples.results[order(ipah_all_samples.results$log2FoldChange,decreasing = T),]
+ipah_DETs=unlist(lapply(strsplit(rownames(ipah_all_samples.results[which(((abs(ipah_all_samples.results$log2FoldChange)>log(2))==T)&(ipah_all_samples.results$padj<=0.05)),]),split = "\\."),`[[`,1))
+ensembl = useEnsembl(biomart="ensembl", dataset="hsapiens_gene_ensembl")
+ipah_all_samples.results$external_transcript_name=getBM(attributes=c("external_transcript_name","ensembl_transcript_id","ensembl_gene_id"),filters = c("ensembl_transcript_id"),values = unlist(lapply(strsplit(rownames(ipah_all_samples.results),split = "\\."),`[[`,1)),mart = ensembl)[,1]
+ipah_all_samples.results$Symbol=getBM(attributes=c("external_transcript_name","ensembl_transcript_id","ensembl_gene_id","hgnc_symbol"),filters = c("ensembl_transcript_id"),values = unlist(lapply(strsplit(rownames(ipah_all_samples.results),split = "\\."),`[[`,1)),mart = ensembl)[,4]
+rownames(ipah_all_samples.results)=NULL
+ipah_all_samples.results=data.frame(ipah_all_samples.results[,c(7:8)],ipah_all_samples.results[,c(2,6)],stringsAsFactors = F)
+datatable(ipah_all_samples.results[order(ipah_all_samples.results$log2FoldChange,decreasing = T),],caption = "List of DEGs, sorted by logFC")
+```
+
+##Reactome pathway enrichment
+
+The differentially expressed transcripts were mapped to EntrezIDs and then tested for enrichment in Reactome pathways. 
+```{r ReactomePA,message=F,eval=T,echo=F}
+library(ReactomePA)
+ipah_DET.ReactomPathways=summary(enrichPathway(gene = mapIds2(IDs = ipah_DETs,IDFrom = "ENSEMBLTRANS",IDTo = "ENTREZID")[[1]][,2],organism = "human",pvalueCutoff = 0.1,pAdjustMethod = "BH"))
+ipah_DET.ReactomPathways[,c(5:7)]=round(ipah_DET.ReactomPathways[,c(5:7)],digits = 4)
+ipah_DET.ReactomPathways$geneID=unlist(lapply(strsplit(ipah_DET.ReactomPathways$geneID,split = "/"),function(x)paste(mapIds2(IDs = x,IDTo = "SYMBOL",IDFrom = "ENTREZID")[[1]][,2],collapse = ",")))
+
+datatable(ipah_DET.ReactomPathways[order(ipah_DET.ReactomPathways$p.adjust,decreasing = F),c(2,5:6,8)],caption = "IPAH DEGs enriched Reactome pathways")
+```
+
+

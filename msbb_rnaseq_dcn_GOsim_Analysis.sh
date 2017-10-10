@@ -6,7 +6,7 @@
 #Cores 
 #$ -pe openmp 8
 #Job Name 
-#$-N MSBB_SemSim
+#$-N Rewire_Threshold
 #Email
 #$-M s.amberkar@sheffield.ac.uk
 

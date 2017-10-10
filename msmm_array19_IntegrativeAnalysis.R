@@ -20,7 +20,7 @@ multiID.u133a=msbb_array19[[1]]$ENTREZ_GENE_ID[grep(pattern="///",msbb_array19[[
 u133a_universe=c(msbb_array19[[1]]$ENTREZ_GENE_ID[-grep(pattern="///",msbb_array19[[1]]$ENTREZ_GENE_ID)],gsub(pattern=" ",replacement="",lapply(strsplit(x=multiID.u133a,split="///"),`[`,1)))
 msbb_array19=lapply(msbb_array19,function(x){x$ENTREZ_GENE_ID<-u133a_universe;x})
 msbb_array19.agg=lapply(lapply(msbb_array19,`[`,-c(1:4)),aggregate,by=list(EntrezID=msbb_array19[[1]]$ENTREZ_GENE_ID),mean)
-# msbb_array19.agg2=lapply(lapply(msbb_array19,`[`,-c(1:4)),aggregate,by=list(Gene.Symbol=msbb_array19[[1]]$Gene.Symbol),mean)
+msbb_array19.agg2=lapply(lapply(msbb_array19,`[`,-c(1:4)),aggregate,by=list(Gene.Symbol=msbb_array19[[1]]$Gene.Symbol),mean)
 for (i in 1:length(names(msbb_array19.agg))){
   msbb_array19.agg[[i]]=msbb_array19.agg[[i]][-1,]
   rownames(msbb_array19.agg[[i]])=msbb_array19.agg[[i]][,1]
@@ -88,7 +88,7 @@ for (j in 1:length(names(msbb_array19.NTr_PLQ_phenoData2))){
   fit2=eBayes(fit2)
   msbb_array19.DEG_NTR[[j]]=topTableF(fit2,adjust.method="BH",number=Inf)
 }
-names(msbb_array19.eset)=names(msbb_array19.DEG_NTR)=names(msbb_array19.DEG_PLQ)=names(msbb_array19)
+names(msbb_array19.eset)=names(msbb_array19.DEG_PLQ)=names(msbb_array19)
 
 #Check regions that have highest DEGs at FDR<=0.2,for plaques
 unlist(lapply(lapply(msbb_array19.DEG_PLQ,function(x)which(x$adj.P.Val<=0.25)),length))

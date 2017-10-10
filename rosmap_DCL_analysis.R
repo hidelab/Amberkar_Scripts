@@ -8,8 +8,8 @@ library(DCGL)
 library(dplyr)
 library(magrittr)
 
-synapseLogin(username = "s.amberkar@sheffield.ac.uk",apiKey = "evb/5m+/10KmKAOP2vS1G6+a20iWAQlDosD9UfoQhvvFUdip/R/kZCzuk3jYecQ7zti5F4ZePz8djJQ8PoRC6Q==",rememberMe = T)
-cl=makeCluster(8)
+synapseLogin()
+#cl=makeCluster(8)
 registerDoParallel(cl)
 #Define functions to be used
 mapIds2<-function(IDs,IDFrom,IDTo){
