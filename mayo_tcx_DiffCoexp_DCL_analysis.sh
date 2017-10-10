@@ -6,6 +6,8 @@
 #$-l mem=32G
 #Job Name 
 #$-N Mayo_TCX_DiffCoexp
+#Queue
+#$-P hidelab
 
 
 module load apps/R/3.3.1
