@@ -45,7 +45,7 @@ regnet_tf2target=fread("/shared/hidelab2/user/md4zsa/Work/Data/TF_Databases/RegN
 msbb_phg_c_counts=msbb_reseq_data2.agg[,msbb_covariates$SampleID[msbb_covariates$BrainRegion.Diagnosis=="PHG.CONTROL"]]
 msbb_phg_t_counts=msbb_reseq_data2.agg[,msbb_covariates$SampleID[msbb_covariates$BrainRegion.Diagnosis=="PHG.AD"]]
 
-msbb_phg_DiffCoexp=diffcoexp(exprs.1 = msbb_phg_c_counts,exprs.2 = msbb_phg_t_counts,rth=0.6, qth=0.1, r.diffth=0.6, q.diffth=0.1)
+msbb_phg_DiffCoexp=diffcoexp(exprs.1 = msbb_phg_c_counts,exprs.2 = msbb_phg_t_counts,rth=0.6, qth=0.1, r.diffth=0.0, q.diffth=0.1)
 
 saveRDS(msbb_phg_DiffCoexp,"MSBB_PHG_DiffCoexp_noLFC.res.RDS")
 # saveRDS(msbb_fp_DCe,"MSBB_FP_DCe_res.RDS")
