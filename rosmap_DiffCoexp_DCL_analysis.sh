@@ -6,7 +6,8 @@
 #$-l mem=32G
 #Job Name 
 #$-N ROSMAP_DiffCoexp
-
+#Queue
+#$-P hidelab
 
 module load apps/R/3.3.1
 module load compilers/gcc/6.2
