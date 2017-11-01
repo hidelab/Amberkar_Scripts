@@ -45,8 +45,8 @@ rosmap_t_counts=rosmap_reseq_data2.agg[,rosmap_covariates$SampleID[rosmap_covari
 #rosmap_DCp=DCp(exprs.1 = rosmap_c_counts,exprs.2 = rosmap_t_counts,r.method = "spearman",link.method = "qth",cutoff = 0.05,N = 1000)
 rosmap_diffcoexp=diffcoexp(exprs.1 = rosmap_c_counts,exprs.2 = rosmap_t_counts,rth=0.6, qth=0.1, r.diffth=0.1, q.diffth=0.1)
 rosmap_diffcoexp_DRsort=DRsort(DCGs = rosmap_diffcoexp$DCGs,DCLs = rosmap_diffcoexp$DCLs,tf2target = regnet_tf2target,expGenes = rownames(rosmap_reseq_data2.agg))
-saveRDS(rosmap_diffcoexp,"ROSMAP_DiffCoexp_noLFC.res.RDS")
-saveRDS(rosmap_diffcoexp_DRsort,"ROSMAP_DRsort_noLFC.res.RDS")
+saveRDS(rosmap_diffcoexp,"ROSMAP_DiffCoexp_noLFC_bugfix.res.RDS")
+saveRDS(rosmap_diffcoexp_DRsort,"ROSMAP_DiffCoexp_noLFC_bugfix.res.RDS")
 
 # DCecutoff = 0.05
 # rosmap_DCe.DCG <- rosmap_DCe$DCGs[rosmap_DCe$DCGs[, "q"] < DCecutoff, ]

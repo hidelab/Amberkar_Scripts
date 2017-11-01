@@ -51,8 +51,8 @@ cer_t_counts=mayo_reseq_cer_data[,mayo_covariates$SampleID[grep(pattern = "CER.A
 #tcx_DCp=DCp(exprs.1 = tcx_c_counts,exprs.2 = tcx_t_counts,r.method = "spearman",link.method = "qth",cutoff = 0.05,N = 1000)
 cer_DiffCoexp=diffcoexp(exprs.1 = cer_c_counts,exprs.2 = cer_t_counts,rth=0.6, qth=0.1, r.diffth=0.1, q.diffth=0.1)
 cer_DRsort=DRsort(DCGs = cer_DiffCoexp$DCGs,DCLs = cer_DiffCoexp$DCLs,tf2target = regnet_tf2target,expGenes = rownames(mayo_reseq_tcx_data))
-saveRDS(cer_DiffCoexp,"CER_DiffCoexp_noLFC_Results.RDS")
-saveRDS(cer_DRsort,"CER_DiffCoexp_DRsort_noLFC.res.RDS")
+saveRDS(cer_DiffCoexp,"CER_DiffCoexp_noLFC_bugfix.res.RDS")
+saveRDS(cer_DRsort,"CER_DiffCoexp_DRsort_noLFC_bugfix.res.RDS")
 
 # DCecutoff = 0.05
 # tcx_DCe.DCG <- tcx_DCe$DCGs[tcx_DCe$DCGs[, "q"] < DCecutoff, ]
