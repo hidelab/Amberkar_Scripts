@@ -7,7 +7,7 @@ library(doParallel)
 library(DCGL)
 library(dplyr)
 library(magrittr)
-source("/shared/hidelab2/user/md4zsa/Work/Software/diffcoexp/diffcoexp.R")
+
 synapseLogin()
 #cl=makeCluster(8)
 #registerDoParallel(cl)
