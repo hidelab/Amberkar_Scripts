@@ -2,8 +2,8 @@
 #Job time 
 #$-l h_rt=12:00:00 
 #Request resources 
-#$-l rmem=32G
-#$-l mem=32G
+#$-l rmem=64G
+#$-l mem=64G
 #Job Name 
 #$-N Mayo_CER_DiffCoexp
 #Queue
