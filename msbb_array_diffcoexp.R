@@ -71,7 +71,7 @@ Control_sample.vector=paste(gsub(pattern = "X",replacement = "",msbb_array19.cov
 msbb_array_region.diffcoexp=vector(mode = "list",length = 17)
 names(msbb_array_region.diffcoexp)=names(msbb_array19)
 #msbb_array_lobe.diffcoexp=vector(mode = "list",length = 5)
-for(i in 1:17){
+for(i in 6:17){
   msbb_array_region.diffcoexp[[i]]=diffcoexp(exprs.1 = as.data.frame(msbb_array19.2.agg2[[i]])[,grep(pattern = Control_sample.vector,x = colnames(as.data.frame(msbb_array19.2.agg2[[i]])))],
                  exprs.2 = as.data.frame(msbb_array19.2.agg2[[i]])[,grep(pattern = AD_sample.vector,x = colnames(as.data.frame(msbb_array19.2.agg2[[i]])))],
                  rth=0.6, qth=0.2, r.diffth=0.1, q.diffth=0.1)
