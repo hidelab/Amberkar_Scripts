@@ -6,6 +6,8 @@
 #$-l rmem=256G
 #Job Name 
 #$-N IPAH_150bp_DC
+#Queue
+#-P hidelab
 
 module load apps/R/3.3.1
 module load compilers/gcc/6.2
