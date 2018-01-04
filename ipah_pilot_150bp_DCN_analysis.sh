@@ -4,8 +4,6 @@
 #Request resources 
 #$-l mem=256G
 #$-l rmem=256G
-#Cores 
-#$-pe openmp 
 #Job Name 
 #$-N IPAH_150bp_DC
 
