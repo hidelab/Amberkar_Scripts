@@ -4,7 +4,7 @@
 #Request resources 
 #$-l mem=64G
 #$-l rmem=32G
-#$-l pe openmp 4
+#$-pe openmp 4
 #Job Name 
 #$-N Berchtold_diffcoep
 #Queue
