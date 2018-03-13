@@ -7,6 +7,8 @@
 #$-pe openmp 4
 #Job Name 
 #$-N Berchtold_diffcoep
+#Queue
+#$-P hidelab
 
 
 module load apps/R/3.3.1
