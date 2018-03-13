@@ -18,7 +18,7 @@ jaccard=function(A,B){
   return(jc)
 }
 allowWGCNAThreads(nThreads = 8)
-setwd("/shared/hidelab2/user/md4zsa/Work/Data/AD_GSE48350")
+setwd("/shared/hidelab2/user/md4zsa/Work/Data/AD_48350")
 # gse48350_series_matrix=getGEO(GEO = "GSE48350",GSEMatrix = T)
 # gse48350_exprs=cbind.data.frame(pData(gse48350_series_matrix@featureData[,c(1,11:12)]),exprs(gse48350_series_matrix))
 # gse48350_exprs.agg=aggregate(x = gse48350_exprs[,-c(1:3)],by=list(symbol=gse48350_exprs$`Gene Symbol`),mean)
