@@ -3,7 +3,7 @@
 #$-l h_rt=12:00:00 
 #Request resources 
 #$-l mem=64G
-#$-l rmem=64G
+#$-l rmem=32G
 #$-pe openmp 4
 #Job Name 
 #$-N Berchtold_diffcoep
