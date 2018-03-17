@@ -1,9 +1,9 @@
 #!/bin/bash 
 #Job time 
-#$-l h_rt=12:00:00 
+#$-l h_rt=36:00:00 
 #Request resources 
 #$-l mem=256G
-#$-l rmem=64G
+#$-l rmem=128G
 #Job Name 
 #$-N MSBB_Diffcoexp2
 #Queue
