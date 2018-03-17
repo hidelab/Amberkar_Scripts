@@ -3,7 +3,7 @@
 #$-l h_rt=12:00:00 
 #Request resources 
 #$-l mem=256G
-#$-l rmem=128G
+#$-l rmem=64G
 #Job Name 
 #$-N MSBB_Diffcoexp2
 #Queue
