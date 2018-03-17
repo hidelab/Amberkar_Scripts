@@ -2,9 +2,8 @@
 #Job time 
 #$-l h_rt=12:00:00 
 #Request resources 
-#$-l mem=64G
-#$-l rmem=64G
-#$-pe openmp 4
+#$-l mem=256G
+#$-l rmem=128G
 #Job Name 
 #$-N MSBB_Diffcoexp2
 #Queue
