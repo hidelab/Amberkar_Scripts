@@ -28,11 +28,13 @@ msbb_gse84422.DCGs_list=lapply(msbb_gse84422.DCGs,function(x)x%>%dplyr::filter(q
 msbb_gse84422.DCLs=lapply(msbb_gse84422_diffcoexp_results,function(x)x$DCLs)
 msbb_gse84422.DCLs_filtered=lapply(msbb_gse84422_diffcoexp_results,function(x)x$DCLs%>%filter(q.diffcor<=0.05))
 
-mc=8
-cl=makeCluster(mc)
 msbb_array_DRrank.TDD=msbb_array_DRrank.TED=vector(mode = "list",length = 19)
 names(msbb_array_DRrank.TDD)=names(msbb_array_DRrank.TED)=names(msbb_gse84422_diffcoexp_results)
-msbb_array_DRrank.TED[c(1,10)]=mcmapply(FUN=function(a,b)DRrank(DCGs = a,DCLs = b,tf2target = regnet_tf2target.HGNC,expGenes = rownames(msbb_gse84422_GPL570_samplesToAnalyse.exprs$Amygdala),rank.method = "TED",Nperm = 1000),msbb_gse84422.DCGs[c(1,10)],msbb_gse84422.DCLs[c(1,10)],mc.cores = mc)
-msbb_array_DRrank.TED[c(1:9,11:19)]=mcmapply(FUN=function(a,b)DRrank(DCGs = a,DCLs = b,tf2target = regnet_tf2target.HGNC,expGenes = rownames(msbb_gse84422_GPL96_97_samplesToAnalyse.exprs$Frontal_Pole),rank.method = "TED",Nperm = 1000),msbb_gse84422.DCGs[c(1:9,11:19)],msbb_gse84422.DCLs[c(1:9,11:19)],mc.cores = mc)
-stopCluster(cl)
-saveRDS(msbb_array_DRrank.TED,"msbb_array_DRrank_TED.RDS")
+for(i in c(1,10)){
+  msbb_array_DRrank.TED[[i]]=DRrank(DCGs=msbb_gse84422.DCGs[[i]],DCLs=msbb_gse84422.DCLs[[i]],tf2target=regnet_tf2target.HGNC,expGenes=rownames(msbb_gse84422_GPL570_samplesToAnalyse.exprs$Amygdala),rank.method="TED",Nperm=1000)
+  paste(names(msbb_array_DRrank.TED)[i],"DRrank_TED.RDS",sep = "_")
+}
+for(i in c(2:9,11:19)){
+  msbb_array_DRrank.TED[[i]]=DRrank(DCGs=msbb_gse84422.DCGs[[i]],DCLs=msbb_gse84422.DCLs[[i]],tf2target=regnet_tf2target.HGNC,expGenes=rownames(msbb_gse84422_GPL96_97_samplesToAnalyse.exprs$`Frontal Pole`),rank.method="TED",Nperm=1000)
+  paste(names(msbb_array_DRrank.TED)[i],"DRrank_TED.RDS",sep = "_")
+}
