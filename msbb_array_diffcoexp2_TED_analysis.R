@@ -7,6 +7,7 @@ library(data.table)
 library(foreach)
 library(doParallel)
 library(DCGL)
+library(tibble)
 
 #setwd("/Users/sandeepamberkar/Work/Data/MSMM-MSBB-HBTRC-Data/MSBB_Array19/GSE84422/")
 setwd("/shared/hidelab2/user/md4zsa/Work/Data/MSBB_Array19/GSE84422")
@@ -31,10 +32,10 @@ msbb_gse84422.DCLs_filtered=lapply(msbb_gse84422_diffcoexp_results,function(x)x$
 msbb_array_DRrank.TDD=msbb_array_DRrank.TED=vector(mode = "list",length = 19)
 names(msbb_array_DRrank.TDD)=names(msbb_array_DRrank.TED)=names(msbb_gse84422_diffcoexp_results)
 for(i in c(1,10)){
-  msbb_array_DRrank.TED[[i]]=DRrank(DCGs=msbb_gse84422.DCGs[[i]],DCLs=msbb_gse84422.DCLs[[i]],tf2target=regnet_tf2target.HGNC,expGenes=rownames(msbb_gse84422_GPL570_samplesToAnalyse.exprs$Amygdala),rank.method="TED",Nperm=1000)
-  paste(names(msbb_array_DRrank.TED)[i],"DRrank_TED.RDS",sep = "_")
+  msbb_array_DRrank.TED[[i]]=DRrank(DCGs=msbb_gse84422.DCGs[[i]],DCLs=msbb_gse84422.DCLs[[i]],tf2target=regnet_tf2target.HGNC,expGenes=rownames(msbb_gse84422_GPL570_samplesToAnalyse.exprs$Amygdala),rank.method="TED",Nperm=1000)%>%rownames_to_column("Gene")
+  saveRDS(msbb_array_DRrank.TED[[i]],paste(names(msbb_array_DRrank.TED)[i],"DRrank_TED.RDS",sep = "_"))
 }
 for(i in c(2:9,11:19)){
-  msbb_array_DRrank.TED[[i]]=DRrank(DCGs=msbb_gse84422.DCGs[[i]],DCLs=msbb_gse84422.DCLs[[i]],tf2target=regnet_tf2target.HGNC,expGenes=rownames(msbb_gse84422_GPL96_97_samplesToAnalyse.exprs$`Frontal Pole`),rank.method="TED",Nperm=1000)
-  paste(names(msbb_array_DRrank.TED)[i],"DRrank_TED.RDS",sep = "_")
+  msbb_array_DRrank.TED[[i]]=DRrank(DCGs=msbb_gse84422.DCGs[[i]],DCLs=msbb_gse84422.DCLs[[i]],tf2target=regnet_tf2target.HGNC,expGenes=rownames(msbb_gse84422_GPL96_97_samplesToAnalyse.exprs$`Frontal Pole`),rank.method="TED",Nperm=1000)%>%rownames_to_column("Gene")
+  saveRDS(msbb_array_DRrank.TED[[i]],paste(names(msbb_array_DRrank.TED)[i],"DRrank_TED.RDS",sep = "_"))
 }
