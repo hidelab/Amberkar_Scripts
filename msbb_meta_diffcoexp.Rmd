@@ -1,0 +1,34 @@
+---
+title: "Differential coexpression of multiple brain regions - Mt.Sinai array dataset"
+author: "Sandeep Amberkar"
+date: "03/01/2018"
+output: 
+    prettydoc::html_pretty:
+    theme: architect
+    highlight: github
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = F,eval = T)
+```
+
+## Analysis Summary
+
+Differential coexpression (DCx) is the change in the coexpression levels of a gene pair between 2 conditions, namely, Case and Control. This principle has been applied in many diseases to identify transcriptional changes beyond the scope of differential expression. Using 'diffcoexp'(https://github.com/hidelab/diffcoexp), DCx analysis was performed on the Mt.Sinai array dataset comprising of 951 samples across 17 brain regions profiled on the Affymetrix hgu133 platform. 
+
+### Results
+
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

@@ -1,5 +1,5 @@
 ---
-title: "IPAH DEG & DCN Analysis2"
+title: "IPAH Differential Expression and downstream pathway enrichment"
 author: "Sandeep Amberkar"
 date: "22/08/2017"
 output:
@@ -200,71 +200,4 @@ ipah_150bp.ReactomPathways[,c(5:7)]=round(ipah_150bp.ReactomPathways[,c(5:7)],di
 ipah_150bp.ReactomPathways$geneID=unlist(lapply(strsplit(ipah_150bp.ReactomPathways$geneID,split = "/"),function(x)paste(mapIds2(IDs = x,IDTo = "SYMBOL",IDFrom = "ENTREZID")[[1]][,2],collapse = ",")))
 datatable(ipah_150bp.ReactomPathways[order(ipah_150bp.ReactomPathways$p.adjust,decreasing = F),c(2,5:6,8)],caption = "IPAH 150bp DEGs enriched Reactome pathways")
 ```
-
-##Differential Coexpression Network analysis
-To build Differential Coexpression Networks (DCNs), differential correlation was computed for approx. ~187 million pairwise Ensembl gene IDs. Basically, the statistical test determines the probability of a gene pair <b>A--B</b> changing its coexpression between healthy and IPAH cases. From the ~187 million gene pairs, 17835 genes with 229k differential coexpression interactions were identified at FDR 5%. 
-
-Separate DCNs were built for healthy and IPAH samples and were identical except for their edge weights. These edge weights were the Spearman Rho of the gene pairs as computed for their respective sample type. Next, using the 270 curated IPAH variants, a directed Random Walk with Restart (RWR) approach was used to derive functional subnetworks of the variants. Downstream enrichment analysis revelead relevant pathways & processes.
-
-```{r dcn_analysis,echo=F,message=F}
-library(igraph)
-library(clusterProfiler)
-
-ipah_pSubnet=read.graph("/Users/sandeepamberkar/Work/Collaborations/IPAH/IPAH_DCN_pSubnet.gml",format = "gml")
-ipah_pSubnet_ReactomePathways=data.frame(enrichPathway(gene = mapIds2(IDs = V(ipah_pSubnet)$name,IDFrom = "SYMBOL",IDTo = "ENTREZID")[[1]][,2],organism = "human",pvalueCutoff = 0.01,pAdjustMethod = "BH"))
-ipah_pSubnet_ReactomePathways$geneID=unlist(lapply(strsplit(ipah_pSubnet_ReactomePathways$geneID,split = "/"),function(x)paste(mapIds2(IDs = x,IDTo = "SYMBOL",IDFrom = "ENTREZID")[[1]][,2],collapse = ",")))
-ipah_pSubnet_ReactomePathways=ipah_pSubnet_ReactomePathways[,c(2,6,8)]
-datatable(ipah_pSubnet_ReactomePathways[order(ipah_pSubnet_ReactomePathways$p.adjust,decreasing = F),],caption = "IPAH Subnet enriched Reactome pathways")
-
-
-hs_ppi.df=read.table("/Users/sandeepamberkar/Work/Data/PPI-Data/iref14_Human_UP_noDup_table.txt",sep = "\t",header=T,as.is=T)
-hs_ppi=graph.data.frame(d = hs_ppi.df[,c(2:3)],directed = F)
-V(hs_ppi)$name[grep(pattern = "-[0-9]",x = V(hs_ppi)$name)]=gsub(pattern = "-[0-9]",replacement = "",V(hs_ppi)$name[grep(pattern = "-[0-9]",x = V(hs_ppi)$name)])
-hs_ppi=delete_vertices(graph = hs_ppi,v=mapIds2(IDs = V(hs_ppi)$name,IDFrom = "UNIPROT",IDTo = "SYMBOL")[[2]])
-V(hs_ppi)$name=mapIds2(IDs = V(hs_ppi)$name,IDFrom = "UNIPROT",IDTo = "SYMBOL")[[1]][,2]
-```
-##Compare DEGs (75bp vs. 150bp)
-To compare DEGs obtained from the 2 datasets, we compared the <i>connectivity</i> i.e. degree of the DEGs in a human-PPI network generated from a curated interaction set from iRefindex v14.0. We used Wilcox test to determine if the degree distributions of the DEGs were significantly different.
-```{r deg_comparison,echo=F,message=F,out.width='100%',out.width='100%'}
-hs_ppi.df=read.table("/Users/sandeepamberkar/Work/Data/PPI-Data/iref14_Human_UP_noDup_table.txt",sep = "\t",header=T,as.is=T)
-hs_ppi=graph.data.frame(d = hs_ppi.df[,c(2:3)],directed = F)
-V(hs_ppi)$name[grep(pattern = "-[0-9]",x = V(hs_ppi)$name)]=gsub(pattern = "-[0-9]",replacement = "",V(hs_ppi)$name[grep(pattern = "-[0-9]",x = V(hs_ppi)$name)])
-hs_ppi=delete_vertices(graph = hs_ppi,v=mapIds2(IDs = V(hs_ppi)$name,IDFrom = "UNIPROT",IDTo = "SYMBOL")[[2]])
-V(hs_ppi)$name=mapIds2(IDs = V(hs_ppi)$name,IDFrom = "UNIPROT",IDTo = "SYMBOL")[[1]][,2]
-V(hs_ppi)$deg=degree(graph = hs_ppi,loops = F)
-hs_ppi_75bp.deg=data.frame(Degree=V(hs_ppi)$deg[which(V(hs_ppi)$name%in%ipah_75bp.res2$symbol)])
-hs_ppi_150bp.deg=data.frame(Degree=V(hs_ppi)$deg[which(V(hs_ppi)$name %in% ipah_150bp.res2$symbol)])
-hs_ppi_75bp.deg$readLength="75bp"
-hs_ppi_150bp.deg$readLength="150bp"
-readLenghts_degree=rbind(hs_ppi_75bp.deg,hs_ppi_150bp.deg)
-#wilcox.test(x = hs_ppi_75bp.deg$Degree,y=hs_ppi_150bp.deg$Degree)
-comp_deg_plot=ggplot(readLenghts_degree,aes(Degree,fill=readLength))+geom_density(alpha=0.25)+annotate("text", x = 100, y = 0.06, label = paste("italic(Wilcox.p) ==", round(wilcox.test(x = hs_ppi_75bp.deg$Degree,y=hs_ppi_150bp.deg$Degree)[[3]],digits = 4),sep = ""),parse = TRUE)+ggtitle(label = "IPAH-Degree distribution of DEGs")
-comp_deg_plot
-```
-
-###Compare DCNs (75bp vs. 150bp)
-
-```{r dcn_compare,message=F,echo=F,out.width='100%',out.width='100%'}
-library(igraph)
-ipah_75_diffcorr=readRDS("/Users/sandeepamberkar/Work/Collaborations/IPAH/IPAH_75bp_NormCountMatrices_FDR05.RDS")
-ipah_150_diffcorr=readRDS("/Users/sandeepamberkar/Work/Collaborations/IPAH/IPAH_150bp_NormCountMatrices_FDR05_wenbin.RDS")
-ipah_75_DCN.HV=ipah_75_DCN.IPAH=graph.data.frame(d=ipah_75_diffcorr[,c(1:2)],directed = F)
-E(ipah_75_DCN.HV)$weight=ipah_75_diffcorr$r.c+1
-E(ipah_75_DCN.IPAH)$weight=ipah_75_diffcorr$r.t+1
-ipah_150_DCN.HV=ipah_150_DCN.IPAH=graph.data.frame(d=ipah_150_diffcorr[,c(1:2)],directed = F)
-E(ipah_150_DCN.HV)$weight=ipah_150_diffcorr$r.c+1
-E(ipah_150_DCN.IPAH)$weight=ipah_150_diffcorr$r.t+1
-
-V(ipah_75_DCN.IPAH)$deg=degree(graph = ipah_75_DCN.IPAH,loops = F)
-V(ipah_150_DCN.IPAH)$deg=degree(graph = ipah_150_DCN.IPAH,loops = F)
-ipah_75_DCN_IPAH.deg=data.frame(Degree=log10(V(ipah_75_DCN.IPAH)$deg),stringsAsFactors = F)
-ipah_150_DCN_IPAH.deg=data.frame(Degree=log10(V(ipah_150_DCN.IPAH)$deg),stringsAsFactors = F)
-ipah_75_DCN_IPAH.deg$readLength="75bp"
-ipah_150_DCN_IPAH.deg$readLength="150bp"
-readLenghts_DCN_degree=rbind(ipah_75_DCN_IPAH.deg,ipah_150_DCN_IPAH.deg)
-#wilcox.test(x = hs_ppi_75bp.deg$Degree,y=hs_ppi_150bp.deg$Degree)
-comp_dcn_plot=ggplot(readLenghts_DCN_degree,aes(Degree,fill=readLength))+geom_density(alpha=0.25)+xlim(0,4)+xlab('log10(Degree)')+annotate("text", x = 2.5, y = 0.5, label = paste("italic(Wilcox.p) ==",wilcox.test(x = ipah_75_DCN_IPAH.deg$Degree,y=ipah_150_DCN_IPAH.deg$Degree)[[3]],sep = ""),parse = TRUE)+ggtitle(label = "IPAH-Degree distribution of DCNs")
-comp_dcn_plot
-```
-
 

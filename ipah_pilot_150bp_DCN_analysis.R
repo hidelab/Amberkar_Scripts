@@ -29,12 +29,13 @@ ipah_metadata$External.ID[ipah_metadata$group=="HV"]=gsub(pattern = "_v1",replac
 ipah_counts.filtered1=ipah_150bp_counts.normalised[-which(rownames(ipah_150bp_counts.normalised)%in%mapIds2(IDs = rownames(ipah_150bp_counts.normalised),IDFrom = "ENSEMBL",IDTo = "SYMBOL")[[2]]),]
 ipah_counts.filtered2=ipah_counts.filtered1[rowSums(ipah_counts.filtered1>0)>=ncol(ipah_counts.filtered1)/3,]
 ipah_counts.filtered2$symbol=mapIds2(IDs=rownames(ipah_counts.filtered2),IDFrom="ENSEMBL",IDTo="SYMBOL")[[1]][,2]
+ipah_counts.filtered2$entrez=mapIds2(IDs=rownames(ipah_counts.filtered2),IDFrom="ENSEMBL",IDTo="ENTREZID")[[1]][,2]
 ipah_counts_filtered2.agg=aggregate(x=ipah_counts.filtered2[,-43],by=list(Symbol=ipah_counts.filtered2$symbol),mean)
 rownames(ipah_counts_filtered2.agg)=ipah_counts_filtered2.agg$Symbol
-ipah_counts_filtered2.agg=ipah_counts_filtered2.agg[,-c(1,44)]
+ipah_counts_filtered2.agg=ipah_counts_filtered2.agg[,-1]
 
-c_counts=ipah_counts_filtered2.agg[,grep(pattern = paste(ipah_metadata$External.ID[ipah_metadata$group=="HV"],collapse = "|"),x = colnames(ipah_counts_filtered2.agg))]
-t_counts=ipah_counts_filtered2.agg[,grep(pattern = paste(ipah_metadata$External.ID[ipah_metadata$group=="IPAH"],collapse = "|"),x = colnames(ipah_counts_filtered2.agg))]
+c_counts=ipah_counts.filtered2[,grep(pattern = paste(ipah_metadata$External.ID[ipah_metadata$group=="HV"],collapse = "|"),x = colnames(ipah_counts_filtered2.agg))]
+t_counts=ipah_counts.filtered2[,grep(pattern = paste(ipah_metadata$External.ID[ipah_metadata$group=="IPAH"],collapse = "|"),x = colnames(ipah_counts_filtered2.agg))]
 n.c=ncol(c_counts)
 n.t=ncol(t_counts)
 gene.names=rownames(ipah_counts.filtered2)

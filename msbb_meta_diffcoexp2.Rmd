@@ -1,0 +1,65 @@
+---
+title: "Differential coexpression of multiple brain regions - Mt.Sinai array dataset"
+author: "Sandeep Amberkar"
+date: "`r Sys.Date()`"
+output:
+  prettydoc::html_pretty:
+    theme: architect
+    highlight: github
+---
+
+# Analysis Summary
+
+Differential coexpression (DCx) is the change in the coexpression levels of a gene pair between 2 conditions, namely, Case and Control. This principle has been applied in many diseases to identify transcriptional changes beyond the scope of differential expression. Using 'diffcoexp'(https://github.com/hidelab/diffcoexp), DCx analysis was performed on the Mt.Sinai array dataset comprising of 951 samples across 17 brain regions profiled on the Affymetrix hgu133 platform. 
+
+# Results
+
+## Preprocessing and normalisation
+
+Array data was quantile normalised and corrected for covariates (e.g. - gender, race, PMI, AOD) using a linear model and was deposited in Synapse as a part of the AMP-AD consortium. Using the clinical and pathologial covariates associated with this dataset, Case and Control samples were defined as follows:
+
+a. **Control** = CDR<=0.5, NP1<=1, Braak<=3
+
+b. **AD** = CDR>=1, NP1>=2, Braak>=4
+
+## Diffcoexp
+
+Diffcoexp analysis outputs multiple gene sets:
+
+1. Differentially Coexpressed Links (DCLs) - Gene pairs that are differentially coexpressed between AD and Control cases (Filters used, rth=0.6, qth=0.2, r.diffth=0.1, q.diffth=0.1)
+```{r DCL, echo=FALSE,message=FALSE}
+library(DT)
+library(dplyr)
+library(magrittr)
+
+setwd("/Users/sandeepamberkar/Work/Data/MSMM-MSBB-HBTRC-Data/MSBB_Array19/Normalised_Data/")
+
+msbb_array.DCL=readRDS("msbb_array_DCL.RDS")
+
+msbb_array.DCL_types=lapply(msbb_array.DCL,function(x)x%>%select(type)%>%table)
+msbb_array.DCL_types$PHG[[3]]=0
+msbb_array.DCL_types$PCC[[2]]=msbb_array.DCL_types$PCC[[3]]=0
+names(msbb_array.DCL_types$PCC)=names(msbb_array.DCL_types$PHG)=names(msbb_array.DCL_types$AC)
+datatable(t(rbind.data.frame(msbb_array.DCL_types)),caption = "Brain region wise DCLs and their subtypes")
+```
+
+2. Differentially Coexpressed Genes (DCGs) - Genes that occur statistically more frequently among the DCLs, as determined by a binomial model
+```{r DCG, echo=FALSE,message=FALSE}
+library(DT)
+library(dplyr)
+library(magrittr)
+
+setwd("/Users/sandeepamberkar/Work/Data/MSMM-MSBB-HBTRC-Data/MSBB_Array19/Normalised_Data/")
+msbb_array.DCG=readRDS("msbb_array_DCG.RDS")
+msbb_array_DCG.filtered=lapply(msbb_array.DCG,function(y)y%>%pull(Gene))
+datatable(cbind(names(msbb_array.DCG),unname(unlist(lapply(msbb_array_DCG.filtered,length)))),colnames = c("Brain_region","#DCGs"),caption = "#DCGs by brain region",options = list(pageLength=5))
+```
+
+3. Differentially Regulated Genes (DRGs) - DCGs that are transcription factors (TFs) as identified using Regnet(http://www.regnetworkweb.org/home.jsp) for TF-target interactions.
+
+4. Differentially Regulated Links (DRLs) - DCLs that are a TF-target interaction or a common TF regulating a DCL, both of which are identified using Regnet(http://www.regnetworkweb.org/home.jsp) for TF-target interactions.
+
+5. Target Enrichment Density (TED) - Enriched targets of a TF in the DCG set and hence, assign causality to a DCG, as identified using a Binomial Probability model and Regnet(http://www.regnetworkweb.org/home.jsp) for TF-target interactions. Pvalues were obtained based on 1000 permutations.
+
+6. Targets' DCL Density (TDD) - Using clustering coefficient to enumerate the density of DCLs among a TF's target and hence prioritise TFs. Regnet(http://www.regnetworkweb.org/home.jsp) for TF-target interactions. Pvalues were obtained based on 1000 permutations.
+

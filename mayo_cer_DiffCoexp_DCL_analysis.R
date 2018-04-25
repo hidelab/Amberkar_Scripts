@@ -50,7 +50,8 @@ regnet_tf2target=fread("/shared/hidelab2/user/md4zsa/Work/Data/TF_Databases/RegN
 cer_c_counts=mayo_reseq_cer_data[,mayo_covariates$SampleID[grep(pattern = "CER.Control",mayo_covariates$BrainRegion.Diagnosis)]]
 cer_t_counts=mayo_reseq_cer_data[,mayo_covariates$SampleID[grep(pattern = "CER.AD",mayo_covariates$BrainRegion.Diagnosis)]]
 #tcx_DCp=DCp(exprs.1 = tcx_c_counts,exprs.2 = tcx_t_counts,r.method = "spearman",link.method = "qth",cutoff = 0.05,N = 1000)
-cer_DiffCoexp=diffcoexp(exprs.1 = cer_c_counts,exprs.2 = cer_t_counts,rth=0.6, qth=0.1, r.diffth=0.1, q.diffth=0.1)
+random_select_genes=which(rownames(cer_c_counts)%in%sample(x = rownames(cer_c_counts),size = 14500,replace = F))
+cer_DiffCoexp=diffcoexp(exprs.1 = cer_c_counts[random_select_genes,],exprs.2 = cer_t_counts[random_select_genes,],rth=0.6, qth=0.1, r.diffth=0.1, q.diffth=0.1)
 cer_DRsort=DRsort(DCGs = cer_DiffCoexp$DCGs,DCLs = cer_DiffCoexp$DCLs,tf2target = regnet_tf2target,expGenes = rownames(mayo_reseq_tcx_data))
 saveRDS(cer_DiffCoexp,"CER_DiffCoexp_noLFC_bugfix2.res.RDS")
 saveRDS(cer_DRsort,"CER_DiffCoexp_DRsort_noLFC_bugfix2.res.RDS")

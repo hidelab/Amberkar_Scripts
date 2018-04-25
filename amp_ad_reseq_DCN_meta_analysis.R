@@ -459,12 +459,13 @@ for(i in c(1:5,7)){
   
 }
 #Module_entrez=lapply(ConsensusModules$DLPFC,function(x)mapIds2(IDs = x,IDFrom = "SYMBOL",IDTo = "ENTREZID")[[1]][,2])
-ConsensusModules_OlpJaccard$DLPFC=lapply(ConsensusModules$DLPFC,jaccard,V(rosmap_DCN.AD2)$symbol)
-ConsensusModules_OlpJaccard$FP=lapply(ConsensusModules$FP,jaccard,V(msmm_DCN$FP$AD)$name)
-ConsensusModules_OlpJaccard$IFG=lapply(ConsensusModules$IFG,jaccard,V(msmm_DCN$IFG$AD)$name)
-ConsensusModules_OlpJaccard$PHG=lapply(ConsensusModules$PHG,jaccard,V(msmm_DCN$PHG$AD)$name)
-ConsensusModules_OlpJaccard$STG=lapply(ConsensusModules$STG,jaccard,V(msmm_DCN$STG$AD)$name)
-ConsensusModules_OlpJaccard$TCX=lapply(ConsensusModules$TCX,jaccard,V(mayo_TCX_DCN.AD2)$name)
+ConsensusModules_OlpJaccard$DLPFC=lapply(ConsensusModules$DLPFC,jaccard,V(metaAD_DCL.graph$ROSMAP_DLPFC)$symbol)
+ConsensusModules_OlpJaccard$FP=lapply(ConsensusModules$FP,jaccard,V(metaAD_DCL.graph$MSBB_FP)$name)
+ConsensusModules_OlpJaccard$IFG=lapply(ConsensusModules$IFG,jaccard,V(metaAD_DCL.graph$MSBB_IFG)$name)
+ConsensusModules_OlpJaccard$PHG=lapply(ConsensusModules$PHG,jaccard,V(metaAD_DCL.graph$MSBB_PHG)$name)
+ConsensusModules_OlpJaccard$STG=lapply(ConsensusModules$STG,jaccard,V(metaAD_DCL.graph$MSBB_STG)$name)
+ConsensusModules_OlpJaccard$TCX=lapply(ConsensusModules$TCX,jaccard,V(metaAD_DCL.graph$Mayo_TCX)$name)
+ConsensusModules_OlpJaccard$TCX=lapply(ConsensusModules$TCX,jaccard,V(metaAD_DCL.graph$)$name)
 
 ConsensusModules_OlpPathways$DLPFC=lapply(ConsensusModules_Entrez$DLPFC,function(y)summary(enrichKEGG(gene = y,organism = "hsa",pvalueCutoff = 0.05,universe = V(rosmap_DCN.AD2)$entrez,pAdjustMethod = "BH"))[,2])
 ConsensusModules_OlpPathways$FP=lapply(ConsensusModules_Entrez$FP,function(y)summary(enrichKEGG(gene = y,organism = "hsa",pvalueCutoff = 0.05,universe = V(msmm_DCN$FP$AD)$entrez,pAdjustMethod = "BH"))[,2])
@@ -600,10 +601,10 @@ for(i in 1:7){
   tmp2[i,2]=as.numeric(length(ConsensusDEGs[[i]]$hgnc_symbol))
   tmp2[i,3]=as.numeric(length(intersect(ConsensusDEGs[[i]]$hgnc_symbol,amp_ad.MetaDCN[[i]])))
   tmp2[i,4]=as.numeric(pval_vec_deg[[i]])
-  if(length(ConsensusDEGs_OlpPathways[[i]])==0){
-    tmp2[i,5]=0
-  }
-  else
+  # if(length(ConsensusDEGs_OlpPathways[[i]])==0){
+  #   tmp2[i,5]=0
+  # }
+  # else
   tmp2[i,5]=paste(ConsensusDEGs_OlpPathways[[i]],collapse = ";")
   tmp2[i,6]=as.numeric(jaccard(A = ConsensusDEGs[[i]]$hgnc_symbol,B = amp_ad.MetaDCN[[i]]))
   

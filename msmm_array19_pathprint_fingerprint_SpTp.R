@@ -7,6 +7,7 @@ Sys.setenv("plotly_api_key"="U5r0L12wRGNM98tLdTKz")
 setwd("/shared/hidelab2/user/md4zsa/Work/Data/MSMM_Array/MSBB_Array19/Normalised_Data")
 mapIds2<-function(IDs,IDFrom,IDTo){
   require(org.Hs.eg.db)
+  require(illuminaHumanv3)
   idmap=mapIds(x = org.Hs.eg.db,keys = IDs,column = IDTo,keytype = IDFrom,multiVals = "first")
   na_vec=names(idmap[is.na(idmap)==T])
   idmap=idmap[is.na(idmap)==F]

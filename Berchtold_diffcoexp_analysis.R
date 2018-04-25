@@ -19,13 +19,17 @@ jaccard=function(A,B){
 }
 allowWGCNAThreads(nThreads = 16)
 setwd("/shared/hidelab2/user/md4zsa/Work/Data/AD_48350")
-# gse48350_series_matrix=getGEO(GEO = "GSE48350",GSEMatrix = T)
-# gse48350_exprs=cbind.data.frame(pData(gse48350_series_matrix@featureData[,c(1,11:12)]),exprs(gse48350_series_matrix))
-# gse48350_exprs.agg=aggregate(x = gse48350_exprs[,-c(1:3)],by=list(symbol=gse48350_exprs$`Gene Symbol`),mean)
-# rownames(gse48350_exprs.agg)=gse48350_exprs.agg$symbol
-# gse48350_exprs.agg=gse48350_exprs.agg[-1,]
-# gse48350_exprs.agg=gse48350_exprs.agg[,-1]
-gse48350_exprs.agg=readRDS("GSE48350_exprs.RDS")
+#gse48350_series_matrix=getGEO(GEO = "GSE48350",GSEMatrix = T)
+#saveRDS(gse48350_series_matrix,"GSE48350_series_matrix.RDS")
+gse48350_series_matrix=readRDS("GSE48350_series_matrix.RDS")
+gse48350_exprs=cbind.data.frame(pData(gse48350_series_matrix$GSE48350_series_matrix.txt.gz@featureData[,c(1,11:12)]),exprs(gse48350_series_matrix$GSE48350_series_matrix.txt.gz))
+gse48350_exprs=gse48350_exprs[-grep(pattern = "///",x = gse48350_exprs$ENTREZ_GENE_ID),]
+gse48350_exprs.agg=aggregate(x = gse48350_exprs[,-c(1:3)],by=list(entrez=gse48350_exprs$ENTREZ_GENE_ID),mean)
+rownames(gse48350_exprs.agg)=gse48350_exprs.agg$entrez
+gse48350_exprs.agg=gse48350_exprs.agg[-1,]
+gse48350_exprs.agg=gse48350_exprs.agg[,-1]
+
+#gse48350_exprs.agg=readRDS("GSE48350_exprs.RDS")
 gse48350_phenodata=readRDS("GSE48350_pData.RDS")
 
 gse48350_phenodata$`brain region:ch1`=gsub(pattern = "^ ",replacement = "",x = gse48350_phenodata$`brain region:ch1`)
@@ -49,7 +53,6 @@ for(i in 1:4){
   cat(paste("Done!\n"))
 }
 proc.time()
-
 
 
 
