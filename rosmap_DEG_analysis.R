@@ -33,11 +33,6 @@ rownames(rosmap_reseq_data.agg)=rosmap_reseq_data.agg$Symbol
 rosmap_reseq_data.agg=rosmap_reseq_data.agg[,-1]
 
 
-rosmap_reseq_data.agg2=apply(rosmap_reseq_data.agg,2,function(x){round(x = x,digits = 0)})
-rosmap_reseq_data.agg2
-rosmap_reseq_data.agg=data.frame(t(rosmap_reseq_data.agg),stringsAsFactors = F)
-colnames(rosmap_reseq_data.agg)=gsub(pattern = "X",replacement = "",colnames(rosmap_reseq_data2.agg))
-
 rosmap_covariates$SampleType="OTHER"
 rosmap_covariates$SampleType[rosmap_covariates$cogdx==1]="CONTROL"
 rosmap_covariates$SampleType[rosmap_covariates$cogdx==2]="COGDX2"
@@ -55,10 +50,8 @@ rosmap_reseq_counts.list$cogdx5=rosmap_reseq_data.agg[,rownames(rosmap_coldata[w
 rosmap_reseq_counts.list$cogdx2=data.frame(apply(rosmap_reseq_counts.list$cogdx2,2,function(x)round(x = x,digits = 0)))
 rosmap_reseq_counts.list$cogdx4=data.frame(apply(rosmap_reseq_counts.list$cogdx4,2,function(x)round(x = x,digits = 0)))
 rosmap_reseq_counts.list$cogdx5=data.frame(apply(rosmap_reseq_counts.list$cogdx5,2,function(x)round(x = x,digits = 0)))
-colnames(rosmap_reseq_counts.list$cogdx2)=gsub(pattern = "X",replacement = "",colnames(rosmap_reseq_counts.list$cogdx2))
-colnames(rosmap_reseq_counts.list$cogdx4)=gsub(pattern = "X",replacement = "",colnames(rosmap_reseq_counts.list$cogdx4))
-colnames(rosmap_reseq_counts.list$cogdx5)=gsub(pattern = "X",replacement = "",colnames(rosmap_reseq_counts.list$cogdx5))
 
+rosmap_reseq_counts.list=lapply(rosmap_reseq_counts.list,function(x){colnames(x) <- gsub(pattern = "X",replacement = "",x = colnames(x));x})
 rosmap_reseq_counts.dds=vector(mode = "list",length = 3)
 names(rosmap_reseq_counts.dds)=c("cogdx2","cogdx4","cogdx5")
 for(i in 1:3){
