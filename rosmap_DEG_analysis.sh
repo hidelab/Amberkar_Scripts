@@ -4,7 +4,7 @@
 #Request resources 
 #$-l mem=8G
 #$-l rmem=8G
-#$-p openmp=8
+#$-p openmp 8
 #Job Name 
 #$-N ROSMAP_DEG
 #Queue
