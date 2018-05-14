@@ -3,6 +3,7 @@ library(dplyr)
 library(magrittr)
 library(data.table)
 library(diffcoexp)
+library(GEOquery)
 
 setwd("/shared/hidelab2/user/md4zsa/Work/Data/MSBB_Array19/GSE84422/")
 load("msbb_gse84422_Lobe_DEG_DEP.RData")
