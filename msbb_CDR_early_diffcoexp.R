@@ -28,9 +28,10 @@ msbb_gse84422.pData=lapply(msbb_gse84422.pData,function(x){x$SampleTypeCDR[which
 msbb_gse84422.pData=lapply(msbb_gse84422.pData,function(x){x$SampleTypeCDR[which(x$`clinical dementia rating:ch`==0.5)]="CDR05";x})
 msbb_gse84422.pData=lapply(msbb_gse84422.pData,function(x){x$SampleTypeCDR[which(x$`clinical dementia rating:ch`==1)]="CDR1";x})
 
-msbb_gse84422_exprs.GPL570=rbind.data.frame(msbb_gse84422.exprs$GPL570)
-msbb_gse84422_exprs.GPL570$GeneSymbol=c(msbb_gse84422.fData$GPL570$`Gene Symbol`)
-msbb_gse84422_exprs.GPL570$ENTREZ_GENE_ID=c(msbb_gse84422.fData$GPL570$ENTREZ_GENE_ID,msbb_gse84422.fData$GPL97$ENTREZ_GENE_ID)
+
+msbb_gse84422_exprs.GPL570=data.frame(exprs(msbb_gse84422_series_matrix.GPL570))
+msbb_gse84422_exprs.GPL570$GeneSymbol=msbb_gse84422.fData$GPL570$`Gene Symbol`
+msbb_gse84422_exprs.GPL570$ENTREZ_GENE_ID=msbb_gse84422.fData$GPL570$ENTREZ_GENE_ID
 msbb_gse84422_exprs_GPL570.agg=aggregate.data.frame(x=msbb_gse84422_exprs.GPL570[,-which(colnames(msbb_gse84422_exprs.GPL570)=="GeneSymbol"|colnames(msbb_gse84422_exprs.GPL570)=="ENTREZ_GENE_ID")],by=list(symbol=msbb_gse84422_exprs.GPL570$GeneSymbol),mean)
 msbb_gse84422_exprs_GPL570.agg_Entrez=aggregate.data.frame(x=msbb_gse84422_exprs.GPL570[,-which(colnames(msbb_gse84422_exprs.GPL570)=="GeneSymbol"|colnames(msbb_gse84422_exprs.GPL570)=="ENTREZ_GENE_ID")],by=list(entrez=msbb_gse84422_exprs.GPL570$ENTREZ_GENE_ID),mean)
 rownames(msbb_gse84422_exprs_GPL570.agg)=msbb_gse84422_exprs_GPL570.agg$symbol
