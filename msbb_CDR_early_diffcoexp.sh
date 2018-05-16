@@ -7,7 +7,7 @@
 #Job Name 
 #$-N MSBB_EarlyDCN
 #Queue
-#$-P RSE
+#$-P rse
 
 module load apps/R/3.4.0/gcc-4.8.5
 module load mpi/openmpi/2.1.1/gcc-6.2
