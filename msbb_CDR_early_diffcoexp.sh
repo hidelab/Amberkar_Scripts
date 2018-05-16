@@ -1,9 +1,9 @@
 #!/bin/bash 
 #Job time 
-#$-l h_rt=24:00:00 
+#$-l h_rt=12:00:00 
 #Request resources 
 #$-l mem=128G
-#$-l rmem=96G
+#$-l rmem=72G
 #Job Name 
 #$-N MSBB_EarlyDCN
 #Queue
