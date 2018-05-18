@@ -1,8 +1,8 @@
 library(diffcoexp)
-library(org.Hs.eg.db)
+
 library(dplyr)
 library(magrittr)
-library(enrichR)
+
 library(data.table)
 library(DCGL)
 
