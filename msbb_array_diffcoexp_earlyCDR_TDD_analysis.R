@@ -1,11 +1,10 @@
 library(diffcoexp)
-
 library(dplyr)
 library(magrittr)
-
 library(data.table)
 library(DCGL)
 
+setwd("/shared/hidelab2/user/md4zsa/Work/Data/MSBB_Array19/GSE84422/")
 msbb_gse84422_GPL96_97_samplesToAnalyse.exprs=readRDS("msbb_gse84422_GPL96_97_samplesToAnalyse_exprs.RDS")
 names(msbb_gse84422_GPL96_97_samplesToAnalyse.exprs)=gsub(pattern = " ",replacement = "_",x = names(msbb_gse84422_GPL96_97_samplesToAnalyse.exprs))
 msbb_gse84422_GPL570_samplesToAnalyse.exprs=readRDS("msbb_gse84422_GPL570_samplesToAnalyse_exprs.RDS")
