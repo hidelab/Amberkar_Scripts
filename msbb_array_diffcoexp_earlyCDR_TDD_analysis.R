@@ -12,7 +12,7 @@ names(msbb_gse84422_GPL570_samplesToAnalyse.exprs)=gsub(pattern = " ",replacemen
 regnet_tf2target.HGNC=fread("/shared/hidelab2/user/md4zsa/Work/Data/TF_Databases/RegNetwork_human_regulators2.txt",header = T,sep = "\t",showProgress = T,data.table = F)%>%dplyr::filter(evidence=="Experimental")%>%dplyr::select(c(regulator_symbol,target_symbol))
 
 
-early_diffcoexp_files=system("find . |grep 'CDR'|sort",intern = T)
+early_diffcoexp_files=system("find . |grep 'CDR0'|sort",intern = T)
 msbb_gse84422_early_diffcoexp_results=msbb_gse84422_earlyCDR.DCGs=msbb_gse84422_earlyCDR.DCLs=msbb_gse84422_earlyCDR.DRGs=msbb_gse84422_earlyCDR.DRLs=vector(mode = "list",length = length(early_diffcoexp_files))
 
 
