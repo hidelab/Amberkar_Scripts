@@ -26,11 +26,11 @@ msbb_gse84422_earlyCDR.DCLs=lapply(msbb_gse84422_early_diffcoexp_results,functio
 
 msbb_array_earlyCDR_DRrank.TDD=msbb_array_earlyCDR_DRrank.TED=vector(mode = "list",length = 19)
 names(msbb_array_earlyCDR_DRrank.TDD)=names(msbb_array_earlyCDR_DRrank.TED)=names(msbb_gse84422_early_diffcoexp_results)
-for(i in c(1,10)){
-  msbb_array_earlyCDR_DRrank.TDD[[i]]=DRrank(DCGs=msbb_gse84422_earlyCDR.DCGs[[i]],DCLs=msbb_gse84422_earlyCDR.DCLs[[i]],tf2target=regnet_tf2target.HGNC,expGenes=rownames(msbb_gse84422_GPL570_samplesToAnalyse.exprs$Amygdala),rank.method="TDD",Nperm=1000)
-  saveRDS(msbb_array_earlyCDR_DRrank.TDD[[i]],paste(names(msbb_array_earlyCDR_DRrank.TDD)[i],"earlyCDR_DRrank_TDD.RDS",sep = "_"))
-}
-for(i in c(2:9,11:19)){
+# for(i in c(1,10)){
+#   msbb_array_earlyCDR_DRrank.TDD[[i]]=DRrank(DCGs=msbb_gse84422_earlyCDR.DCGs[[i]],DCLs=msbb_gse84422_earlyCDR.DCLs[[i]],tf2target=regnet_tf2target.HGNC,expGenes=rownames(msbb_gse84422_GPL570_samplesToAnalyse.exprs$Amygdala),rank.method="TDD",Nperm=1000)
+#   saveRDS(msbb_array_earlyCDR_DRrank.TDD[[i]],paste(names(msbb_array_earlyCDR_DRrank.TDD)[i],"earlyCDR_DRrank_TDD.RDS",sep = "_"))
+# }
+for(i in c(4:9,11:19)){
   msbb_array_earlyCDR_DRrank.TDD[[i]]=DRrank(DCGs=msbb_gse84422_earlyCDR.DCGs[[i]],DCLs=msbb_gse84422_earlyCDR.DCLs[[i]],tf2target=regnet_tf2target.HGNC,expGenes=rownames(msbb_gse84422_GPL570_samplesToAnalyse.exprs$Amygdala),rank.method="TDD",Nperm=1000)
   saveRDS(msbb_array_earlyCDR_DRrank.TDD[[i]],paste(names(msbb_array_earlyCDR_DRrank.TDD)[i],"earlyCDR_DRrank_TDD.RDS",sep = "_"))
 }

@@ -1,11 +1,11 @@
 #!/bin/bash 
 #Job time 
-#$-l h_rt=24:00:00 
+#$-l h_rt=96:00:00 
 #Request resources 
 #$-l mem=128G
 #$-l rmem=128G
 #Job Name 
-#$-N EarlyCDR_TED
+#$-N EarlyCDR_TDD
 #Queue
 #$-P rse
 
