@@ -8,10 +8,10 @@ library(GEOquery)
 # 
 # 
 # 
-msbb_gse84422_series_matrix=getGEO(GEO = "GSE84422",GSEMatrix = T)
-msbb_gse84422_series_matrix.GPL96=msbb_gse84422_series_matrix$`GSE84422-GPL96_series_matrix.txt.gz`
-msbb_gse84422_series_matrix.GPL97=msbb_gse84422_series_matrix$`GSE84422-GPL97_series_matrix.txt.gz`
-msbb_gse84422_series_matrix.GPL570=msbb_gse84422_series_matrix$`GSE84422-GPL570_series_matrix.txt.gz`
+
+msbb_gse84422_series_matrix.GPL96=getGEO(filename = "../../../GSE84422-GPL96_series_matrix.txt.gz",GSEMatrix = F,AnnotGPL = T)
+msbb_gse84422_series_matrix.GPL97=getGEO(filename = "../../../GSE84422-GPL97_series_matrix.txt.gz",GSEMatrix = F,AnnotGPL = T)
+msbb_gse84422_series_matrix.GPL570=getGEO(filename = "../../../GSE84422-GPL570_series_matrix.txt.gz",GSEMatrix = F,AnnotGPL = T)
 
 msbb_gse84422.fData=vector(mode = "list",length = 3)
 names(msbb_gse84422.fData)=c("GPL96","GPL97","GPL570")
@@ -58,8 +58,10 @@ msbb_gse84422.exprs$GPL570=aggregate.data.frame(x=msbb_gse84422.exprs$GPL570[,-w
 rownames(msbb_gse84422.exprs$GPL570)=msbb_gse84422.exprs$GPL570$symbol
 msbb_gse84422.exprs$GPL570=msbb_gse84422.exprs$GPL570[,-which(colnames(msbb_gse84422.exprs$GPL570)=="symbol")]
 
-msbb_gse84422_GPL96_97_byRegion.exprs=vector(mode = "length",length = 17)
+msbb_gse84422_GPL96_97_byRegion.exprs=vector(mode = "list",length = 17)
+msbb_gse84422_GPL570_byRegion.exprs=vector(mode = "list",length = 2)
 names(msbb_gse84422_GPL96_97_byRegion.exprs)=unique(msbb_gse84422.pData$GPL96$`brain region:ch1`)
+names(msbb_gse84422_GPL570_byRegion.exprs)=unique(msbb_gse84422.pData$GPL570$`brain region:ch1`)
 msbb_gse84422_GPL96_97_samplesToAnalyse=lapply(unique(msbb_gse84422.pData$GPL96$`brain region:ch1`),function(y)msbb_gse84422.pData$GPL96%>%filter(`brain region:ch1`==y&SampleType!="OTHER")%>%select(c(SampleType,pseudoSampleID)))
 names(msbb_gse84422_GPL96_97_samplesToAnalyse)=unique(msbb_gse84422.pData$GPL96$`brain region:ch1`)
 msbb_gse84422_GPL570_samplesToAnalyse=lapply(unique(msbb_gse84422.pData$GPL570$`brain region:ch1`),function(y)msbb_gse84422.pData$GPL570%>%filter(`brain region:ch1`==y&SampleType!="OTHER")%>%select(c(SampleType,geo_accession)))

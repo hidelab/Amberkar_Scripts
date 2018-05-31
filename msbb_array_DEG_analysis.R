@@ -135,6 +135,7 @@ msbb_gse84422.exprs=vector(mode = "list",length = 2)
 names(msbb_gse84422.exprs)=c("GPL96","GPL97")
 msbb_gse84422.exprs$GPL96=exprs(msbb_gse84422_series_matrix.GPL96)
 msbb_gse84422.exprs$GPL97=exprs(msbb_gse84422_series_matrix.GPL97)
+msbb_gse84422.exprs$GPL570=exprs(msbb_gse84422_series_matrix.GPL570)
 colnames(msbb_gse84422.exprs$GPL96)=colnames(msbb_gse84422.exprs$GPL97)=msbb_gse84422.pData$GPL96$pseudoSampleID
 
 msbb_gse84422_exprs.GPL96_97=rbind.data.frame(msbb_gse84422.exprs$GPL96,msbb_gse84422.exprs$GPL97)

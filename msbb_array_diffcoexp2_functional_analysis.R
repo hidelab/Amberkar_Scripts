@@ -21,16 +21,18 @@ jaccard=function(A,B){
   jc=set_cardinality(intersect(A,B))/set_cardinality(union(A,B))
   return(jc)
 }
+
 dbs <- listEnrichrDbs()
 kegg_dbs=grep(pattern = "KEGG",x = dbs$libraryName,value = T)[3]
 biocarta_dbs=grep(pattern = "BioCarta|Panther",x = dbs$libraryName,value = T)[4]
 panther_dbs=grep(pattern = "BioCarta|Panther",x = dbs$libraryName,value = T)[5]
+kegg_2016_pathways.df=read.gmt(gmtfile = "../../../../../KEGG_2016.txt")
 
 tanzi_ranked_genes=read.table("/Users/sandeepamberkar/Work/Collaborations/Tanzi_WGS/Gene_Lists/All_genes_ranked.txt",header = T,sep = "\t",stringsAsFactors = F)
 tanzi_ranked_genes.great=read.table("/Users/sandeepamberkar/Work/Collaborations/Tanzi_WGS/Gene_Lists/Ranked_genes_corrected_allele_top_4000_SNPs_genes_from_great.txt",header = T,sep = "\t",stringsAsFactors = F)
 tanzi_ranked_genes.great$SNP_Rank=gsub(pattern = "SNP_rank_",replacement = "",x = tanzi_ranked_genes.great$SNP_Rank)
-tanzi_ranked_genes.AD=unique(tanzi_ranked_genes.great%>%mutate(SNP_Rank=as.integer(gsub(pattern = "SNP_rank_",replacement = "",x = SNP_Rank)))%>%filter(Corrected_association=="Case"&SNP_Rank<=1000)%>%pull(Gene))
-tanzi_ranked_genes.Control=unique(tanzi_ranked_genes.great%>%mutate(SNP_Rank=as.integer(gsub(pattern = "SNP_rank_",replacement = "",x = SNP_Rank)))%>%filter(Corrected_association=="Control"&SNP_Rank<=1000)%>%pull(Gene))
+tanzi_ranked_genes.AD=unique(tanzi_ranked_genes.great%>%mutate(SNP_Rank=as.integer(gsub(pattern = "SNP_rank_",replacement = "",x = SNP_Rank)))%>%dplyr::filter(Corrected_association=="Case"&SNP_Rank<=1000)%>%pull(Gene))
+tanzi_ranked_genes.Control=unique(tanzi_ranked_genes.great%>%mutate(SNP_Rank=as.integer(gsub(pattern = "SNP_rank_",replacement = "",x = SNP_Rank)))%>%dplyr::filter(Corrected_association=="Control"&SNP_Rank<=1000)%>%pull(Gene))
 tanzi_ranked_genes.union=union(tanzi_ranked_genes.AD,tanzi_ranked_genes.Control)
 
 setwd("/Users/sandeepamberkar/Work/Data/MSMM-MSBB-HBTRC-Data/MSBB_Array19/GSE84422/")
@@ -40,17 +42,28 @@ msbb_gse84422_GPL570_samplesToAnalyse.exprs=readRDS("msbb_gse84422_GPL570_sample
 names(msbb_gse84422_GPL570_samplesToAnalyse.exprs)=gsub(pattern = " ",replacement = "_",x = names(msbb_gse84422_GPL570_samplesToAnalyse.exprs))
 regnet_tf2target.HGNC=fread("/shared/hidelab2/user/md4zsa/Work/Data/TF_Databases/RegNetwork_human_regulators2.txt",header = T,sep = "\t",showProgress = T,data.table = F)%>%dplyr::filter(evidence=="Experimental")%>%dplyr::select(c(regulator_symbol,target_symbol))
 regnet_tf2target.HGNC=fread("/Users/sandeepamberkar/Work/Data/TF_Databases/RegNetwork_human_regulators2.txt",header = T,sep = "\t",showProgress = T,data.table = F)%>%filter(evidence=="Experimental")%>%dplyr::select(c(regulator_symbol,target_symbol))
+regnet_tf2target.graph=graph.data.frame(d = regnet_tf2target.HGNC,directed = F)
 
-msbb_gse84422_diffcoexp_results_files=list.files(path = ".",pattern = "diffcoexp")%>%grep(pattern = ".RDS",value = T)%>%sort
+msbb_gse84422_diffcoexp_results_files=list.files(path = "Lobe_Analysis/Dyscorrelation_Landscape_Results/",pattern = "diffcoexp",full.names = T)%>%grep(pattern = ".RDS",value = T)%>%sort
 msbb_gse84422_diffcoexp_results=vector(mode = "list",length = length(msbb_gse84422_diffcoexp_results_files))
-names(msbb_gse84422_diffcoexp_results)=gsub(pattern = " ",unlist(lapply(lapply(msbb_gse84422_diffcoexp_results_files,function(y)strsplit(x = y,split = "_")[[1]]),`[[`,1)),replacement = "_")
+names(msbb_gse84422_diffcoexp_results)=gsub(pattern = " ",replacement = "_",gsub(pattern = "_diffcoexp_results",replacement = "",x = unlist(lapply(lapply(lapply(strsplit(x = msbb_gse84422_diffcoexp_results_files,split = "//"),`[[`,2),function(a)strsplit(x = a[[1]],split = "\\.")[[1]]),`[[`,1))))
 for(f in 1:19){
   msbb_gse84422_diffcoexp_results[[f]]=readRDS(msbb_gse84422_diffcoexp_results_files[f])  
 }
+
+#Separate DCGs & DCLs in individual lists
 msbb_gse84422.DCGs=lapply(msbb_gse84422_diffcoexp_results,function(x)x$DCGs)
 msbb_gse84422.DCGs_list=lapply(msbb_gse84422.DCGs,function(x)x%>%dplyr::filter(q<=0.05)%>%pull(Gene))
+msbb_gse84422.RS_DCGs_list=vector(mode = "list",length = 19)
+names(msbb_gse84422.RS_DCGs_list)=names(msbb_gse84422.DCGs_list)
+
+for(i in 1:length(msbb_gse84422.DCGs_list)){
+  msbb_gse84422.RS_DCGs_list[[i]]=setdiff(msbb_gse84422.DCGs_list[[i]],(Reduce(union,lapply(msbb_gse84422.DCGs_list,function(x)intersect(x,msbb_gse84422.DCGs_list[[i]]))[-i])))
+}
+
 msbb_gse84422.DCGs_list_Entrez=lapply(msbb_gse84422.DCGs_list,function(y)unname(mapIds(x = org.Hs.eg.db,keys = y,keytype = "SYMBOL",column = "ENTREZID")))
-msbb_gse84422.DCLs=lapply(msbb_gse84422_diffcoexp_results,function(x)x$DCLs%>%filter(q.diffcor<=0.05)%>%rownames_to_column("GenePair"))
+msbb_gse84422.RS_DCGs_list_Entrez=lapply(msbb_gse84422.RS_DCGs_list,function(y)unname(mapIds(x = org.Hs.eg.db,keys = y,keytype = "SYMBOL",column = "ENTREZID")))
+msbb_gse84422.DCLs=lapply(msbb_gse84422_diffcoexp_results,function(x)x$DCLs%>%dplyr::filter(q.diffcor<=0.05)%>%rownames_to_column("GenePair"))
 msbb_gse84422_total_DCGs=unlist(lapply(msbb_gse84422.DCGs_list,length))
 msbb_gse84422_total_DCLs=unlist(lapply(msbb_gse84422.DCLs,function(x)dim(x)[1]))
 dat1=data.frame(DCLs=msbb_gse84422_total_DCLs,DCGs=msbb_gse84422_total_DCGs,Region=names(msbb_gse84422_total_DCLs))
@@ -59,46 +72,36 @@ ggplot(dat1m,aes(x = Region,y = value)) + geom_bar(aes(fill = variable),stat = "
   labs(title="MSBB array - DCGs and DCLs")+
   theme(title = element_text(face = "bold",size = 15,colour = "black"),axis.title.x = element_text(face = "bold",size = 15,colour = "black"),axis.text.x = element_text(size = 10,colour = "black",angle = 90),legend.text = element_text(size = 15))
 
+
+msbb_gse84422_DCG.CompMatrix=matrix(NA,ncol=length(msbb_gse84422.DCGs_list),nrow=length(msbb_gse84422.DCGs_list))
+rownames(msbb_gse84422_DCG.CompMatrix)=colnames(msbb_gse84422_DCG.CompMatrix)=c("AMYG","AC","CN","DLPFC","FP","HIPP","IFG","ITG","MTG","NAc","OVC","PHG","PCC","PCG","FC","PTMN","SPL","STG","TP")
+for(i in 1:length(msbb_gse84422.DCGs_list)){
+  msbb_gse84422_DCG.CompMatrix[i,]=unlist(lapply(msbb_gse84422.DCGs_list,function(x)jaccard(x,msbb_gse84422.DCGs_list[[i]])))
+}
+diag(msbb_gse84422_DCG.CompMatrix)=0
+
+
+
+cbind.data.frame(DCGs=rowSums(msbb_gse84422_DCG.CompMatrix[-c(14,16),-c(14,16)]),
+                 RS_DCGs=unlist(lapply(msbb_gse84422.RS_DCGs_list[-c(14,16)],length)),
+                 Rank_by_G_DCGs=rank(-rowSums(msbb_gse84422_DCG.CompMatrix[-c(14,16),-c(14,16)])),
+                 Rank_by_RS_DCGs=rank(-unlist(lapply(msbb_gse84422.RS_DCGs_list[-c(14,16)],length))))
+
+circos.par(gap.after = c(rep(2, nrow(mat)-1), 10, rep(2, ncol(mat)-1), 10))
+chordDiagram(msbb_gse84422_DCG.CompMatrix, annotationTrack = "grid", transparency = 0.5,preAllocateTracks = list(track.height = 0.1))
+circos.text(niceFacing = T,cex = 10,x = 1,y = 1,)
+
 #Read DRsort results
 msbb_gse84422.DRsort=vector(mode = "list",length = 19)
 names(msbb_gse84422.DRsort)=names(msbb_gse84422_diffcoexp_results)
-msbb_gse84422.DRsort$Amygdala=DRsort(DCGs = msbb_gse84422.DCGs$Amygdala,DCLs = msbb_gse84422.DCLs$Amygdala,tf2target = regnet_tf2target.HGNC,expGenes = rownames(msbb_gse84422_GPL570_samplesToAnalyse.exprs$Amygdala))
+for(i in c(2:9,11:19)){
+  msbb_gse84422.DRsort[[i]]=DRsort(DCGs = msbb_gse84422.DCGs[[i]],DCLs = msbb_gse84422.DCLs[[i]],tf2target = regnet_tf2target.HGNC,expGenes =rownames(msbb_gse84422_GPL96_97_samplesToAnalyse.exprs$Frontal_Pole))  
+}
+for(i in c(1,10)){
+  msbb_gse84422.DRsort[[i]]=DRsort(DCGs = msbb_gse84422.DCGs[[i]],DCLs = msbb_gse84422.DCLs[[i]],tf2target = regnet_tf2target.HGNC,expGenes =rownames(msbb_gse84422_GPL570_samplesToAnalyse.exprs$Amygdala))  
+}
+names(msbb_gse84422.DRsort)=names(msbb_gse84422.DCGs)
 
-msbb_gse84422.DRsort$Anterior_Cingulate=DRsort(DCGs = msbb_gse84422.DCGs$Anterior_Cingulate,DCLs = msbb_gse84422.DCLs$Anterior_Cingulate,tf2target = regnet_tf2target.HGNC,expGenes = rownames(msbb_gse84422_GPL96_97_samplesToAnalyse.exprs$Anterior_Cingulate))
-
-msbb_gse84422.DRsort$Caudate_Nucleus=DRsort(DCGs = msbb_gse84422.DCGs$Caudate_Nucleus,DCLs = msbb_gse84422.DCLs$Caudate_Nucleus,tf2target = regnet_tf2target.HGNC,expGenes = rownames(msbb_gse84422_GPL96_97_samplesToAnalyse.exprs$Caudate_Nucleus))
-
-msbb_gse84422.DRsort$Dorsolateral_Prefrontal_Cortex=DRsort(DCGs = msbb_gse84422.DCGs$Dorsolateral_Prefrontal_Cortex,DCLs = msbb_gse84422.DCLs$Dorsolateral_Prefrontal_Cortex,tf2target = regnet_tf2target.HGNC,expGenes = rownames(msbb_gse84422_GPL96_97_samplesToAnalyse.exprs$Dorsolateral_Prefrontal_Cortex))
-
-msbb_gse84422.DRsort$Frontal_Pole=DRsort(DCGs = msbb_gse84422.DCGs$Frontal_Pole,DCLs = msbb_gse84422.DCLs$Frontal_Pole,tf2target = regnet_tf2target.HGNC,expGenes = rownames(msbb_gse84422_GPL96_97_samplesToAnalyse.exprs$Frontal_Pole))
-
-msbb_gse84422.DRsort$Hippocampus=DRsort(DCGs = msbb_gse84422.DCGs$Hippocampus,DCLs = msbb_gse84422.DCLs$Hippocampus,tf2target = regnet_tf2target.HGNC,expGenes = rownames(msbb_gse84422_GPL96_97_samplesToAnalyse.exprs$Hippocampus))
-
-msbb_gse84422.DRsort$Inferior_Frontal_Gyrus=DRsort(DCGs = msbb_gse84422.DCGs$Inferior_Frontal_Gyrus,DCLs = msbb_gse84422.DCLs$Inferior_Frontal_Gyrus,tf2target = regnet_tf2target.HGNC,expGenes = rownames(msbb_gse84422_GPL96_97_samplesToAnalyse.exprs$Inferior_Frontal_Gyrus))
-
-msbb_gse84422.DRsort$Inferior_Temporal_Gyrus=DRsort(DCGs = msbb_gse84422.DCGs$Inferior_Temporal_Gyrus,DCLs = msbb_gse84422.DCLs$Inferior_Temporal_Gyrus,tf2target = regnet_tf2target.HGNC,expGenes = rownames(msbb_gse84422_GPL96_97_samplesToAnalyse.exprs$Inferior_Temporal_Gyrus))
-
-msbb_gse84422.DRsort$Middle_Temporal_Gyrus=DRsort(DCGs = msbb_gse84422.DCGs$Middle_Temporal_Gyrus,DCLs = msbb_gse84422.DCLs$Middle_Temporal_Gyrus,tf2target = regnet_tf2target.HGNC,expGenes = rownames(msbb_gse84422_GPL96_97_samplesToAnalyse.exprs$Middle_Temporal_Gyrus))
-
-msbb_gse84422.DRsort$Nucleus_Accumbens=DRsort(DCGs = msbb_gse84422.DCGs$Nucleus_Accumbens,DCLs = msbb_gse84422.DCLs$Nucleus_Accumbens,tf2target = regnet_tf2target.HGNC,expGenes = rownames(msbb_gse84422_GPL570_samplesToAnalyse.exprs$Nucleus_Accumbens))
-
-msbb_gse84422.DRsort$Occipital_Visual_Cortex=DRsort(DCGs = msbb_gse84422.DCGs$Occipital_Visual_Cortex,DCLs = msbb_gse84422.DCLs$Occipital_Visual_Cortex,tf2target = regnet_tf2target.HGNC,expGenes = rownames(msbb_gse84422_GPL96_97_samplesToAnalyse.exprs$Occipital_Visual_Cortex))
-
-msbb_gse84422.DRsort$Parahippocampal_Gyrus=DRsort(DCGs = msbb_gse84422.DCGs$Parahippocampal_Gyrus,DCLs = msbb_gse84422.DCLs$Parahippocampal_Gyrus,tf2target = regnet_tf2target.HGNC,expGenes = rownames(msbb_gse84422_GPL96_97_samplesToAnalyse.exprs$Parahippocampal_Gyrus))
-
-msbb_gse84422.DRsort$Posterior_Cingulate_Cortex=DRsort(DCGs = msbb_gse84422.DCGs$Posterior_Cingulate_Cortex,DCLs = msbb_gse84422.DCLs$Posterior_Cingulate_Cortex,tf2target = regnet_tf2target.HGNC,expGenes = rownames(msbb_gse84422_GPL96_97_samplesToAnalyse.exprs$Posterior_Cingulate_Cortex))
-
-msbb_gse84422.DRsort$Precentral_Gyrus=DRsort(DCGs = msbb_gse84422.DCGs$Precentral_Gyrus,DCLs = msbb_gse84422.DCLs$Precentral_Gyrus,tf2target = regnet_tf2target.HGNC,expGenes = rownames(msbb_gse84422_GPL96_97_samplesToAnalyse.exprs$Precentral_Gyrus))
-
-msbb_gse84422.DRsort$Prefrontal_Cortex=DRsort(DCGs = msbb_gse84422.DCGs$Prefrontal_Cortex,DCLs = msbb_gse84422.DCLs$Prefrontal_Cortex,tf2target = regnet_tf2target.HGNC,expGenes = rownames(msbb_gse84422_GPL96_97_samplesToAnalyse.exprs$Prefrontal_Cortex))
-
-msbb_gse84422.DRsort$Putamen=DRsort(DCGs = msbb_gse84422.DCGs$Putamen,DCLs = msbb_gse84422.DCLs$Putamen,tf2target = regnet_tf2target.HGNC,expGenes = rownames(msbb_gse84422_GPL96_97_samplesToAnalyse.exprs$Putamen))
-
-msbb_gse84422.DRsort$Superior_Parietal_Lobule=DRsort(DCGs = msbb_gse84422.DCGs$Superior_Parietal_Lobule,DCLs = msbb_gse84422.DCLs$Superior_Parietal_Lobule,tf2target = regnet_tf2target.HGNC,expGenes = rownames(msbb_gse84422_GPL96_97_samplesToAnalyse.exprs$Superior_Parietal_Lobule))
-
-msbb_gse84422.DRsort$Superior_Temporal_Gyrus=DRsort(DCGs = msbb_gse84422.DCGs$Superior_Temporal_Gyrus,DCLs = msbb_gse84422.DCLs$Superior_Temporal_Gyrus,tf2target = regnet_tf2target.HGNC,expGenes = rownames(msbb_gse84422_GPL96_97_samplesToAnalyse.exprs$Superior_Temporal_Gyrus))
-
-msbb_gse84422.DRsort$Temporal_Pole=DRsort(DCGs = msbb_gse84422.DCGs$Temporal_Pole,DCLs = msbb_gse84422.DCLs$Temporal_Pole,tf2target = regnet_tf2target.HGNC,expGenes = rownames(msbb_gse84422_GPL96_97_samplesToAnalyse.exprs$Temporal_Pole))
 
 
 # for(i in c(1,10)){msbb_gse84422.DRsort$Amygdala=DRsort(DCGs = msbb_gse84422.DCGs$Amygdala,DCLs = msbb_gse84422.DCLs$Amygdala,tf2target = regnet_tf2target.HGNC,expGenes = rownames(msbb_gse84422_GPL570_samplesToAnalyse.exprs$Amygdala))
@@ -111,6 +114,18 @@ msbb_gse84422.DRsort$Temporal_Pole=DRsort(DCGs = msbb_gse84422.DCGs$Temporal_Pol
 # msbb_gse84422.DRsort=readRDS("msbb_gse84422_DRsort.RDS")
 msbb_gse84422.DRGs=lapply(msbb_gse84422.DRsort,function(x)x$DRGs%>%filter(DCGisTF=="TRUE"&q<=0.05))
 msbb_gse84422.DRGs_list=lapply(msbb_gse84422.DRsort,function(x)x$DRGs%>%filter(DCGisTF=="TRUE"&q<=0.05)%>%pull(DCG)%>%droplevels%>%levels)
+msbb_gse84422.RS_DRGs_list=vector(mode = "list",length = 18)
+names(msbb_gse84422.RS_DRGs_list)=names(msbb_gse84422.DRGs_list)
+
+for(i in 1:length(msbb_gse84422.DRGs_list)){
+  msbb_gse84422.RS_DRGs_list[[i]]=setdiff(msbb_gse84422.DRGs_list[[i]],(Reduce(union,lapply(msbb_gse84422.DRGs_list,function(x)intersect(x,msbb_gse84422.DRGs_list[[i]]))[-i])))
+}
+msbb_gse84422.RS_DRGs_list=Filter(f = function(x)length(x)>0,x = msbb_gse84422.RS_DRGs_list)
+rs_DRG_DCLs=list()
+for(i in names(msbb_gse84422.RS_DRGs_list)){
+  rs_DRG_DCLs[[i]]=msbb_gse84422.DRGs[[i]]%>%dplyr::filter(DCG%in%msbb_gse84422.RS_DRGs_list[[i]])%>%pull(DCLs)%>%sum
+}
+
 msbb_gse84422.DRGs_list_Entrez=lapply(msbb_gse84422.DRGs_list,function(y)unname(mapIds(x = org.Hs.eg.db,keys = y,keytype = "SYMBOL",column = "ENTREZID")))
 msbb_gse84422.DRLs=lapply(msbb_gse84422.DRsort,function(x)x$DRLs%>%filter(q.diffcor<=0.05))
 msbb_gse84422.TF_bridged_DCL=Filter(f = function(x)dim(x)[1]>0,x = lapply(msbb_gse84422.DRsort,function(x)x$TF_bridged_DCL%>%filter(q.diffcor<=0.05)))
@@ -143,7 +158,9 @@ msbb_gse84422_DCGs.h=lapply(msbb_gse84422.DCGs_list,function(x)data.frame(enrich
 msbb_gse84422_DCGs.KEGG=vector(mode = "list",length = 19)
 names(msbb_gse84422_DCGs.KEGG)=names(msbb_gse84422_diffcoexp_results)
 msbb_gse84422_DCGs.KEGG=lapply(msbb_gse84422.DCGs_list_Entrez,function(x)data.frame(enrichKEGG(gene = x,organism = "hsa",pvalueCutoff = 0.05,pAdjustMethod = "BH",qvalueCutoff = 0.1),stringsAsFactors = F))
+msbb_gse84422_RS_DCGs.KEGG=lapply(msbb_gse84422.RS_DCGs_list_Entrez,function(x)data.frame(enrichKEGG(gene = x,organism = "hsa",pvalueCutoff = 0.05,pAdjustMethod = "BH",qvalueCutoff = 0.2),stringsAsFactors = F))
 msbb_gse84422_DCGs.KEGG=Filter(f = function(x)dim(x)[1]>0,x = msbb_gse84422_DCGs.KEGG)
+msbb_gse84422_RS_DCGs.KEGG=Filter(f = function(x)dim(x)[1]>0,x = msbb_gse84422_RS_DCGs.KEGG)
 msbb_gse84422_DRGs.KEGG=lapply(msbb_gse84422.DRGs_list_Entrez,function(x)data.frame(enrichKEGG(gene = x,organism = "hsa",pvalueCutoff = 0.05,pAdjustMethod = "BH",qvalueCutoff = 0.1),stringsAsFactors = F))
 msbb_gse84422_DRGs.KEGG=Filter(f = function(x)dim(x)[1]>0,x = msbb_gse84422_DRGs.KEGG)
 msbb_gse84422_DCGs_KEGG.list=lapply(msbb_gse84422_DCGs.KEGG,function(x)x$Description)
@@ -222,7 +239,7 @@ msbb_exp_dhmc_NP_DCGs=lapply(lapply(msbb_gse84422.DCGs_list,length),function(x)r
 msbb_gse84422_dhmc_NP.fisher_results=msbb_gse84422_dhmc_NFT.fisher_results=msbb_gse84422_d5mc.fisher_results=vector(mode = "list",length = length(msbb_gse84422.DCGs_list))
 names(msbb_gse84422_dhmc_NP.fisher_results)=names(msbb_gse84422_dhmc_NFT.fisher_results)=names(msbb_gse84422_d5mc.fisher_results)=names(msbb_gse84422.DCGs_list)
 for(m in 1:length(msbb_gse84422.DCGs_list)){
-  msbb_gse84422_dhmc_NP.fisher_results[[m]]=fisher.test(matrix(c(length(msbb_gse84422_tanzi_SAGs.overlap[[m]]),
+  msbb_gse84422_dhmc_NP.fisher_results[[m]]=fisher.test(matrix(c(length(msbb_gse84422_DCG_dhmc_NP.overlap[[m]]),
                                                                     length(dhmc_bennet_NP.genes)-length(msbb_gse84422_DCG_dhmc_NP.overlap[[m]]),
                                                                     lapply(msbb_gse84422.DCGs_list,length)[[m]]-length(msbb_gse84422_DCG_dhmc_NP.overlap[[m]]),
                                                                     21982-(length(dhmc_bennet_NP.genes)-length(msbb_gse84422_DCG_dhmc_NP.overlap[[m]]))-
@@ -450,4 +467,70 @@ for(f in 1:4){
 }
 gse48350.DCGs=lapply(gse48350_brain_regions.diffcoexp,function(x)x$DCGs)
 gse48350.DCLs=lapply(gse48350_brain_regions.diffcoexp,function(x)x$DCLs)
+
+
+#Plot interesting results
+
+foxo_subg_regions=c("Caudate_Nucleus","Frontal_Pole","Precentral_Gyrus","Temporal_Pole")
+foxo_subg_list=vector(mode = "list",length = length(foxo_subg_regions))
+foxo_subg_colours=brewer.pal(n = length(foxo_subg_regions),name = "YlGnBu")
+names(foxo_subg_colours)=foxo_subg_regions
+for(r in foxo_subg_regions){
+  subg=graph.data.frame(msbb_gse84422.DCLs[[r]][c(grep(pattern = paste(msbb_gse84422.DRGs[[r]]$DCG[grep(pattern = "FOXO",x = msbb_gse84422.DRGs[[r]]$Upstream_TFofDCG)]%>%droplevels,collapse = "|"),x = msbb_gse84422.DCLs[[r]]$Gene.1),
+                                                  grep(pattern = paste(msbb_gse84422.DRGs[[r]]$DCG[grep(pattern = "FOXO",x = msbb_gse84422.DRGs[[r]]$Upstream_TFofDCG)]%>%droplevels,collapse = "|"),x = msbb_gse84422.DCLs[[r]]$Gene.2)),c('Gene.1','Gene.2')],directed = F)
+  V(subg)$colour=foxo_subg_colours[[r]]
+  foxo_subg_list[[r]]=subg
+}
+
+
+
+
+
+
+
+
+#Randomisation test to determine significance of top10 enriched pathways
+random_enrichedKEGG.list=vector(mode = "list",length = 9)
+names(random_enrichedKEGG.list)=c("AMYG","CN","HIPP","IFG","NAc","PCG","FC","PTMN","TP")
+
+random_enrichedKEGG.list$AMYG=replicate(1000,sample(x = levels(kegg_2016_pathways.df$ont),size = length(msbb_gse84422_DCGs_KEGG.list$Amygdala),replace = F))
+random_enrichedKEGG.list$CN=replicate(1000,sample(x = levels(kegg_2016_pathways.df$ont),size = length(msbb_gse84422_DCGs_KEGG.list$Caudate_Nucleus),replace = F))
+random_enrichedKEGG.list$HIPP=replicate(1000,sample(x = levels(kegg_2016_pathways.df$ont),size = length(msbb_gse84422_DCGs_KEGG.list$Hippocampus),replace = F))
+random_enrichedKEGG.list$IFG=replicate(1000,sample(x = levels(kegg_2016_pathways.df$ont),size = length(msbb_gse84422_DCGs_KEGG.list$Inferior_Frontal_Gyrus),replace = F))
+random_enrichedKEGG.list$NAc=replicate(1000,sample(x = levels(kegg_2016_pathways.df$ont),size = length(msbb_gse84422_DCGs_KEGG.list$Nucleus_Accumbens),replace = F))
+random_enrichedKEGG.list$PCG=replicate(1000,sample(x = levels(kegg_2016_pathways.df$ont),size = length(msbb_gse84422_DCGs_KEGG.list$Precentral_Gyrus),replace = F))
+random_enrichedKEGG.list$FC=replicate(1000,sample(x = levels(kegg_2016_pathways.df$ont),size = length(msbb_gse84422_DCGs_KEGG.list$Prefrontal_Cortex),replace = F))
+random_enrichedKEGG.list$PTMN=replicate(1000,sample(x = levels(kegg_2016_pathways.df$ont),size = length(msbb_gse84422_DCGs_KEGG.list$Putamen),replace = F))
+random_enrichedKEGG.list$TP=replicate(1000,sample(x = levels(kegg_2016_pathways.df$ont),size = length(msbb_gse84422_DCGs_KEGG.list$Temporal_Pole),replace = F))
+
+random_enrichedKEGG_freq.matrix=matrix(NA,ncol = 8,nrow = 1000)
+colnames(random_enrichedKEGG_freq.matrix)=names(random_enrichedKEGG.list)[-9]
+for(i in 1:dim(random_enrichedKEGG_freq.matrix)[1]){
+  random_enrichedKEGG_freq.matrix[i,]=unlist(lapply(random_enrichedKEGG.list[-9],function(y)length(intersect(y[,i],names(table(unlist(lapply(random_enrichedKEGG.list[-9],function(x)x[,i])))[1:10])))))
+}
+
+
+
+
+#Compare with DEGs generated for the same dataset
+msbb_gse84422_GPL96_97_samplesToAnalyse.exprs=readRDS("msbb_gse84422_GPL96_97_samplesToAnalyse_exprs.RDS")
+msbb_gse84422_GPL96_97_samplesToAnalyse=readRDS("msbb_gse84422_GPL96_97_samplesToAnalyse.RDS")
+msbb_gse84422.DEGs=vector(mode = "list",length = length(msbb_gse84422_GPL96_97_samplesToAnalyse.exprs))
+names(msbb_gse84422.DEGs)=names(msbb_gse84422_GPL96_97_samplesToAnalyse.exprs)
+
+for(i in 1:17){
+  c_exprs=msbb_gse84422_GPL96_97_samplesToAnalyse.exprs[[i]][,msbb_gse84422_GPL96_97_samplesToAnalyse[[i]]$SampleType=="CONTROL"]
+  d_exprs=msbb_gse84422_GPL96_97_samplesToAnalyse.exprs[[i]][,msbb_gse84422_GPL96_97_samplesToAnalyse[[i]]$SampleType=="AD"]
+  group=factor(c(rep("CONTROL",dim(c_exprs)[2]),rep("AD",dim(d_exprs)[2])))
+  design_df=model.matrix(~0+group)
+  colnames(design_df)=levels(group)
+  contrasts_matrix=makeContrasts(CONTROL-AD,levels = design_df)
+  fit=lmFit(object = cbind.data.frame(c_exprs,d_exprs),design = design_df)
+  fit2=contrasts.fit(fit,contrasts_matrix)
+  fit2=eBayes(fit2,trend = T)
+  msbb_gse84422.DEGs[[i]]=topTable(fit = fit2,coef = 1,number = dim(msbb_gse84422_GPL96_97_samplesToAnalyse.exprs[[i]])[1],adjust.method = "BH",p.value = 0.1)%>%rownames_to_column("Gene")
+}
+msbb_gse84422.DEGs=Filter(f = function(x)dim(x)[1]>0,x = msbb_gse84422.DEGs)
+msbb_gse84422.DEGs$`Inferior Temporal Gyrus`$EntrezID=unname(mapIds(x = org.Hs.eg.db,keys = msbb_gse84422.DEGs$`Inferior Temporal Gyrus`$Gene,column = "ENTREZID",keytype = "SYMBOL"))
+msbb_gse84422.DEGs$`Putamen`$EntrezID=unname(mapIds(x = org.Hs.eg.db,keys = msbb_gse84422.DEGs$`Putamen`$Gene,column = "ENTREZID",keytype = "SYMBOL"))
 

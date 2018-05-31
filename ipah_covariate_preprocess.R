@@ -1,0 +1,10 @@
+library(dplyr)
+library(data.table)
+library(magrittr)
+
+setwd("/Users/sandeepamberkar/Work/Collaborations/IPAH/Clinical_Covariates_Metadata/")
+ipah_pheno_master=fread("DO_NOT_SHARE final pheno in progress.xlsx - Sheet 1.tsv",sep = "\t",header = T,data.table = F)
+ipah_rnaseq_pheno=fread("RNA_seq_phenotype_2017_06_12_vlj.xlsx - RNA_seq_phenotype_2017_06_12.tsv",sep = "\t",header = T,data.table = F)
+ipah_rnaseqIDs=fread("RNAseq_ids.xlsx - RNAseq_ids.tsv",sep = "\t",header = T,data.table = F)
+ipah_assay_L001=fread("Allan_RNASeq_L001 - assay.tsv",sep = "\t",header = T,data.table = F)
+ipah_assay_L002=fread("RNA-Seq _L002 - assay.tsv",sep = "\t",header = T,data.table = F)
