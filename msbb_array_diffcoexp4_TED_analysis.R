@@ -22,6 +22,6 @@ earlyAD_DCLs=lapply(earlyAD_diffcoexp_results,function(x)x$DCLs)
 earlyAD_DRrank.TED=earlyAD_DRrank.TED=vector(mode = "list",length = length(earlyAD_samples.exprs))
 names(earlyAD_DRrank.TED)=names(earlyAD_DRrank.TED)=names(earlyAD_diffcoexp_results)
 for(i in 1:length(earlyAD_samples.exprs)){
-  earlyAD_DRrank.TED[[i]]=DRrank(DCGs=earlyAD_DCGs[[i]],DCLs=earlyAD_DCLs[[i]],tf2target=regnet_tf2target.HGNC,expGenes=rownames(earlyAD_samples.exprs$Frontal_Pole),rank.method="TED",Nperm=10)
+  earlyAD_DRrank.TED[[i]]=DRrank(DCGs=earlyAD_DCGs[[i]],DCLs=earlyAD_DCLs[[i]],tf2target=regnet_tf2target.HGNC,expGenes=rownames(earlyAD_samples.exprs$Frontal_Pole),rank.method="TED",Nperm=1000)
   saveRDS(earlyAD_DRrank.TED[[i]],paste(names(earlyAD_DRrank.TED)[i],"earlyAD_DRrank_TED.RDS",sep = "_"))
 }
