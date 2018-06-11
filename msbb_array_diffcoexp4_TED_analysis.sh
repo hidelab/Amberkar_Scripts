@@ -1,14 +1,14 @@
 #!/bin/bash 
 #Job time 
-#$-l h_rt=00:01:00 
+#$ -l h_rt=00:01:00 
 #Request resources 
-#$-l rmem=64G
-#$-p smp 4
+#$ -l rmem=64G
+#$ -p smp 4
 #Job Name 
-#$-N EarlyCDR_TED
-#$-o msbb_array_diffcoexp4_TED_analysis.out
+#$ -N EarlyCDR_TED
+#$ -o msbb_array_diffcoexp4_TED_analysis.out
 #Queue
-#$-P rse
+#$ -P rse
 
 
 
