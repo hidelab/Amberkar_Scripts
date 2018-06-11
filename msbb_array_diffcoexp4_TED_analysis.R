@@ -24,7 +24,7 @@ earlyAD_DRrank.TED=earlyAD_DRrank.TED=vector(mode = "list",length = length(early
 names(earlyAD_DRrank.TED)=names(earlyAD_DRrank.TED)=names(earlyAD_diffcoexp_results)
 genes=earlyAD_DCGs$Frontal_Pole
 dcls=earlyAD_DCLs$Frontal_Pole
-prob<-nrow(dcls)/choose(nrow(earlyAD_DCGs), 2)
+prob<-nrow(dcls)/choose(nrow(earlyAD_DCGs$Frontal_Pole), 2)
 
 ProcessElement<-function(ic) {
   regulator_gene_symbol<-names(humanRegnetwork)[ic]
