@@ -2,13 +2,14 @@ library(dplyr)
 library(magrittr)
 library(data.table)
 library(DCGL)
+library(parallel)
 
 setwd("/shared/hidelab2/user/md4zsa/Work/Data/MSBB_Array19/GSE84422/")
 earlyAD_diffcoexp_files=list.files(path = ".",pattern = "earlyAD_diffcoexp",full.names = T)
 earlyAD_samples=readRDS("./msbb_gse84422_GPL96_97_earlyAD_samplesToAnalyse.RDS")
 earlyAD_samples.exprs=readRDS("./msbb_gse84422_GPL96_97_earlyAD_samplesToAnalyse_exprs.RDS")
 
-regnet_tf2target.HGNC=fread("/shared/hidelab2/user/md4zsa/Work/Data/TF_Databases/RegNetwork_human_regulators2.txt",header = T,sep = "\t",showProgress = T,data.table = F)%>%dplyr::filter(evidence=="Experimental")%>%dplyr::select(c(regulator_symbol,target_symbol))
+humanRegnetwork=readRDS("humanRegnetwork.RDS")
 
 earlyAD_diffcoexp_results=vector(mode = "list",length = length(earlyAD_diffcoexp_files))
 for(i in 1:length(earlyAD_diffcoexp_files)){
@@ -21,7 +22,39 @@ earlyAD_DCLs=lapply(earlyAD_diffcoexp_results,function(x)x$DCLs)
 
 earlyAD_DRrank.TED=earlyAD_DRrank.TED=vector(mode = "list",length = length(earlyAD_samples.exprs))
 names(earlyAD_DRrank.TED)=names(earlyAD_DRrank.TED)=names(earlyAD_diffcoexp_results)
-for(i in 1:length(earlyAD_samples.exprs)){
-  earlyAD_DRrank.TED[[i]]=DRrank(DCGs=earlyAD_DCGs[[i]],DCLs=earlyAD_DCLs[[i]],tf2target=regnet_tf2target.HGNC,expGenes=rownames(earlyAD_samples.exprs$Frontal_Pole),rank.method="TED",Nperm=1000)
-  saveRDS(earlyAD_DRrank.TED[[i]],paste(names(earlyAD_DRrank.TED)[i],"earlyAD_DRrank_TED.RDS",sep = "_"))
+genes=earlyAD_DCGs$Frontal_Pole
+dcls=earlyAD_DCLs$Frontal_Pole
+prob<-nrow(dcls)/choose(nrow(number.of.genes), 2)
+
+ProcessElement<-function(ic) {
+  regulator_gene_symbol<-names(humanRegnetwork)[ic]
+  targets<-humanRegnetwork[[ic]]
+  common.genes<-intersect(targets, genes)
+  n<-length(common.genes)
+  N<-n * (n-1)/2
+  rowIntersect<-function(x) {
+    length(intersect(x, common.genes))
+  }
+  y<-apply(dcls, 1, rowIntersect)
+  e<-sum(y==2)
+  #binom.test(e, N, prob, alternative="greater")
+  p.value <- pbinom(e-1, N, prob, lower.tail = FALSE, log.p = FALSE)
+  tmp <- data.frame(regulator_gene_symbol = regulator_gene_symbol,
+                    n.target.gene.in.data = n,
+                    n.target.pairs = e,
+                    n.expected.target.pairs = N * prob,
+                    p.value = p.value
+  )
+  setTxtProgressBar(pb,ic)
+  return(tmp)
 }
+nc = 4
+input = 1:length(humanRegnetwork)
+pb = txtProgressBar(min=0,max=length(humanRegnetwork), style=3, initial=0)
+cat("\n")
+result<- mclapply(input, ProcessElement, mc.cores=nc)
+close(pb)
+library(data.table)
+result<-rbindlist(result)
+result<-as.data.frame(result)
+result$p.adjusted<-p.adjust(result$p.value)
