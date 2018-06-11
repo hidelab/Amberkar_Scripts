@@ -2,10 +2,11 @@
 #Job time 
 #$-l h_rt=00:01:00 
 #Request resources 
-#$-l mem=64G
-#$-p openmp 4
+#$-l rmem=64G
+#$-p smp 4
 #Job Name 
 #$-N EarlyCDR_TED
+#$-o msbb_array_diffcoexp4_TED_analysis.out
 #Queue
 #$-P rse
 
