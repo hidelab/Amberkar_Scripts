@@ -1,6 +1,6 @@
 #!/bin/bash 
 #Job time 
-#$ -l h_rt=00:01:00 
+#$ -l h_rt=02:00:00 
 #Request resources 
 #$ -l rmem=64G
 #$ -pe smp 4
