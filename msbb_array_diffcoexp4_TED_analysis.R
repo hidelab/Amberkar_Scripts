@@ -23,7 +23,7 @@ earlyAD_DCLs=lapply(earlyAD_diffcoexp_results,function(x)x$DCLs)
 earlyAD_DRrank.TED=earlyAD_DRrank.TED=vector(mode = "list",length = length(earlyAD_samples.exprs))
 names(earlyAD_DRrank.TED)=names(earlyAD_DRrank.TED)=names(earlyAD_diffcoexp_results)
 compute_time=list()
-for(t in 1:length(earlyAD_diffcoexp_results)){
+for(t in 9:length(earlyAD_diffcoexp_results)){
   genes=earlyAD_DCGs[[t]]$Gene
   dcls=earlyAD_DCLs[[t]]
   prob<-nrow(dcls)/choose(nrow(earlyAD_samples.exprs[[t]]), 2)
