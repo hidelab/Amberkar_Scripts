@@ -1,9 +1,9 @@
 #!/bin/bash 
 #Job time 
-#$ -l h_rt=15:00:00 
+#$ -l h_rt=24:00:00 
 #Request resources 
-#$ -l rmem=64G
-#$ -pe smp 4
+#$ -l rmem=16G
+#$ -pe smp 8
 #Job Name 
 #$ -N EarlyCDR_TED
 #$ -o msbb_array_diffcoexp4_TED_analysis.out
