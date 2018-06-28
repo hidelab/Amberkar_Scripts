@@ -5,8 +5,8 @@ library(data.table)
 library(diffcoexp)
 
 
-setwd("/shared/hidelab2/user/md4zsa/Work/Data/MSBB_Array19/GSE84422/")
-
+# setwd("/shared/hidelab2/user/md4zsa/Work/Data/MSBB_Array19/GSE84422/")
+# 
 # msbb_gse84422_series_matrix.GPL96=getGEO(filename = "./GSE84422-GPL96_series_matrix.txt.gz",GSEMatrix = F,AnnotGPL = T)
 # msbb_gse84422_series_matrix.GPL97=getGEO(filename = "./GSE84422-GPL97_series_matrix.txt.gz",GSEMatrix = F,AnnotGPL = T)
 # 
@@ -61,7 +61,7 @@ setwd("/shared/hidelab2/user/md4zsa/Work/Data/MSBB_Array19/GSE84422/")
 # msbb_gse84422_GPL96_97_samplesToAnalyse=lapply(unique(msbb_gse84422.pData$GPL96$`brain region:ch1`),function(y)msbb_gse84422.pData$GPL96[which(msbb_gse84422.pData$GPL96$`brain region:ch1`==y&(msbb_gse84422.pData$GPL96$SampleType=="CONTROL"|msbb_gse84422.pData$GPL96$SampleType=="AD")),c('SampleType','pseudoSampleID')])
 # names(msbb_gse84422_GPL96_97_samplesToAnalyse)=unique(msbb_gse84422.pData$GPL96$`brain region:ch1`)
 # names(msbb_gse84422_GPL96_97_samplesToAnalyse)=gsub(pattern = " ",replacement = "_",x = names(msbb_gse84422_GPL96_97_byRegion.exprs))
-# select_brain_regions=which(names(msbb_gse84422_GPL96_97_samplesToAnalyse)%in%c("Precentral_Gyrus","Prefrontal_Cortex","Putamen","Caudate_Nucleus"))
+# select_brain_regions=which(names(msbb_gse84422_GPL96_97_samplesToAnalyse)%in%c("Precentral_Gyrus","Prefrontal_Cortex","Putamen","Caudate_Nucleus","Superior_Parietal_Lobule"))
 # msbb_gse84422_GPL96_97_samplesToAnalyse=msbb_gse84422_GPL96_97_samplesToAnalyse[-select_brain_regions]
 # msbb_gse84422_GPL96_97_samplesToAnalyse.exprs=lapply(msbb_gse84422_GPL96_97_samplesToAnalyse,function(y)msbb_gse84422_exprs_GPL96_97.agg[-1,colnames(msbb_gse84422_exprs_GPL96_97.agg)%in%y$pseudoSampleID])
 # 
@@ -79,16 +79,3 @@ for(i in length(names(msbb_gse84422_GPL96_97_samplesToAnalyse)):1){
   saveRDS(diffcoexp_out,paste(names(msbb_gse84422_GPL96_97_samplesToAnalyse.exprs)[i],"earlyAD_diffcoexp_results.RDS",sep = "_"))
   proc.time()
 }
-
-
-
-# msbb_gse84422_sample_breakdown_GPL96_97.NP1=lapply(unique(msbb_gse84422.pData$GPL96$`neuropathological category:ch1`),function(x)msbb_gse84422.pData$GPL96%>%filter(`neuropathological category:ch1`==x)%>%select(c(`brain region:ch1`,`average neuritic plaque density:ch1`))%>%table)
-# msbb_gse84422_sample_breakdown_GPL570.NP1=lapply(unique(msbb_gse84422.pData$GPL570$`neuropathological category:ch1`),function(x)msbb_gse84422.pData$GPL570%>%filter(`neuropathological category:ch1`==x)%>%pull(`brain region:ch1`)%>%table)
-# msbb_gse84422_sample_breakdown_GPL96_97.Braak=lapply(c(2,4,6),function(x)msbb_gse84422.pData$GPL96%>%filter(`braak neurofibrillary tangle score:ch1`==x)%>%pull(`brain region:ch1`)%>%table)
-# msbb_gse84422_sample_breakdown_GPL570.Braak=lapply(c(2,4,6),function(x)msbb_gse84422.pData$GPL570%>%filter(`braak neurofibrillary tangle score:ch1`==x)%>%pull(`brain region:ch1`)%>%table)
-# names(msbb_gse84422_sample_breakdown_GPL96_97.Braak)=names(msbb_gse84422_sample_breakdown_GPL570.Braak)=c(2,4,6)
-# names(msbb_gse84422_sample_breakdown_GPL96_97.NP1)=names(msbb_gse84422_sample_breakdown_GPL570.NP1)=unique(msbb_gse84422.pData$GPL570$`neuropathological category:ch1`)
-# 
-# 
-# 
-# 
