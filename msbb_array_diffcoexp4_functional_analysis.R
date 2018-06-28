@@ -65,13 +65,18 @@ for(i in 1:length(earlyAD_diffcoexp_files)){
 }
 names(earlyAD_diffcoexp_results)=names(lateAD_diffcoexp_results)=names(earlyAD_samples.exprs)
 
-random_earlyAD_DCGs=replicate(n = 1000,expr = sample(x = rownames(lateAD_samples.exprs$Frontal_Pole),size = length(earlyAD_diffcoexp_results$Frontal_Pole$DCGs$Gene),replace = F),simplify = T)
-random_lateAD_DCGs=replicate(n = 1000,expr = sample(x = rownames(lateAD_samples.exprs$Frontal_Pole),size = length(lateAD_diffcoexp_results$Frontal_Pole$DCGs$Gene),replace = F),simplify = T)
-common_DCGs=intersect(earlyAD_diffcoexp_results$Frontal_Pole$DCGs$Gene,lateAD_diffcoexp_results$Frontal_Pole$DCGs$Gene)
-
-res=foreach(i=1:1000)%do%{
-  length(intersect(random_earlyAD_DCGs[,i],random_lateAD_DCGs[,i]))
+common_DCGs=mapply(FUN = function(a,b)intersect(a$DCGs$Gene,b$DCGs$Gene),earlyAD_diffcoexp_results,lateAD_diffcoexp_results)
+earlyAD_DCGs.uniq=mapply(FUN = function(a,b)setdiff(a$DCGs$Gene,b$DCGs$Gene),earlyAD_diffcoexp_results,lateAD_diffcoexp_results)
+  
+random_common_DCGs.list=vector(mode = "list",length = 6)
+for(t in 1:6){
+  random_earlyAD_DCGs=replicate(n = 1000,expr = sample(x = rownames(lateAD_samples.exprs[[t]]),size = length(earlyAD_diffcoexp_results[[t]]$DCGs$Gene),replace = F),simplify = T)
+  random_lateAD_DCGs=replicate(n = 1000,expr = sample(x = rownames(lateAD_samples.exprs[[t]]),size = length(lateAD_diffcoexp_results[[t]]$DCGs$Gene),replace = F),simplify = T)
+  random_common_DCGs.list[[t]]=unlist(foreach(i=1:1000)%do%{
+    length(intersect(random_earlyAD_DCGs[,i],random_lateAD_DCGs[,i]))
+  })  
 }
+
 
 earlyAD_DCGs=earlyAD_DCLs=earlyAD_DCGs.list=earlyAD_DCLs.list=earlyAD_DRsort=earlyAD_DRGs=earlyAD_DRGs.list=earlyAD_DRLs=earlyAD_DRLs.list=earlyAD_bridged_DCLs=vector(mode = "list",length = length(earlyAD_diffcoexp_results))
 names(earlyAD_DCGs)=names(earlyAD_DCLs)=names(earlyAD_DCGs.list)=names(earlyAD_DCLs.list)=names(earlyAD_DRsort)=names(earlyAD_DRGs)=names(earlyAD_DRGs.list)=names(earlyAD_DRLs)=names(earlyAD_DRLs.list)=names(earlyAD_bridged_DCLs)
