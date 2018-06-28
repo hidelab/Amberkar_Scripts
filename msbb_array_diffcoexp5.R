@@ -78,6 +78,6 @@ for(i in 1:length(names(msbb_gse84422_GPL96_97_samplesToAnalyse))){
   c_exprs=msbb_gse84422_GPL96_97_samplesToAnalyse.exprs[[i]][,msbb_gse84422_GPL96_97_samplesToAnalyse[[i]]$SampleType=="CONTROL"]
   d_exprs=msbb_gse84422_GPL96_97_samplesToAnalyse.exprs[[i]][,msbb_gse84422_GPL96_97_samplesToAnalyse[[i]]$SampleType=="AD"]
   diffcoexp_out=diffcoexp(exprs.1 = c_exprs,exprs.2 = d_exprs,r.method="spearman",rth=0.6,q.diffth=0.1,q.dcgth=0.1)
-  saveRDS(diffcoexp_out,paste(names(msbb_gse84422_GPL96_97_samplesToAnalyse.exprs)[i],"LateAD_diffcoexp/lateAD_diffcoexp_results.RDS",sep = "_"))
+  saveRDS(diffcoexp_out,paste(names(msbb_gse84422_GPL96_97_samplesToAnalyse.exprs)[i],"lateAD_diffcoexp_results.RDS",sep = "_"))
   proc.time()
 }
