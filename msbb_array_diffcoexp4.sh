@@ -5,7 +5,7 @@
 #$-l mem=128G
 #$-l rmem=128G
 #Job Name 
-#$-N MSBB_EarlyDCN
+#$-N Early_DCN
 #Queue
 #$-P rse
 #$ -m bea # send mails at beginning, end and if aborted unexpectedly
