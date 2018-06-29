@@ -4,7 +4,7 @@ library(data.table)
 library(DCGL)
 library(parallel)
 
-setwd("/shared/hidelab2/user/md4zsa/Work/Data/MSBB_Array19/GSE84422/")
+setwd("/shared/hidelab2/user/md4zsa/Work/Data/MSBB_Array19/GSE84422/EarlyAD_diffcoexp/")
 earlyAD_diffcoexp_files=list.files(path = ".",pattern = "earlyAD_diffcoexp",full.names = T)
 earlyAD_samples=readRDS("./msbb_gse84422_GPL96_97_earlyAD_samplesToAnalyse.RDS")
 earlyAD_samples.exprs=readRDS("./msbb_gse84422_GPL96_97_earlyAD_samplesToAnalyse_exprs.RDS")
@@ -19,18 +19,21 @@ earlyAD_diffcoexp_results=vector(mode = "list",length = length(earlyAD_diffcoexp
 for(i in 1:length(earlyAD_diffcoexp_files)){
   earlyAD_diffcoexp_results[[i]]=readRDS(earlyAD_diffcoexp_files[[i]])
 }
-names(earlyAD_diffcoexp_results)=names(earlyAD_samples.exprs)
+names(earlyAD_diffcoexp_results)=unlist(lapply(strsplit(split = "_earlyAD",basename(earlyAD_diffcoexp_files)),`[[`,1))
 
 earlyAD_DCGs=lapply(earlyAD_diffcoexp_results,function(x)x$DCGs)
 earlyAD_DCGs.filtered=lapply(earlyAD_diffcoexp_results,function(x)x$DCGs%>%dplyr::filter(q<=0.1))
+earlyAD_DCGs.filtered=Filter(f = function(x)dim(x)[1]>0,x = earlyAD_DCGs.filtered)
 earlyAD_DCLs=lapply(earlyAD_diffcoexp_results,function(x)x$DCLs)
 earlyAD_DCLs.filtered=lapply(earlyAD_diffcoexp_results,function(x)x$DCLs%>%dplyr::filter(q.diffcor<=0.1))
+earlyAD_DCLs.filtered=Filter(f = function(x)dim(x)[1]>0,x = earlyAD_DCLs.filtered)
 
-earlyAD_DRrank.TED=earlyAD_DRrank.TED=vector(mode = "list",length = length(earlyAD_samples.exprs))
-names(earlyAD_DRrank.TED)=names(earlyAD_DRrank.TED)=names(earlyAD_diffcoexp_results)
+earlyAD_DRrank.TED=earlyAD_DRrank.TED=vector(mode = "list",length = length(earlyAD_DCGs.filtered))
+names(earlyAD_DRrank.TED)=names(earlyAD_DRrank.TED)=names(earlyAD_DCGs.filtered)
 compute_time=list()
+earlyAD_samples.exprs=earlyAD_samples.exprs[names(earlyAD_DCGs.filtered)]
 
-for(t in 1:length(earlyAD_diffcoexp_results)){
+for(t in 1:length(earlyAD_DCGs.filtered)){
   genes=earlyAD_DCGs.filtered[[t]]$Gene
   dcls=earlyAD_DCLs.filtered[[t]]
   prob<-nrow(dcls)/choose(nrow(earlyAD_samples.exprs[[t]]), 2)
