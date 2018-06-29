@@ -71,7 +71,7 @@ for(t in 1:length(earlyAD_DCGs.filtered)){
   result<-rbindlist(result)
   result<-as.data.frame(result)
   result$p.adjusted<-p.adjust(result$p.value)
-  saveRDS(result,paste("earlyAD",names(earlyAD_diffcoexp_results)[t],"TED_new_pbinom_out.RDS",sep = "_"))
+  saveRDS(result,paste("earlyAD",names(earlyAD_DCGs.filtered)[t],"TED_new_pbinom_out.RDS",sep = "_"))
   compute_time[[t]]=proc.time()
-  saveRDS(compute_time,paste("earlyAD",names(earlyAD_diffcoexp_results)[t],"TED_compute_time.RDS",sep = "_"))
+  saveRDS(compute_time,paste("earlyAD",names(earlyAD_DCGs.filtered)[t],"TED_compute_time.RDS",sep = "_"))
 }
