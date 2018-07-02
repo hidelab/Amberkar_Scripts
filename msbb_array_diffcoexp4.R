@@ -34,7 +34,7 @@ library(diffcoexp)
 # 
 # 
 # msbb_gse84422.pData=lapply(msbb_gse84422.pData,function(x){x$SampleType[which(x$SampleTypeCDR=="CDR0"&(x$`neuropathological category:ch1`=='Normal'))]="CONTROL";x})
-# msbb_gse84422.pData=lapply(msbb_gse84422.pData,function(x){x$SampleType[which(x$SampleTypeCDR=="CDR1"&(x$`neuropathological category:ch1`!='Normal'&x$`neuropathological category:ch1`!='Possible AD'))]="AD";x})
+# msbb_gse84422.pData=lapply(msbb_gse84422.pData,function(x){x$SampleType[which(x$SampleTypeCDR=="CDR1"&(x$`neuropathological category:ch1`!='Normal'))]="AD";x})
 # msbb_gse84422_GPL96_97_samples.Control=msbb_gse84422.pData$GPL96$pseudoSampleID[msbb_gse84422.pData$GPL96$SampleType=="CONTROL"]
 # msbb_gse84422_GPL96_97_samples.AD=msbb_gse84422.pData$GPL96$pseudoSampleID[msbb_gse84422.pData$GPL96$SampleType=="AD"]
 # 
@@ -44,19 +44,16 @@ library(diffcoexp)
 # msbb_gse84422.exprs$GPL96=exprs(msbb_gse84422_series_matrix.GPL96)
 # msbb_gse84422.exprs$GPL97=exprs(msbb_gse84422_series_matrix.GPL97)
 # 
-# 
+#  
 # colnames(msbb_gse84422.exprs$GPL96)=colnames(msbb_gse84422.exprs$GPL97)=msbb_gse84422.pData$GPL96$pseudoSampleID
-# 
+#  
 # msbb_gse84422_exprs.GPL96_97=rbind.data.frame(msbb_gse84422.exprs$GPL96,msbb_gse84422.exprs$GPL97)
 # msbb_gse84422_exprs.GPL96_97$GeneSymbol=c(msbb_gse84422.fData$GPL96$`Gene symbol`,msbb_gse84422.fData$GPL97$`Gene symbol`)
 # msbb_gse84422_exprs_GPL96_97.agg=aggregate.data.frame(x=msbb_gse84422_exprs.GPL96_97[,-which(colnames(msbb_gse84422_exprs.GPL96_97)=="GeneSymbol")],by=list(symbol=msbb_gse84422_exprs.GPL96_97$GeneSymbol),mean)
 # rownames(msbb_gse84422_exprs_GPL96_97.agg)=msbb_gse84422_exprs_GPL96_97.agg$symbol
 # msbb_gse84422_exprs_GPL96_97.agg=msbb_gse84422_exprs_GPL96_97.agg[,-which(colnames(msbb_gse84422_exprs_GPL96_97.agg)=="symbol")]
+#  
 # 
-# 
-# msbb_gse84422_GPL96_97_byRegion.exprs=vector(mode = "list",length = 17)
-# 
-# names(msbb_gse84422_GPL96_97_byRegion.exprs)=unique(msbb_gse84422.pData$GPL96$`brain region:ch1`)
 # 
 # msbb_gse84422_GPL96_97_samplesToAnalyse=lapply(unique(msbb_gse84422.pData$GPL96$`brain region:ch1`),function(y)msbb_gse84422.pData$GPL96[which(msbb_gse84422.pData$GPL96$`brain region:ch1`==y&(msbb_gse84422.pData$GPL96$SampleType=="CONTROL"|msbb_gse84422.pData$GPL96$SampleType=="AD")),c('SampleType','pseudoSampleID')])
 # names(msbb_gse84422_GPL96_97_samplesToAnalyse)=unique(msbb_gse84422.pData$GPL96$`brain region:ch1`)
@@ -64,7 +61,7 @@ library(diffcoexp)
 # select_brain_regions=which(names(msbb_gse84422_GPL96_97_samplesToAnalyse)%in%c("Precentral_Gyrus","Prefrontal_Cortex","Putamen","Caudate_Nucleus","Superior_Parietal_Lobule"))
 # msbb_gse84422_GPL96_97_samplesToAnalyse=msbb_gse84422_GPL96_97_samplesToAnalyse[-select_brain_regions]
 # msbb_gse84422_GPL96_97_samplesToAnalyse.exprs=lapply(msbb_gse84422_GPL96_97_samplesToAnalyse,function(y)msbb_gse84422_exprs_GPL96_97.agg[-1,colnames(msbb_gse84422_exprs_GPL96_97.agg)%in%y$pseudoSampleID])
-
+# 
 # saveRDS(msbb_gse84422_GPL96_97_samplesToAnalyse,"msbb_gse84422_GPL96_97_earlyAD_samplesToAnalyse.RDS")
 # saveRDS(msbb_gse84422_GPL96_97_samplesToAnalyse.exprs,"msbb_gse84422_GPL96_97_earlyAD_samplesToAnalyse_exprs.RDS")
 setwd("/shared/hidelab2/user/md4zsa/Work/Data/MSBB_Array19/GSE84422/EarlyAD_diffcoexp")
