@@ -2,7 +2,7 @@
 #Job time 
 #$ -l h_rt=24:00:00 
 #Request resources 
-#$ -l mem=64G
+#$ -l mem=256G
 #Job Name 
 #$ -N EarlyAD_TFbridgedDCL_GO
 #$ -o earlyAD_TFbridgedDCL_downstream_GO_analysis.out
