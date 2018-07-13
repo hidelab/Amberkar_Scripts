@@ -13,12 +13,12 @@ earlyAD_TF_bridged_DCL.TF_downstream=readRDS("earlyAD_TF_bridged_DCL_TF_downstre
 earlyAD_TF_bridged_DCL.TF_downstream_subgraph=readRDS("earlyAD_TF_bridged_DCL_TF_downstream_subgraph.RDS")
 earlyAD_TF_bridged_DCL.TF_downstream_subgraph_entrez=readRDS("earlyAD_TF_bridged_DCL_TF_downstream_subgraph_entrez.RDS")
 
-  for(l in 1:length(earlyAD_TF_bridged_DCL.TF_downstream_subgraph_GO)){
+for(l in 1:length(earlyAD_TF_bridged_DCL.TF_downstream_subgraph_GO)){
     cat(paste("Processing TF",names(earlyAD_TF_bridged_DCL.TF_downstream_subgraph_GO)[l],"...\n",sep = " "))
-    earlyAD_TF_bridged_DCL.TF_downstream_subgraph_GO[[l]]=lapply(earlyAD_TF_bridged_DCL.TF_downstream_subgraph_entrez[[l]],function(x)enrichGO(gene = x,OrgDb = org.Hs.eg.db,ont = "BP",pvalueCutoff = 0.01,pAdjustMethod = "BH"))
+    earlyAD_TF_bridged_DCL.TF_downstream_subgraph_GO[[l]]=lapply(earlyAD_TF_bridged_DCL.TF_downstream_subgraph_entrez[[l]],function(x)enrichGO(gene = x,OrgDb = org.Hs.eg.db,ont = "BP",pvalueCutoff = 0.05,pAdjustMethod = "BH"))
     earlyAD_TF_bridged_DCL.TF_downstream_subgraph_GO_simplify[[l]]=lapply(earlyAD_TF_bridged_DCL.TF_downstream_subgraph_GO[[l]],function(x)data.frame(clusterProfiler::simplify(x,cutoff=0.8,by="p.adjust",select_fun = min, measure = "Wang")))
     
-  }
+}
 saveRDS(earlyAD_TF_bridged_DCL.TF_downstream_subgraph_GO,"earlyAD_TF_bridged_DCL_TF_downstream_subgraph_GO.RDS")
 saveRDS(earlyAD_TF_bridged_DCL.TF_downstream_subgraph_GO_simplify,"earlyAD_TF_bridged_DCL_TF_downstream_subgraph_GO_simplify.RDS")
 proc.time()
