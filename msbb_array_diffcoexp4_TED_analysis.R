@@ -10,7 +10,7 @@ earlyAD_samples=readRDS("./msbb_gse84422_GPL96_97_earlyAD_samplesToAnalyse.RDS")
 earlyAD_samples.exprs=readRDS("./msbb_gse84422_GPL96_97_earlyAD_samplesToAnalyse_exprs.RDS")
 
 humanRegnetwork=readRDS("humanRegnetwork.RDS")
-regnet_tf2target_data=fread("/shared/hidelab2/user/md4zsa/Work/Data/TF_Databases/RegNetwork_human_regulators2.txt",header = T,sep = "\t",showProgress = T,data.table = F)%>%dplyr::filter(evidence=="Experimental")
+regnet_tf2target_data=fread("/shared/hidelab2/user/md4zsa/Work/Data/TF_Databases/RegNetwork_human_regulators2.txt",header = T,sep = "\t",showProgress = T,data.table = F)
 regnet_tf2target.HGNC=regnet_tf2target_data%>%dplyr::select(c(regulator_symbol,target_symbol))
 humanRegnetwork=humanRegnetwork[unique(regnet_tf2target.HGNC$regulator_symbol)]
 humanRegnetwork=humanRegnetwork[unlist(lapply(humanRegnetwork,function(x)length(x)>2))]
@@ -71,7 +71,7 @@ for(t in 1:length(earlyAD_DCGs.filtered)){
   result<-rbindlist(result)
   result<-as.data.frame(result)
   result$p.adjusted<-p.adjust(result$p.value)
-  saveRDS(result,paste("earlyAD",names(earlyAD_DCGs.filtered)[t],"TED_new_pbinom_out.RDS",sep = "_"))
+  saveRDS(result,paste("earlyAD",names(earlyAD_DCGs.filtered)[t],"allTFs_TED_new_pbinom_out.RDS",sep = "_"))
   compute_time[[t]]=proc.time()
   saveRDS(compute_time,paste("earlyAD",names(earlyAD_DCGs.filtered)[t],"TED_compute_time.RDS",sep = "_"))
 }
