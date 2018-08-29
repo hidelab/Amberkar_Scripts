@@ -34,7 +34,7 @@ rownames(rosmap_coldata)=colnames(rosmap_reseq_data.agg)
 
 rosmap_control.counts=rosmap_reseq_data.agg[,rosmap_covariates%>%dplyr::filter(SampleType=="CONTROL")%>%dplyr::pull(SampleID)]
 rosmap_cogdx2.counts=rosmap_reseq_data.agg[,rosmap_covariates%>%dplyr::filter(SampleType=="COGDX2")%>%dplyr::pull(SampleID)]
-rosmap_diffcoexp=diffcoexp(exprs.1 = rosmap_control.counts[1:1000,],exprs.2 = rosmap_cogdx2.counts[1:1000,],r.method="spearman",rth=0.6,q.diffth=0.1,q.dcgth=0.1)
+rosmap_diffcoexp=diffcoexp(exprs.1 = rosmap_control.counts[,],exprs.2 = rosmap_cogdx2.counts[,],r.method="spearman",rth=0.6,q.diffth=0.1,q.dcgth=0.1)
 saveRDS(rosmap_diffcoexp,"ROSMAP_earlyAD_diffcoexp_results.RDS")
 
 
