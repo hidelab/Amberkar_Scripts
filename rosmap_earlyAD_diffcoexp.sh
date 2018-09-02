@@ -2,8 +2,8 @@
 #Job time 
 #$-l h_rt=12:00:00 
 #Request resources 
-#$-l mem=128G
-#$-l rmem=128G
+#$-l mem=512G
+#$-l rmem=512G
 #Job Name 
 #$-N ROSMAP_EarlyAD_DCN
 #Queue
