@@ -35,7 +35,7 @@ rosmap_covariates.df=fread(rosmap_covariates@filePath,sep = "\t",header = T,stri
 rosmap_covariates.df=rosmap_covariates.df%>%mutate(diagnosis=if_else((cogdx=4 & braaksc>=4 & ceradsc <= 2),true = "AD",false = "OTHER"))
 rosmap_covariates.df=rosmap_covariates.df%>%mutate(diagnosis=if_else((cogdx=1 & braaksc<=3 & ceradsc >= 3),true = "CONTROL",false = "OTHER"))
 
-c_rosmap_exprs=rosmap_reseq_data2[1:5000,rosmap_covariates.df%>%dplyr::filter(Diagnosis=="CONTROL")%>%pull(SampleID)]
-t_rosmap_exprs=rosmap_reseq_data2[1:5000,rosmap_covariates.df%>%dplyr::filter(Diagnosis=="AD")%>%pull(SampleID)]
+c_rosmap_exprs=rosmap_reseq_data2[,rosmap_covariates.df%>%dplyr::filter(Diagnosis=="CONTROL")%>%pull(SampleID)]
+t_rosmap_exprs=rosmap_reseq_data2[,rosmap_covariates.df%>%dplyr::filter(Diagnosis=="AD")%>%pull(SampleID)]
 rosmap.diffcoexp=diffcoexp(exprs.1=c_rosmap_exprs,exprs.2=t_rosmap_exprs,r.method="spearman",rth=0.6,q.diffth=0.1,q.dcgth=0.1)
 saveRDS(rosmap.diffcoexp,"rosmap_diffcoexp_CTRL_AD_out.RDS")

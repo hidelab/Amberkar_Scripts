@@ -10,7 +10,7 @@
 #$-P rse
 #$ -m bea # send mails at beginning, end and if aborted unexpectedly
 #$ -M s.amberkar@Sheffield.ac.uk # mail sent to this address
-#$ -o ROSMAP_EarlyAD_DCN.log # output file
+#$ -o ROSMAP_AD_DCN.log # output file
 #$ -j y # send output and error to same file
 
 module load apps/R/3.4.0/gcc-4.8.5
