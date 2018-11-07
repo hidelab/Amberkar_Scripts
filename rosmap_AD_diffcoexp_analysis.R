@@ -30,8 +30,8 @@ setwd("/shared/hidelab2/user/md4zsa/Work/Data/AMP-AD_RNAseq_ReSeq/Normalised_cov
 # rosmap_reseq_data2=rosmap_reseq_data.agg[,-1]
 
 #Read ROSMAP covariates
-rosmap_covariates=synGet("syn11024258")
-rosmap_covariates.df=fread(rosmap_covariates@filePath,sep = "\t",header = T,stringsAsFactors = F,showProgress = T,data.table = F)
+rosmap_covariates=synGet("syn3191087")
+rosmap_covariates.df=fread(rosmap_covariates@filePath,sep = ",",header = T,stringsAsFactors = F,showProgress = T,data.table = F)
 rosmap_covariates.df=rosmap_covariates.df%>%mutate(diagnosis=if_else((cogdx=4 & braaksc>=4 & ceradsc <= 2),true = "AD",false = "OTHER"))
 rosmap_covariates.df=rosmap_covariates.df%>%mutate(diagnosis=if_else((cogdx=1 & braaksc<=3 & ceradsc >= 3),true = "CONTROL",false = "OTHER"))
 
