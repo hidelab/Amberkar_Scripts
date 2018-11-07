@@ -5,7 +5,7 @@ library(org.Hs.eg.db)
 library(dplyr)
 library(magrittr)
 library(diffcoexp)
-library(EnsDb.Hsapiens.v79)
+#library(EnsDb.Hsapiens.v79)
 
 synapseLogin()
 #cl=makeCluster(8)
