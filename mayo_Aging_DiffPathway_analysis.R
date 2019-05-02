@@ -109,12 +109,13 @@ mayo_Control_AD_samples_To_analyse=c(mayo_Control_samples,mayo_AD_samples2)
 mayo_yControl_PA_samples_To_analyse=c(mayo_yControl_samples,mayo_PA_samples)
 
 mayo_AD_PA_norm_counts=cbind.data.frame(mayo_PA_norm_counts,mayo_AD_norm_counts)
-mayo_yControl_Control_norm_counts=cbind.data.frame(mayo_AD_norm_counts[,colnames(mayo_AD_norm_counts)%in%mayo_yControl_samples],mayo_AD_norm_counts[,colnames(mayo_AD_norm_counts)%in%mayo_oControl_samples])
-mayo_yControl_Control_norm_counts$ensembl_id=mayo_AD_norm_counts$ensembl_id
+#mayo_yControl_PA_norm_counts=cbind.data.frame(mayo_PA_norm_counts,mayo_AD_norm_counts)
+mayo_yControl_oControl_norm_counts=cbind.data.frame(mayo_AD_norm_counts[,colnames(mayo_AD_norm_counts)%in%mayo_yControl_samples],mayo_AD_norm_counts[,colnames(mayo_AD_norm_counts)%in%mayo_oControl_samples])
+mayo_yControl_oControl_norm_counts$ensembl_id=mayo_AD_norm_counts$ensembl_id
 mayo_AD_PA_norm_counts=mayo_AD_PA_norm_counts[which((rowSums(mayo_AD_PA_norm_counts>0)>=ncol(mayo_AD_PA_norm_counts)/3)=="TRUE"),]
 mayo_AD_norm_counts=mayo_AD_norm_counts[which((rowSums(mayo_AD_norm_counts>0)>=ncol(mayo_AD_norm_counts)/3)=="TRUE"),]
 mayo_yControl_PA_norm_counts=mayo_yControl_PA_norm_counts[which((rowSums(mayo_yControl_PA_norm_counts>0)>=ncol(mayo_yControl_PA_norm_counts)/3)=="TRUE"),]
-mayo_yControl_Control_norm_counts=mayo_yControl_oControl_norm_counts[which((rowSums(mayo_yControl_oControl_norm_counts>0)>=ncol(mayo_yControl_oControl_norm_counts)/3)=="TRUE"),]
+mayo_yControl_oControl_norm_counts=mayo_yControl_oControl_norm_counts[which((rowSums(mayo_yControl_oControl_norm_counts>0)>=ncol(mayo_yControl_oControl_norm_counts)/3)=="TRUE"),]
 
 mayo_AD_PA_norm_counts$EntrezID=unname(mapIds(x = org.Hs.eg.db,keys = mayo_AD_PA_norm_counts$ensembl_id,column = "ENTREZID",keytype = "ENSEMBL",multiVals = "first"))
 mayo_AD_norm_counts$EntrezID=unname(mapIds(x = org.Hs.eg.db,keys = mayo_AD_norm_counts$ensembl_id,column = "ENTREZID",keytype = "ENSEMBL",multiVals = "first"))
