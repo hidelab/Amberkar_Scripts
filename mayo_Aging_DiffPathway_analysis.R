@@ -1,11 +1,11 @@
-library(synapseClient)
+library(synapser)
 library(dplyr)
 library(magrittr)
 library(data.table)
 library(org.Hs.eg.db)
 library(pathprint)
 library(limma)
-synapseLogin()
+synLogin()
 mapIds2<-function(IDs,IDFrom,IDTo){
   require(org.Hs.eg.db)
   idmap=mapIds(x = org.Hs.eg.db,keys = IDs,column = IDTo,keytype = IDFrom,multiVals = "first")
@@ -89,14 +89,14 @@ names(pathprint_membership.genes)[grep(pattern = "/",names(pathprint_membership.
 
 ds = c("chipframe", "genesets","pathprint.Hs.gs" ,"platform.thresholds")
 data(list = ds)
-mayo_PA_norm_counts.synapse=synGet(id='syn7440549')
-mayo_PA_covariates.synapse=synGet(id='syn7437038')
-mayo_AD_norm_counts.synapse=synGet(id='syn4650265')
-mayo_AD_covariates.synapse=synGet(id='syn8466814')
-mayo_AD_norm_counts=fread(mayo_AD_norm_counts.synapse@filePath,sep = "\t",header = T,stringsAsFactors = F,data.table = F)
-mayo_PA_norm_counts=fread(mayo_PA_norm_counts.synapse@filePath,sep = "\t",header = T,stringsAsFactors = F,data.table = F)
-mayo_PA_covariates=fread(mayo_PA_covariates.synapse@filePath,sep = "\t",header = T,stringsAsFactors = F,data.table = F)
-mayo_AD_covariates=fread(mayo_AD_covariates.synapse@filePath,sep = "\t",header = T,stringsAsFactors = F,data.table = F)
+mayo_PA_norm_counts.synapse=synGet('syn7440549')
+mayo_PA_covariates.synapse=synGet('syn7437038')
+mayo_AD_norm_counts.synapse=synGet('syn4650265')
+mayo_AD_covariates.synapse=synGet('syn8466814')
+mayo_AD_norm_counts=fread(mayo_AD_norm_counts.synapse$path,sep = "\t",header = T,stringsAsFactors = F,data.table = F)
+mayo_PA_norm_counts=fread(mayo_PA_norm_counts.synapse$path,sep = "\t",header = T,stringsAsFactors = F,data.table = F)
+mayo_PA_covariates=fread(mayo_PA_covariates.synapse$path,sep = "\t",header = T,stringsAsFactors = F,data.table = F)
+mayo_AD_covariates=fread(mayo_AD_covariates.synapse$path,sep = "\t",header = T,stringsAsFactors = F,data.table = F)
 mayo_PA_samples=mayo_PA_covariates%>%filter(AgeAtDeath>=90)%>%pull(SubjectID)
 mayo_allPA_samples=mayo_PA_covariates$SubjectID
 mayo_Control_samples=mayo_AD_covariates%>%filter(Tissue.SourceDiagnosis=="TCX.CONTROL"&AgeAtDeath>=90)%>%pull(SampleID)
@@ -109,12 +109,12 @@ mayo_Control_AD_samples_To_analyse=c(mayo_Control_samples,mayo_AD_samples2)
 mayo_yControl_PA_samples_To_analyse=c(mayo_yControl_samples,mayo_PA_samples)
 
 mayo_AD_PA_norm_counts=cbind.data.frame(mayo_PA_norm_counts,mayo_AD_norm_counts)
-mayo_yControl_oControl_norm_counts=cbind.data.frame(mayo_AD_norm_counts[,colnames(mayo_AD_norm_counts)%in%mayo_yControl_samples],mayo_AD_norm_counts[,colnames(mayo_AD_norm_counts)%in%mayo_oControl_samples])
-mayo_yControl_oControl_norm_counts$ensembl_id=mayo_AD_norm_counts$ensembl_id
+mayo_yControl_Control_norm_counts=cbind.data.frame(mayo_AD_norm_counts[,colnames(mayo_AD_norm_counts)%in%mayo_yControl_samples],mayo_AD_norm_counts[,colnames(mayo_AD_norm_counts)%in%mayo_oControl_samples])
+mayo_yControl_Control_norm_counts$ensembl_id=mayo_AD_norm_counts$ensembl_id
 mayo_AD_PA_norm_counts=mayo_AD_PA_norm_counts[which((rowSums(mayo_AD_PA_norm_counts>0)>=ncol(mayo_AD_PA_norm_counts)/3)=="TRUE"),]
 mayo_AD_norm_counts=mayo_AD_norm_counts[which((rowSums(mayo_AD_norm_counts>0)>=ncol(mayo_AD_norm_counts)/3)=="TRUE"),]
 mayo_yControl_PA_norm_counts=mayo_yControl_PA_norm_counts[which((rowSums(mayo_yControl_PA_norm_counts>0)>=ncol(mayo_yControl_PA_norm_counts)/3)=="TRUE"),]
-mayo_yControl_oControl_norm_counts=mayo_yControl_oControl_norm_counts[which((rowSums(mayo_yControl_oControl_norm_counts>0)>=ncol(mayo_yControl_oControl_norm_counts)/3)=="TRUE"),]
+mayo_yControl_Control_norm_counts=mayo_yControl_oControl_norm_counts[which((rowSums(mayo_yControl_oControl_norm_counts>0)>=ncol(mayo_yControl_oControl_norm_counts)/3)=="TRUE"),]
 
 mayo_AD_PA_norm_counts$EntrezID=unname(mapIds(x = org.Hs.eg.db,keys = mayo_AD_PA_norm_counts$ensembl_id,column = "ENTREZID",keytype = "ENSEMBL",multiVals = "first"))
 mayo_AD_norm_counts$EntrezID=unname(mapIds(x = org.Hs.eg.db,keys = mayo_AD_norm_counts$ensembl_id,column = "ENTREZID",keytype = "ENSEMBL",multiVals = "first"))
